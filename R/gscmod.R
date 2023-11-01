@@ -1,0 +1,1 @@
+gscmod = function(data, gscprep.out) 

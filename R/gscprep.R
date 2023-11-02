@@ -8,8 +8,6 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     warning("The trial does not have a rectangular grid!")
   }
   
-  
-  
 # Entry -------------------------------------------------------------------
   p = dist.col/dist.row
   dist.diag = sqrt(dist.row^2 + dist.col^2)
@@ -22,6 +20,28 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     col = as.numeric(data[, col]),
     trait = as.numeric(data[, trait])
   )
+  
+  control = data.frame(
+    trait = length(x$trait), 
+    ngen = nlevels(x$trat),
+    nrepl = nlevels(x$repl),
+    nrow = length(unique(x$row)),
+    ncol = length(unique(x$col))
+  )
+  
+  colnames(control) = c(trait, gen, repl, row, col)
+  
+  if(is.null(age)){
+    control$age = 0
+  }else{
+    control[, age] = length(unique(data[, age]))
+  }
+  
+  if(is.null(age)){
+    control$area = 0
+  }else{
+    control[, area] = length(unique(data[, area]))
+  }
 
   if(!is.null(area)){ # If the trial was laid out in different areas (talhões)
     x$area = as.factor(data[, area])  
@@ -210,7 +230,6 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
           )
         }
 
-         
       }
       
       cif = mean(fr, na.rm=T)*mean(nr) + mean(fc,na.rm=T)*mean(nc) + 
@@ -241,7 +260,7 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
         if(!is.factor(input[, area])) input[, area] = as.factor(input[, area])
       }
       
-      Z = list(Z = z, CIF = cif, neigh_check = w, data = input)
+      Z = list(Z = z, CIF = cif, neigh_check = w, data = input, control = control)
       
       return(Z)
       
@@ -448,7 +467,7 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
         
         input = data.frame(cbind(z, dat))
         
-        if(!is.factor(input[, age])) input[, gen]= as.factor(input[, age])
+        if(!is.factor(input[, age])) input[, age]= as.factor(input[, age])
         if(!is.factor(input[, gen])) input[, gen]= as.factor(input[, gen])
         if(!is.factor(input[, repl])) input[, repl] = as.factor(input[, repl])
         if(!is.factor(input[, row])) input[, row] = as.factor(input[, row])
@@ -462,6 +481,7 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
       
       names(Z) = paste0("Age_", names(Z))
       Z$data = rbind(Z$Age_3$data, Z$Age_6$data)
+      Z$control = control
       
       return(Z)
   }

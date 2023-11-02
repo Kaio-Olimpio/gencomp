@@ -1,12 +1,9 @@
 
-<!-- badges: start -->
-
-[![R-CMD-check](https://github.com/saulo-chaves/competition/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/saulo-chaves/competition/actions/workflows/R-CMD-check.yaml)
-<!-- badges: end -->
-
-# Package `competition`
+# Package `Competition`
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/Kaio-Olimpio/Competition/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Kaio-Olimpio/Competition/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-`competition` is in its infancy. Coming soon……..
+`Competition` is in its infancy. Coming soon……..

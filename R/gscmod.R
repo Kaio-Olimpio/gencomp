@@ -1,1 +1,3 @@
-gscmod = function(data, gscprep.out) 
+gscmod = function(data, gscprep.out) {
+  
+}

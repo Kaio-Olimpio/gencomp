@@ -2,3 +2,7 @@
 ^LICENSE\.md$
 ^Global_config\.R$
 ^real data$
+^.*\.Rproj$
+^\.Rproj\.user$
+^breedR\.R$
+^comp_breedR\.R$

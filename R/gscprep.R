@@ -1,3 +1,14 @@
+##'
+##'
+##'
+##'
+##'
+##'
+##'
+##'
+##' 
+##' @export
+
 gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col, 
                     method = 'SK', area = NULL, age = NULL, n.dec = 2, 
                    verbose = FALSE){
@@ -37,7 +48,7 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     control[, age] = length(unique(data[, age]))
   }
   
-  if(is.null(age)){
+  if(is.null(area)){
     control$area = 0
   }else{
     control[, area] = length(unique(data[, area]))

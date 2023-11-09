@@ -11,7 +11,7 @@
 ##' @export
 
 
-gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) {
+gscmod = function(gscprep.out, fixed, random = ~1, cor = TRUE, maxit = 50, ...) {
   
   requireNamespace('asreml')
   
@@ -23,7 +23,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
     {
       if(gscprep.out$control[,6] > 0) ### Multi-ages --------
       {
-        if(cov){
+        if(cor){
           input = input[order(input$area, input$age, input$row, input$col),]
           
           scm = asreml::asreml(fixed = fixed,
@@ -40,7 +40,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
                        ),
                        group = list(g1 = 1:gscprep.out$control[,2]),
                        residual = as.formula(paste0(
-                         '~dsum(~ar1(', colnames(gscprep.out$control)[6],'):ar1(',
+                         '~dsum(~ar1h(', colnames(gscprep.out$control)[6],'):ar1(',
                          colnames(gscprep.out$control)[4],'):ar1(',
                          colnames(gscprep.out$control)[5],')|',
                          colnames(gscprep.out$control)[7],')')
@@ -62,7 +62,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
                        ),
                        group = list(g1 = 1:gscprep.out$control[,2]),
                        residual = as.formula(paste0(
-                         '~dsum(~ar1(', colnames(gscprep.out$control)[6],'):ar1(',
+                         '~dsum(~ar1h(', colnames(gscprep.out$control)[6],'):ar1(',
                          colnames(gscprep.out$control)[4],'):ar1(',
                          colnames(gscprep.out$control)[5],')|',
                          colnames(gscprep.out$control)[7],')')
@@ -73,7 +73,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
         }
       }else ### Single age ---------------
       {
-        if(cov){
+        if(cor){
           scm = asreml::asreml(fixed = fixed,
                        random = as.formula(
                          paste(paste(as.character(random), collapse = ""), 
@@ -110,7 +110,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
       {
         if(gscprep.out$control[,6] > 0) ### Multi-ages --------
         {
-          if(cov){
+          if(cor){
             input = input[order(input$age, input$row, input$col),]
             scm = asreml::asreml(fixed = fixed,
                          random = as.formula(
@@ -126,7 +126,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
                          ),
                          group = list(g1 = 1:gscprep.out$control[,2]),
                          residual = as.formula(paste0(
-                           '~ar1(', colnames(gscprep.out$control)[6],'):ar1(',
+                           '~ar1h(', colnames(gscprep.out$control)[6],'):ar1(',
                            colnames(gscprep.out$control)[4],'):ar1(',
                            colnames(gscprep.out$control)[5],')')
                          ),
@@ -146,7 +146,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
                          ),
                          group = list(g1 = 1:gscprep.out$control[,2]),
                          residual = as.formula(paste0(
-                           '~ar1(', colnames(gscprep.out$control)[6],'):ar1(',
+                           '~ar1h(', colnames(gscprep.out$control)[6],'):ar1(',
                            colnames(gscprep.out$control)[4],'):ar1(',
                            colnames(gscprep.out$control)[5],')')
                          ),
@@ -155,7 +155,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cov = TRUE, maxit = 50, ...) 
           }
         }else ### Single age ---------------
         {
-          if(cov){
+          if(cor){
             scm = asreml::asreml(fixed = fixed,
                          random = as.formula(
                            paste(paste(as.character(random), collapse = ""), 

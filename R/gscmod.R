@@ -34,7 +34,7 @@ gscmod = function(gscprep.out, fixed, random = ~1, cor = TRUE, maxit = 50, ...) 
                                       colnames(gscprep.out$control)[2],')) + str(~',
                                       colnames(gscprep.out$control)[2],':',
                                       colnames(gscprep.out$control)[6],'+grp(g1):',
-                                      colnames(gscprep.out$control)[6], ', ~corh(2):id(',
+                                      colnames(gscprep.out$control)[6], ', ~diag(2):id(',
                                       colnames(gscprep.out$control)[6], '):id(',
                                       colnames(gscprep.out$control)[2], '))'))
                        ),

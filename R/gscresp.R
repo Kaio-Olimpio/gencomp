@@ -1,6 +1,20 @@
+##'
+##'
+##'
+##'
+##'
+##'
+##'
+##' @import ggplot2
+##' @importFrom rlang .data
+##' @importFrom stats reorder
+##' @importFrom ggpubr ggarrange
+##' 
+##' @export
+
+
 gscresp = function(gscprep.out, model, weight.tgv = FALSE) {
   
-  requireNamespace('asreml')
   requireNamespace('ggplot2')
   
   gscprep.out <<- gscprep.out
@@ -25,12 +39,12 @@ gscresp = function(gscprep.out, model, weight.tgv = FALSE) {
                                                     grepl(names(gscprep.out$control)[6],
                                                           rownames(varcomp))),])
     ] = paste("IGE", names(gscprep.out$control)[6], sep = ':')
-    rownames(varcomp)[
-      rownames(varcomp) == rownames(varcomp[which(grepl('grp', rownames(varcomp)) &
-                                                    grepl('cor', rownames(varcomp)) &
-                                                    grepl(names(gscprep.out$control)[6],
-                                                          rownames(varcomp))),])
-    ] = paste("cor(IGE_DGE)", names(gscprep.out$control)[6], sep = ':')
+    # rownames(varcomp)[
+    #   rownames(varcomp) == rownames(varcomp[which(grepl('grp', rownames(varcomp)) &
+    #                                                 grepl('cor', rownames(varcomp)) &
+    #                                                 grepl(names(gscprep.out$control)[6],
+    #                                                       rownames(varcomp))),])
+    # ] = paste("cor(IGE_DGE)", names(gscprep.out$control)[6], sep = ':')
     
     if(gscprep.out$control[,7] > 0){
       rownames(varcomp)[
@@ -353,16 +367,15 @@ gscresp = function(gscprep.out, model, weight.tgv = FALSE) {
     comp = rep(c('DGE', 'IGE'), each = gscprep.out$control[,2])
   )
   
-  retrieve = function(x) do.call(rbind, strsplit(x, '@#_'))[,1]
+  temp$gen = factor(temp$gen, levels = temp[order(temp$blup, decreasing = TRUE)[
+    order(temp$blup, decreasing = TRUE) %in% which(temp$comp == 'DGE')], 1
+    ])
   
- plott = ggplot(data = cbind(temp, V4 = paste(temp$gen, temp$comp, sep = '@#_')), 
-         aes(x = stats::reorder(.data$V4, -.data$blup), y = .data$blup)) + 
-    facet_wrap(.~.data$comp, ncol = 1, scales = 'free') +
-    scale_x_discrete(labels = retrieve) + 
-    geom_segment(aes(x = stats::reorder(.data$V4, .data$blup),
-                     xend = .data$V4, y = 0, yend = .data$blup),
+  plott = ggplot(data = temp, aes(x = .data$gen, y = .data$blup)) + 
+    facet_wrap(.~.data$comp, ncol = 1, scales = 'free_y') + 
+    geom_segment(aes(x = .data$gen,
+                     xend = .data$gen, y = 0, yend = .data$blup),
                  linewidth = 1) + 
-    facet_wrap(.~.data$comp, ncol = 1, scales = 'free') + 
     geom_point(aes(fill = rel),
                size = 2, color = 'black',
                alpha = 0.7, shape = 21, stroke = .4) + 
@@ -373,7 +386,7 @@ gscresp = function(gscprep.out, model, weight.tgv = FALSE) {
     labs(x = names(gscprep.out$control)[2], y = 'BLUP', fill = "Reliability") + 
     guides(fill = guide_colourbar(title.position = 'top', title.hjust = .5, 
                                   barwidth = 9, frame.colour = 'black'))
-  
+    
   output$plots$main$DGE.IGE = plott
   
   ### TGV 
@@ -450,26 +463,26 @@ gscresp = function(gscprep.out, model, weight.tgv = FALSE) {
           comp = rep(c('DGE', 'IGE'), each = gscprep.out$control[,2])
         )
         
-        aa = ggplot(data = cbind(temp2, V4 = paste(temp2$gen, temp2$comp, sep = '@#_')), 
-                       aes(x = stats::reorder(.data$V4, -.data$blup), y = .data$blup)) + 
-          facet_wrap(.~.data$comp, ncol = 1, scales = 'free') +
-          scale_x_discrete(labels = retrieve) + 
-          geom_segment(aes(x = stats::reorder(.data$V4, .data$blup),
-                           xend = .data$V4, y = 0, yend = .data$blup),
+        temp2$gen = factor(temp2$gen, levels = temp2[order(temp2$blup, decreasing = TRUE)[
+          order(temp2$blup, decreasing = TRUE) %in% which(temp2$comp == 'DGE')], 1
+        ])
+        
+        aa = ggplot(data = temp2, aes(x = .data$gen, y = .data$blup)) + 
+          facet_wrap(.~.data$comp, ncol = 1, scales = 'free_y') + 
+          geom_segment(aes(x = .data$gen,
+                           xend = .data$gen, y = 0, yend = .data$blup),
                        linewidth = 1) + 
-          facet_wrap(.~.data$comp, ncol = 1, scales = 'free') + 
           geom_point(aes(fill = rel),
                      size = 2, color = 'black',
                      alpha = 0.7, shape = 21, stroke = .4) + 
-          theme(axis.text.x = element_text(angle = 90, size = 6), 
+          theme(axis.text.x = element_text(angle = 90, size = 8), 
                 legend.position = 'top', panel.background = element_blank(), 
                 panel.grid = element_line(colour = 'lightgrey')) +
           scale_fill_viridis_c(option = 'turbo') + 
-          labs(x = names(gscprep.out$control)[2], y = 'BLUP', fill = "Reliability",
-               subtitle = paste(names(gscprep.out$control)[6],
-                                unique(x[,2]))) + 
+          labs(x = names(gscprep.out$control)[2], y = 'BLUP', fill = "Reliability") + 
           guides(fill = guide_colourbar(title.position = 'top', title.hjust = .5, 
                                         barwidth = 9, frame.colour = 'black'))
+        
       }), common.legend = TRUE)
     )
     
@@ -537,7 +550,7 @@ gscresp = function(gscprep.out, model, weight.tgv = FALSE) {
                 axis.title = element_text(face = 'bold'),
                 legend.position = 'bottom') +
           labs(x = names(gscprep.out$control)[2], 
-               y = "Number of neighbours", fill = 'Class', 
+               y = "No of different genotypes as neighbours", fill = 'Class', 
                subtitle = paste(names(gscprep.out$control)[6], 
                                 unique(x[,names(gscprep.out$control)[6]]))) +
           scale_fill_manual(values = c('#fd8d3c', '#edf8e9', '#6baed6'))

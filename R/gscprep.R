@@ -104,45 +104,45 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
           }
         }
         
-        ## Column ---------------
-        gen.col = x$trat[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
-        repl.col = x$repl[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
-        ind.col = x$ind[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
-        area.col = x$area[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
-        trt_c = NULL
-        for (k in 1:length(gen.col)) {
-          if (is.na(x[which(x$trat %in% gen.col[k] & 
-                            x$repl %in% repl.col[k] & 
-                            x$ind %in% ind.col[k]), "trait"]) | 
-              x[i,'area'] != area.col[k]){
-            n_cd = n_cd + 1
-            trt_c[k] = NA
-          }else{
-            n_c = n_c + 1
-            trt_c[k] = x[which(x$trat %in% gen.col[k] & 
-                                 x$repl %in% repl.col[k] & 
-                                 x$ind %in% ind.col[k]), "trait"]
-          }
-        }
-        
-        ## Row ------------------
-        gen.row = x$trat[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
-        repl.row = x$repl[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
-        ind.row = x$ind[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
-        area.row = x$area[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
+        ## Row ---------------
+        gen.row = x$trat[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
+        repl.row = x$repl[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
+        ind.row = x$ind[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
+        area.row = x$area[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
         trt_r = NULL
         for (k in 1:length(gen.row)) {
           if (is.na(x[which(x$trat %in% gen.row[k] & 
                             x$repl %in% repl.row[k] & 
                             x$ind %in% ind.row[k]), "trait"]) | 
               x[i,'area'] != area.row[k]){
-            n_rd = n_rd + 1
+            n_cd = n_cd + 1
             trt_r[k] = NA
           }else{
-            n_r = n_r + 1
+            n_c = n_c + 1
             trt_r[k] = x[which(x$trat %in% gen.row[k] & 
                                  x$repl %in% repl.row[k] & 
                                  x$ind %in% ind.row[k]), "trait"]
+          }
+        }
+        
+        ## Column ------------------
+        gen.col = x$trat[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
+        repl.col = x$repl[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
+        ind.col = x$ind[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
+        area.col = x$area[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
+        trt_c = NULL
+        for (k in 1:length(gen.col)) {
+          if (is.na(x[which(x$trat %in% gen.col[k] & 
+                            x$repl %in% repl.col[k] & 
+                            x$ind %in% ind.col[k]), "trait"]) | 
+              x[i,'area'] != area.col[k]){
+            n_rd = n_rd + 1
+            trt_c[k] = NA
+          }else{
+            n_r = n_r + 1
+            trt_c[k] = x[which(x$trat %in% gen.col[k] & 
+                                 x$repl %in% repl.col[k] & 
+                                 x$ind %in% ind.col[k]), "trait"]
           }
         }
         
@@ -324,47 +324,48 @@ gscprep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
             }
           }
           
-          ## Column ---------------
-          gen.col = q$trat[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
-          repl.col = q$repl[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
-          ind.col = q$ind[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
-          area.col = q$area[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
-          trt_c = NULL
-          for (k in 1:length(gen.col)) {
-            if (is.na(q[which(q$trat %in% gen.col[k] & 
-                              q$repl %in% repl.col[k] & 
-                              q$ind %in% ind.col[k]), "trait"]) | 
-                q[i,'area'] != area.col[k]){
-              n_cd = n_cd + 1
-              trt_c[k] = NA
-            }else{
-              n_c = n_c + 1
-              trt_c[k] = q[which(q$trat %in% gen.col[k] & 
-                                   q$repl %in% repl.col[k] & 
-                                   q$ind %in% ind.col[k]), "trait"]
-            }
-          }
-          
-          ## Row ------------------
-          gen.row = q$trat[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
-          repl.row = q$repl[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
-          ind.row = q$ind[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
-          area.row = q$area[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
+          ## Row ---------------
+          gen.row = q$trat[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
+          repl.row = q$repl[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
+          ind.row = q$ind[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
+          area.row = q$area[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
           trt_r = NULL
           for (k in 1:length(gen.row)) {
             if (is.na(q[which(q$trat %in% gen.row[k] & 
                               q$repl %in% repl.row[k] & 
                               q$ind %in% ind.row[k]), "trait"]) | 
                 q[i,'area'] != area.row[k]){
-              n_rd = n_rd + 1
+              n_cd = n_cd + 1
               trt_r[k] = NA
             }else{
-              n_r = n_r + 1
+              n_c = n_c + 1
               trt_r[k] = q[which(q$trat %in% gen.row[k] & 
                                    q$repl %in% repl.row[k] & 
                                    q$ind %in% ind.row[k]), "trait"]
             }
           }
+          
+          ## Column ------------------
+          gen.col = q$trat[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
+          repl.col = q$repl[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
+          ind.col = q$ind[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
+          area.col = q$area[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
+          trt_c = NULL
+          for (k in 1:length(gen.col)) {
+            if (is.na(q[which(q$trat %in% gen.col[k] & 
+                              q$repl %in% repl.col[k] & 
+                              q$ind %in% ind.col[k]), "trait"]) | 
+                q[i,'area'] != area.col[k]){
+              n_rd = n_rd + 1
+              trt_c[k] = NA
+            }else{
+              n_r = n_r + 1
+              trt_c[k] = q[which(q$trat %in% gen.col[k] & 
+                                   q$repl %in% repl.col[k] & 
+                                   q$ind %in% ind.col[k]), "trait"]
+            }
+          }
+          
           
           ### Neighbourhood check -------------
           w[[i]] = data.frame(

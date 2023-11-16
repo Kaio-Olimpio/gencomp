@@ -1,9 +1,27 @@
-composite = function(gscprep.out, model, gscresp.out, d.row.col, d.weight = TRUE, 
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'  @importFrom stats quantile model.matrix model.matrix.lm
+#'  
+#'  
+#'  
+#'  
+#'  @export
+
+
+composite = function(prep.out, model, resp.out, d.row.col, d.weight = TRUE, 
                      selected, nsim = 10, verbose = TRUE) {
   
   ## Objects from previous functions
-  gscprep.out = gscprep.out
-  gscresp.out = gscresp.out
+  prep.out = prep.out
+  resp.out = resp.out
   model = model
   
   # Distances
@@ -12,7 +30,7 @@ composite = function(gscprep.out, model, gscresp.out, d.row.col, d.weight = TRUE
   ddiag = sqrt(drow^2 + dcol^2)
   
   # New dataset: main effects
-  dat = gscresp.out$blups$main
+  dat = resp.out$blups$main
   dat = dat[which(dat[,1] %in% selected),]
   ngen = length(unique(dat[,1]))
   mu = model$coefficients$fixed[grep('Intercept', rownames(model$coefficients$fixed))]
@@ -49,35 +67,35 @@ composite = function(gscprep.out, model, gscresp.out, d.row.col, d.weight = TRUE
   grid = lapply(grid, function(x){
     
     if(d.weight){
-      dge = model.matrix(~-1 + gen, data = x)
+      dge = stats::model.matrix(~-1 + gen, data = x)
       colnames(dge) = sub('gen', '', colnames(dge))
       dge = dge %*% as.matrix(dat[match(dat[,1], colnames(dge)),'DGE'])
       
-      ige.row1 = model.matrix(~-1 + row1, data = x)
+      ige.row1 = stats::model.matrix(~-1 + row1, data = x)
       colnames(ige.row1) = sub('row1', '', colnames(ige.row1))
-      ige.row2 = model.matrix.lm(~-1 + row2, data = x, na.action = 'na.pass')
+      ige.row2 = stats::model.matrix.lm(~-1 + row2, data = x, na.action = 'na.pass')
       colnames(ige.row2) = sub('row2', '', colnames(ige.row2))
       ige.row2 = ifelse(is.na(ige.row2), 0, ige.row2)
       ige.row = ige.row1 + ige.row2; rm(ige.row1, ige.row2)
       ige.row = ige.row %*% (as.matrix(dat[match(dat[,1], colnames(ige.row)),'IGE'])/drow)
       
-      ige.col1 = model.matrix(~-1 + col1, data = x)
+      ige.col1 = stats::model.matrix(~-1 + col1, data = x)
       colnames(ige.col1) = sub('col1', '', colnames(ige.col1))
-      ige.col2 = model.matrix.lm(~-1 + col2, data = x, na.action = 'na.pass')
+      ige.col2 = stats::model.matrix.lm(~-1 + col2, data = x, na.action = 'na.pass')
       colnames(ige.col2) = sub('col2', '', colnames(ige.col2))
       ige.col2 = ifelse(is.na(ige.col2), 0, ige.col2)
       ige.col = ige.col1 + ige.col2; rm(ige.col1, ige.col2)
       ige.col = ige.col %*% (as.matrix(dat[match(dat[,1], colnames(ige.col)),'IGE'])/dcol)
       
-      ige.diag1 = model.matrix(~-1 + diag1, data = x)
+      ige.diag1 = stats::model.matrix(~-1 + diag1, data = x)
       colnames(ige.diag1) = sub('diag1', '', colnames(ige.diag1))
-      ige.diag2 = model.matrix.lm(~-1 + diag2, data = x, na.action = 'na.pass')
+      ige.diag2 = stats::model.matrix.lm(~-1 + diag2, data = x, na.action = 'na.pass')
       colnames(ige.diag2) = sub('diag2', '', colnames(ige.diag2))
       ige.diag2 = ifelse(is.na(ige.diag2), 0, ige.diag2)
-      ige.diag3 = model.matrix.lm(~-1 + diag3, data = x, na.action = 'na.pass')
+      ige.diag3 = stats::model.matrix.lm(~-1 + diag3, data = x, na.action = 'na.pass')
       colnames(ige.diag3) = sub('diag3', '', colnames(ige.diag3))
       ige.diag3 = ifelse(is.na(ige.diag3), 0, ige.diag3)
-      ige.diag4 = model.matrix.lm(~-1 + diag4, data = x, na.action = 'na.pass')
+      ige.diag4 = stats::model.matrix.lm(~-1 + diag4, data = x, na.action = 'na.pass')
       colnames(ige.diag4) = sub('diag4', '', colnames(ige.diag4))
       ige.diag4 = ifelse(is.na(ige.diag4), 0, ige.diag4)
       ige.diag = ige.diag1 + ige.diag2 + ige.diag3 + ige.diag4; rm(ige.diag1, ige.diag2, ige.diag3, ige.diag4)
@@ -90,31 +108,31 @@ composite = function(gscprep.out, model, gscresp.out, d.row.col, d.weight = TRUE
       colnames(dge) = sub('gen', '', colnames(dge))
       dge = dge %*% as.matrix(dat[match(dat[,1], colnames(dge)),'DGE'])
       
-      ige.row1 = model.matrix(~-1 + row1, data = x)
+      ige.row1 = stats::model.matrix(~-1 + row1, data = x)
       colnames(ige.row1) = sub('row1', '', colnames(ige.row1))
-      ige.row2 = model.matrix.lm(~-1 + row2, data = x, na.action = 'na.pass')
+      ige.row2 = stats::model.matrix.lm(~-1 + row2, data = x, na.action = 'na.pass')
       colnames(ige.row2) = sub('row2', '', colnames(ige.row2))
       ige.row2 = ifelse(is.na(ige.row2), 0, ige.row2)
       ige.row = ige.row1 + ige.row2; rm(ige.row1, ige.row2)
       ige.row = ige.row %*% as.matrix(dat[match(dat[,1], colnames(ige.row)),'IGE'])
       
-      ige.col1 = model.matrix(~-1 + col1, data = x)
+      ige.col1 = stats::model.matrix(~-1 + col1, data = x)
       colnames(ige.col1) = sub('col1', '', colnames(ige.col1))
-      ige.col2 = model.matrix.lm(~-1 + col2, data = x, na.action = 'na.pass')
+      ige.col2 = stats::model.matrix.lm(~-1 + col2, data = x, na.action = 'na.pass')
       colnames(ige.col2) = sub('col2', '', colnames(ige.col2))
       ige.col2 = ifelse(is.na(ige.col2), 0, ige.col2)
       ige.col = ige.col1 + ige.col2; rm(ige.col1, ige.col2)
       ige.col = ige.col %*% as.matrix(dat[match(dat[,1], colnames(ige.col)),'IGE'])
       
-      ige.diag1 = model.matrix(~-1 + diag1, data = x)
+      ige.diag1 = stats::model.matrix(~-1 + diag1, data = x)
       colnames(ige.diag1) = sub('diag1', '', colnames(ige.diag1))
-      ige.diag2 = model.matrix.lm(~-1 + diag2, data = x, na.action = 'na.pass')
+      ige.diag2 = stats::model.matrix.lm(~-1 + diag2, data = x, na.action = 'na.pass')
       colnames(ige.diag2) = sub('diag2', '', colnames(ige.diag2))
       ige.diag2 = ifelse(is.na(ige.diag2), 0, ige.diag2)
-      ige.diag3 = model.matrix.lm(~-1 + diag3, data = x, na.action = 'na.pass')
+      ige.diag3 = stats::model.matrix.lm(~-1 + diag3, data = x, na.action = 'na.pass')
       colnames(ige.diag3) = sub('diag3', '', colnames(ige.diag3))
       ige.diag3 = ifelse(is.na(ige.diag3), 0, ige.diag3)
-      ige.diag4 = model.matrix.lm(~-1 + diag4, data = x, na.action = 'na.pass')
+      ige.diag4 = stats::model.matrix.lm(~-1 + diag4, data = x, na.action = 'na.pass')
       colnames(ige.diag4) = sub('diag4', '', colnames(ige.diag4))
       ige.diag4 = ifelse(is.na(ige.diag4), 0, ige.diag4)
       ige.diag = ige.diag1 + ige.diag2 + ige.diag3 + ige.diag4; rm(ige.diag1, ige.diag2, ige.diag3, ige.diag4)

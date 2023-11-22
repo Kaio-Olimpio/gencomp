@@ -1,4 +1,3 @@
-##' Function comp.resp
 ##'
 ##'
 ##'
@@ -180,7 +179,9 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     
     IGE = blup[which(grepl('grp', rownames(blup)) & 
                        !grepl(names(prep.out$control)[6], rownames(blup))), -3]
-    IGE[,names(prep.out$control)[2]] = gsub('grp(g1)_', '', rownames(IGE), fixed = T)
+    IGE[,names(prep.out$control)[2]] = regmatches(rownames(IGE), 
+                                                  m = regexpr(paste(DGE$clone, collapse = "|"),
+                                                              rownames(IGE)))
     rownames(IGE) = NULL
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')
@@ -208,9 +209,25 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     }
     
     ## Interaction effects ----------------
+    DGE.int = blup[which(grepl(names(prep.out$control)[2], rownames(blup)) & 
+                           grepl(names(prep.out$control)[6], rownames(blup))), -3]
+    DGE.int[,names(prep.out$control)[2]] = gsub(paste0(names(prep.out$control)[2],'_'),'', 
+                                                gsub(':.*', '', rownames(DGE.int)), fixed = T)
+    DGE.int[,names(prep.out$control)[6]] = gsub(paste0(names(prep.out$control)[6], '_'),'', 
+                                                gsub('.*:', '', rownames(DGE.int)), fixed = T)
+    rownames(DGE.int) = NULL
+    DGE.int$rel.DGE = 1-(DGE.int$std.error^2/varcomp['DGE','component'])
+    DGE.int = DGE.int[,c(3,4,1,2,5)]; colnames(DGE.int)[c(3,4)] = c('DGE', 'se.DGE')
+    DGE.int = merge(DGE.int, DGE[,c(names(prep.out$control)[2], 'DGE')],
+                    by = names(prep.out$control)[2])
+    DGE.int$DGE = DGE.int$DGE.x + DGE.int$DGE.y
+    DGE.int = DGE.int[,c(1, 2, 7, 4, 5)]
+    
     IGE.int = blup[which(grepl('grp', rownames(blup)) & 
                            grepl(names(prep.out$control)[6], rownames(blup))), -3]
-    IGE.int[,names(prep.out$control)[2]] = gsub('grp(g1)_','', gsub(':.*', '', rownames(IGE.int)), fixed = T)
+    IGE.int[,names(prep.out$control)[2]] = regmatches(rownames(IGE.int), 
+                                                      m = regexpr(paste(DGE$clone, collapse = "|"),
+                                                                  rownames(IGE.int)))
     IGE.int[,names(prep.out$control)[6]] = gsub(paste0(names(prep.out$control)[6], '_'),'', 
                                                    gsub('.*:', '', rownames(IGE.int)), fixed = T)
     rownames(IGE.int) = NULL
@@ -225,20 +242,6 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
              ifelse(x$IGE < mean(x$IGE) - sd(x$IGE), 'Aggressive', 
                     'Homeostatic'))
     }))
-    
-    DGE.int = blup[which(grepl(names(prep.out$control)[2], rownames(blup)) & 
-                           grepl(names(prep.out$control)[6], rownames(blup))), -3]
-    DGE.int[,names(prep.out$control)[2]] = gsub(paste0(names(prep.out$control)[2],'_'),'', 
-                                                   gsub(':.*', '', rownames(DGE.int)), fixed = T)
-    DGE.int[,names(prep.out$control)[6]] = gsub(paste0(names(prep.out$control)[6], '_'),'', 
-                                                   gsub('.*:', '', rownames(DGE.int)), fixed = T)
-    rownames(DGE.int) = NULL
-    DGE.int$rel.DGE = 1-(DGE.int$std.error^2/varcomp['DGE','component'])
-    DGE.int = DGE.int[,c(3,4,1,2,5)]; colnames(DGE.int)[c(3,4)] = c('DGE', 'se.DGE')
-    DGE.int = merge(DGE.int, DGE[,c(names(prep.out$control)[2], 'DGE')],
-                    by = names(prep.out$control)[2])
-    DGE.int$DGE = DGE.int$DGE.x + DGE.int$DGE.y
-    DGE.int = DGE.int[,c(1, 2, 7, 4, 5)]
     
     within = merge(DGE.int, IGE.int, 
                    by = c(names(prep.out$control)[2],
@@ -299,7 +302,8 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     
     IGE = blup[which(grepl('grp', rownames(blup)) & 
                        !grepl(names(prep.out$control)[6], rownames(blup))), -3]
-    IGE[,names(prep.out$control)[2]] = gsub('grp(g1)_', '', rownames(IGE), fixed = T)
+    IGE[,names(prep.out$control)[2]] = regmatches(rownames(IGE), 
+                                                  m = regexpr(paste(DGE$clone, collapse = "|"), rownames(IGE)))
     rownames(IGE) = NULL
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')

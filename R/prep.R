@@ -1,4 +1,4 @@
-##' @title Preparations to fit the genetic-spatial competition model
+##' @title Preparations to fit a genetic-spatial competition model
 ##' 
 ##' @description
 ##' This function builds the genetic competition matrix (\eqn{\mathbf{Z}_c}), prepare the 
@@ -15,12 +15,13 @@
 ##' Valid if the trial has non-contiguous blocks, for e.g., blocks 1 and 2 in area 1, and
 ##' blocks 3 and 4 in area 2. `NULL` (default) otherwise.
 ##' @param age A string. The name of the column that corresponds to the age information.
-##' Necessary for fitting a multi-age model using [competition::gscmod()]. `NULL` (default)
+##' Necessary for fitting a multi-age model using [competition::comp.asr()]. `NULL` (default)
 ##' otherwise.
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
-##' It has three options: "MU" for the method proposed by Muir (2005), "SK" for the 
-##' method proposed by Costa e Silva and Kerr (2013), and "CC" for the method proposed by 
-##' Cappa and Cantet (2008). See details for more information on these methods.
+##' It has three options: "MU" for the method proposed by \insertCite{muir_incorporation_2005;textual}{competition}, 
+##' "CC" for the method proposed by \insertCite{cappa_direct_2008;textual}{competition}, and."SK" for the 
+##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{competition}.
+##' See details for more information on these methods.
 ##' @param n.dec An integer. The number of decimal digits to be displayed in \eqn{\mathbf{Z}_c}. 
 ##' Defaults to 2.
 ##' @param verbose A logical value. If `TRUE`, a progress bar will be displayed in the 
@@ -43,7 +44,7 @@
 ##' Three methods are available for estimating the competition intensity and building
 ##' the \eqn{\mathbf{Z}_c}, the genetic competition matrix: 
 ##' 
-##' \itemize{\item Muir (2005): "MU"}
+##' \itemize{\item \insertCite{muir_incorporation_2005;textual}{competition}: "MU"}
 ##' 
 ##' The average competition intensity is the inverse of the distance between the focal 
 ##' plant and its neighbours:
@@ -58,7 +59,7 @@
 ##' in the diagonal, row, and column directions of the \eqn{v^{th}} clone, 
 ##' respectively; and \eqn{d_R} and \eqn{d_C} are the inter-row and inter-column distances. 
 ##'
-##' \itemize{\item Cappa and Cantet (2008): "CC"}
+##' \itemize{\item \insertCite{cappa_direct_2008;textual}{competition}: "CC"}
 ##' 
 ##' The average compentition intensity depends on the number of neighbours in each direction
 ##' 
@@ -73,7 +74,7 @@
 ##' Note that, in this case, it is assumed that the distance between rows and 
 ##' columns are the same.
 ##' 
-##' \itemize{\item Costa e Silva and Kerr (2013): "SK"}
+##' \itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{competition}: "SK"}
 ##' 
 ##' The average competition intensity depends on both the distance between the focal 
 ##' tree and its neighbours, and the number of neighbours in each direction:
@@ -93,17 +94,9 @@
 ##' \deqn{CIF = \overline{n_D} \overline{f_D} + \overline{n_R} \overline{f_R} + \overline{n_C} \overline{f_C}}
 ##' 
 ##' @references 
+##' \insertAllCited{}
 ##' 
-##' Cappa, E. P., & Cantet, R. J. C. (2008). Direct and competition additive effects 
-##' in tree breeding: Bayesian estimation from an individual tree mixed model. 
-##' \emph{Silvae Genetica}, 57 (1-6), 45–56. \doi{10.1515/sg-2008-0008}
-##' 
-##' Costa e Silva, J., & Kerr, R. J. (2013). Accounting for competition in genetic 
-##' analysis, with particular emphasis on forest genetic trials. 
-##' \emph{Tree Genetics & Genomes}, 9 (1), 1–17. \doi{10.1007/s11295-012-0521-8}
-##' 
-##' Muir, W. M. (2005). Incorporation of competitive effects in forest tree or 
-##' animal breeding programs. \emph{Genetics}, 170 (3), 1247–1259. \doi{10.1534/genetics.104.035956}
+##' @importFrom Rdpack reprompt
 ##' 
 ##' @export
 ##' 
@@ -111,9 +104,9 @@
 ##' @examples
 ##' \donttest{
 ##'  comp_mat = comp.prep(data = data, gen = 'clone', repl = 'block', area = 'area', 
-##'  ind = 'tree', age = 'age', row = 'row', col = 'col', 
-##'  dist.col = 3, dist.row = 2.5, trait = 'mai', method = 'SK',
-##'  n.dec = 3, verbose = TRUE)
+##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
+##'                       dist.col = 3, dist.row = 2.5, trait = 'mai', method = 'SK',
+##'                       n.dec = 3, verbose = TRUE)
 ##' }
 
 
@@ -381,6 +374,8 @@ comp.prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     
     Z = list(Z = z, CIF = cif, neigh_check = w, data = input, control = control)
     
+    class(Z) = "comp.prep"
+    
     return(Z)
     
   } else # Several ages -----------------------
@@ -601,6 +596,8 @@ comp.prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     names(Z) = paste0("Age_", names(Z))
     Z$data = rbind(Z$Age_3$data, Z$Age_6$data)
     Z$control = control
+    
+    class(Z) = 'comp.prep'
     
     return(Z)
   }

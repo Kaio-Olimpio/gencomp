@@ -11,8 +11,8 @@ Fit spatial-genetic competition models for assessing the competition capacity of
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/saulo-chaves/competition}
-  \item Report bugs at \url{https://github.com/saulo-chaves/competition/issues}
+  \item \url{https://github.com/Kaio-Olimpio/Competition}
+  \item Report bugs at \url{https://github.com/Kaio-Olimpio/Competition/issues}
 }
 
 }

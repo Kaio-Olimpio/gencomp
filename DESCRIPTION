@@ -22,4 +22,6 @@ Imports:
     asreml,
     ggplot2,
     ggpubr,
-    rlang
+    rlang,
+    Rdpack
+RdMacros: Rdpack

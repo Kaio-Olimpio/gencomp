@@ -1,17 +1,103 @@
+##' @title Extract outputs from the genetic-spatial competition model
+##' 
+##' @description
+##' This function provides responses extracted from the genetic-spatial 
+##' competition model fitted using [competition::comp.asr()]. 
+##' 
+##' @param prep.out A `comp.prep` object.
+##' @param model An `asreml` object, preferably obtained using the [competition::comp.asr()] function.
+##' @param weight.tgv A logical value. If `TRUE`, the function will use the direct and
+##' indirect genetic effects' reliability as a weight when estimating the total genotypic
+##' value. Defaults to `FALSE`. See Details for more information on these methods.
 ##'
+##' @return The function returns:
+##' \itemize{
+##' \item \code{varcomp} : A data frame summarizing the random parameter vector 
+##' (object$vparameters). Variance component ratios are included if param = "gamma", 
+##' and a measure of precision (standard error) is included along with boundary 
+##' constraints at termination and the percentage change in the final iteration.
+##' \item \code{blups} : The direct (DGE) and indirect genetic effects (IGE), their standard errors, 
+##' the competition class of each genotype and the total genotypic value (TGV). If `age = TRUE`, 
+##' `blup` is a list containing the main effects and the within-ages DGE and IGE. If 
+##' other random effects were declared in the model, `blup` will contain another data frame 
+##' with their BLUPs.
+##' \item \code{plots} : A list of plots:
+##'   \itemize{
+##'   \item `IGE.density` a density plot with the IGE distribution. The area within the
+##'   distribution is filled according to the competition class (see Details).
+##'   \item `DGEvsIGE` a scatter plot illustrating the relation between IGE (\emph{x}-axis) 
+##'   and DGE (\emph{y}-axis). The dots are coloured according to the competition class
+##'   \item `DGE.IGE` lollipop plots representing the DGE and IGE of each genotype. The plots 
+##'   are in descending order according to the DGE. The dots' colour depicts the DGE's and IGE's 
+##'   reliability of each genotype.
+##'   \item `TGV` a lollipop plot with the TGV of each genotype, in increasing order. 
+##'   \item `n.neigh` a bar plot depicting the number of different genotypes as neighbours
+##'    (total and per competition class) of each selection candidate. If `age = TRUE`, 
+##'    there will be a `n.neigh` plot for each age. 
+##'    \item `grid.pheno` a heatmap representing the grid. The cells are filled according
+##'    to the phenotype value of each plot. If `age = TRUE`, there will be a `grid.pheno` plot for each age.
+##'    \item `grid.DGE` a heatmap representing the grid. The cells are filled according
+##'    to the DGE value of each genotype. If `age = TRUE`, there will be a `grid.DGE` plot for each age.
+##'    \item `grid.IGE` a heatmap representing the grid. The cells are filled according
+##'    to the IGE value of each genotype. If `age = TRUE`, there will be a `grid.DGE` plot for each age.
+##'    \item `grid.IGE.class` a heatmap representing the grid. The cells are filled according
+##'    to the competition class of each genotype. If `age = TRUE`, there will be a `grid.DGE` plot for each age. 
+##'   }
+##'   All plots are customizable using resources of the `ggplot2` library.
+##' }
 ##'
+##' @details
+##' The genetic-spatial competition model provides the direct (DGE) and indirect 
+##' genetic effects (IGE) of each genotype. The DGE represents the "pure" performance
+##' of the genotype, while the IGE is the related to the average effect of the genotype on
+##' the genotypic value of its neighbours. The higher the IGE, the more aggressive is the genotype. 
+##' Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{competition} 
+##' to define competition classes: 
+##' 
+##' \deqn{\begin{cases} c_i > \overline{c} + sd(c) \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) > c_i > \overline{c} - sd(c) \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \rightarrow \text{Sensitive} \end{cases}}
+##' 
+##' where \eqn{c_i} is the IGE of the i<sup>th</sup> genotype, \eqn{\overline{c}} is 
+##' the mean IGE, and \eqn{sd(c)} is the standard deviation of the IGE. This classification is 
+##' detailed in the plot `IGE.density`.
+##' 
+##' The total genotypic value (TGV) is given by: 
+##' 
+##' \deqn{TGV_i =  d_i + CIF \times c_i}
+##' 
+##' where \eqn{d_i} is the DGE of the i<sup>th</sup> genotype, and \eqn{CIF} is 
+##' the overall competition intensity factor, previously computed in the function 
+##' [competition::comp.prep()]. If `weight.tgv = TRUE`, the DGE and IGE will be 
+##' multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}):
+##' 
+##' \deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
 ##'
-##'
-##'
-##'
+##' @seealso  [competition::comp.prep], [competition::comp.asr], [ggplot2]
+##' 
+##' @references 
+##' \insertAllCited{}
+##' 
 ##' @import ggplot2
 ##' @importFrom rlang .data
-##' @importFrom stats reorder
+##' @importFrom stats reorder sd density
 ##' @importFrom ggpubr ggarrange
-##' 
+##' @importFrom Rdpack reprompt
 ##' @export
 ##' 
-##' 
+##' @examples
+##' \donttest{
+##'  comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
+##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
+##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+##'                       n.dec = 3, verbose = TRUE)
+##'  
+##'  model = comp.asr(prep.out = comp_mat, 
+##'                   fixed = mai~ age, 
+##'                   random = ~ block:age, 
+##'                   cor = TRUE, 
+##'                   maxit = 50)
+##'                   
+##'   results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'  }
 
 
 comp.resp = function(prep.out, model, weight.tgv = FALSE) {
@@ -186,8 +272,8 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')
     
-    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + sd(IGE$IGE), 'Sensitive', 
-                       ifelse(IGE$IGE < mean(IGE$IGE) - sd(IGE$IGE), 'Aggressive', 
+    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + stats::sd(IGE$IGE), 'Sensitive', 
+                       ifelse(IGE$IGE < mean(IGE$IGE) - stats::sd(IGE$IGE), 'Aggressive', 
                               'Homeostatic'))
 
     main = merge(DGE, IGE, by = names(prep.out$control)[2])
@@ -238,8 +324,8 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     IGE.int$IGE = IGE.int$IGE.x + IGE.int$IGE.y
     IGE.int = IGE.int[,c(1, 2, 7, 4, 5)]
     IGE.int$class = do.call(c, lapply(split(IGE.int, IGE.int[,2]), function(x){
-      ifelse(x$IGE > mean(x$IGE) + sd(x$IGE), 'Sensitive', 
-             ifelse(x$IGE < mean(x$IGE) - sd(x$IGE), 'Aggressive', 
+      ifelse(x$IGE > mean(x$IGE) + stats::sd(x$IGE), 'Sensitive', 
+             ifelse(x$IGE < mean(x$IGE) - stats::sd(x$IGE), 'Aggressive', 
                     'Homeostatic'))
     }))
     
@@ -308,8 +394,8 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')
     
-    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + sd(IGE$IGE), 'Sensitive', 
-                       ifelse(IGE$IGE < mean(IGE$IGE) - sd(IGE$IGE), 'Aggressive', 
+    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + stats::sd(IGE$IGE), 'Sensitive', 
+                       ifelse(IGE$IGE < mean(IGE$IGE) - stats::sd(IGE$IGE), 'Aggressive', 
                               'Homeostatic'))
     
     main = merge(DGE, IGE, by = names(prep.out$control)[2])    
@@ -343,9 +429,9 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     geom_density(aes(x = .data$IGE, after_stat(density), fill = 'Homeostatic'), 
                  alpha = .8)
   d = ggplot2::ggplot_build(den.ige.main)$data[[1]]
-  den.ige.main = den.ige.main + geom_area(data = subset(d, x > mean(IGE$IGE) + sd(IGE$IGE)), 
+  den.ige.main = den.ige.main + geom_area(data = subset(d, x > mean(IGE$IGE) + stats::sd(IGE$IGE)), 
                 aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-    geom_area(data = subset(d, x < mean(IGE$IGE) - sd(IGE$IGE)), 
+    geom_area(data = subset(d, x < mean(IGE$IGE) - stats::sd(IGE$IGE)), 
               aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
     geom_density(data = main, aes(x = .data$IGE, after_stat(density)), 
                  color = 'black', linewidth = 1.2, show.legend = F) +
@@ -424,9 +510,9 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
           geom_density(aes(x = IGE, after_stat(density), fill = 'Homeostatic'), 
                        alpha = .8)
         d = ggplot2::ggplot_build(aa)$data[[1]]
-        aa = aa + geom_area(data = subset(d, x > mean(IGE$IGE) + sd(IGE$IGE)), 
+        aa = aa + geom_area(data = subset(d, x > mean(IGE$IGE) + stats::sd(IGE$IGE)), 
                             aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-          geom_area(data = subset(d, x < mean(IGE$IGE) - sd(IGE$IGE)), 
+          geom_area(data = subset(d, x < mean(IGE$IGE) - stats::sd(IGE$IGE)), 
                     aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
           geom_density(data = x, aes(x = .data$IGE, after_stat(density)), 
                        color = 'black', linewidth = 1.2, show.legend = F) +
@@ -586,7 +672,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                                 fill = .data$y)) + 
         geom_tile(color = 'black') + 
         facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
-                   scale = 'free_x', 
+                   scales = 'free_x', 
                    labeller = labeller(.cols = facet.label.col,
                                        .rows = facet.label.row)) +
         scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
@@ -601,7 +687,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                                  fill = .data$DGE)) + 
         geom_tile(color = 'black') + 
         facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
-                   scale = 'free_x', 
+                   scales = 'free_x', 
                    labeller = labeller(.cols = facet.label.col,
                                        .rows = facet.label.row)) +
         scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
@@ -616,7 +702,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                                 fill = .data$IGE)) + 
         geom_tile(color = 'black') + 
         facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
-                   scale = 'free_x', 
+                   scales = 'free_x', 
                    labeller = labeller(.cols = facet.label.col,
                                        .rows = facet.label.row)) +
         scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
@@ -631,7 +717,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                                       fill = .data$class)) + 
         geom_tile(color = 'black') + 
         facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
-                   scale = 'free_x', 
+                   scales = 'free_x', 
                    labeller = labeller(.cols = facet.label.col,
                                        .rows = facet.label.row)) +
         scale_fill_manual(values = c('#fd8d3c', '#edf8e9', '#6baed6')) + 
@@ -657,7 +743,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                               aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                                                   fill = .data$y)) + 
         geom_tile(color = 'black') + 
-        facet_grid(rows = vars(.data$age), scale = 'free_x', 
+        facet_grid(rows = vars(.data$age), scales = 'free_x', 
                    labeller = labeller(.rows = facet.label.row)) +
         scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
         labs(x = "Row", y = 'Column', fill = '',
@@ -670,7 +756,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                             aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                                                 fill = .data$DGE)) + 
         geom_tile(color = 'black') + 
-        facet_grid(rows = vars(.data$age), scale = 'free_x', 
+        facet_grid(rows = vars(.data$age), scales = 'free_x', 
                    labeller = labeller(.rows = facet.label.row)) +
         scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
         labs(x = "Row", y = 'Column', fill = '',
@@ -683,7 +769,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                             aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                                                 fill = .data$IGE)) + 
         geom_tile(color = 'black') + 
-        facet_grid(rows = vars(.data$age), scale = 'free_x', 
+        facet_grid(rows = vars(.data$age), scales = 'free_x', 
                    labeller = labeller(.rows = facet.label.row)) +
         scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
         labs(x = "Row", y = 'Column', fill = '',
@@ -696,7 +782,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                                   aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                                                       fill = .data$class)) + 
         geom_tile(color = 'black') + 
-        facet_grid(rows = vars(.data$age), scale = 'free_x', 
+        facet_grid(rows = vars(.data$age), scales = 'free_x', 
                    labeller = labeller(.rows = facet.label.row)) +
         scale_fill_manual(values = c('#fd8d3c', '#edf8e9', '#6baed6')) + 
         labs(x = "Row", y = 'Column', fill = '',
@@ -757,7 +843,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                    fill = .data$y)) + 
           geom_tile(color = 'black') + 
-          facet_wrap(.~.data$area, scale = 'free_x', 
+          facet_wrap(.~.data$area, scales = 'free_x', 
                      labeller = labeller(.cols = facet.label)) +
           scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
           labs(x = "Row", y = 'Column', fill = '',
@@ -769,7 +855,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
         #        aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
         #            fill = .data$e)) + 
         #   geom_tile(color = 'black') + 
-        #   facet_wrap(.~.data$area, scale = 'free_x', 
+        #   facet_wrap(.~.data$area, scales = 'free_x', 
         #              labeller = labeller(.cols = facet.label)) +
         #   scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
         #   labs(x = "Row", y = 'Column', fill = '',
@@ -781,7 +867,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                    fill = .data$DGE)) + 
           geom_tile(color = 'black') + 
-          facet_wrap(.~.data$area, scale = 'free_x', 
+          facet_wrap(.~.data$area, scales = 'free_x', 
                      labeller = labeller(.cols = facet.label)) +
           scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
           labs(x = "Row", y = 'Column', fill = '',
@@ -793,7 +879,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                    fill = .data$class)) + 
           geom_tile(color = 'black') + 
-          facet_wrap(.~.data$area, scale = 'free_x', 
+          facet_wrap(.~.data$area, scales = 'free_x', 
                      labeller = labeller(.cols = facet.label)) +
           scale_fill_manual(values = c('#fd8d3c', '#edf8e9', '#6baed6')) + 
           labs(x = "Row", y = 'Column', fill = '',
@@ -805,7 +891,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
                    fill = .data$IGE)) + 
           geom_tile(color = 'black') + 
-          facet_wrap(.~.data$area, scale = 'free_x', 
+          facet_wrap(.~.data$area, scales = 'free_x', 
                      labeller = labeller(.cols = facet.label)) +
           scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
           labs(x = "Row", y = 'Column', fill = '',
@@ -866,6 +952,8 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     }
   }
   remove(prep.out, envir = .GlobalEnv)
+  
+  class(output) = 'comp.resp'
   
   return(output)
 }

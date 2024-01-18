@@ -1,7 +1,7 @@
 ##' @title Fit a genetic-spatial competition model
 ##' 
 ##' @description
-##' This function fits genetic-spatial competition models using ASReml-R
+##' This function fits genetic-spatial competition models using [asreml::asreml()]
 ##' 
 ##' @param prep.out A `comp.prep` object.
 ##' @inheritParams asreml::asreml 
@@ -10,7 +10,7 @@
 ##'  object specifying them. Otherwise, `random = ~1` (default). This argument has 
 ##'  the same general characteristics as fixed, but there can be no left side to 
 ##'  the ~ operator. Variance structures imposed on random terms are specified using 
-##'  special model functions.
+##'  special model functions. See [asreml::asreml()] for details.
 ##' @param cor A logical value. If `TRUE` (default), fits a model considering the correlation 
 ##' between direct and indirect genetic effects.
 ##' @param maxit An integer. The maximum number of iterations. Defaults to 50.
@@ -55,7 +55,7 @@
 ##'  the DGE \eqn{\times} age interaction, and the IGE \eqn{\times} age interaction.
 ##'  
 ##'
-##' @seealso  [competition::comp.prep], [asreml::asreml.options()], [asreml::asreml.object()], [asreml::family_dist()]
+##' @seealso  [competition::comp.prep], [asreml::asreml.options], [asreml::asreml.object], [asreml::family_dist]
 ##'
 ##' @import asreml
 ##' @importFrom stats as.formula
@@ -64,15 +64,15 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  comp_mat = comp.prep(data = data, gen = 'clone', repl = 'block', area = 'area', 
+##'  comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
-##'                       dist.col = 3, dist.row = 2.5, trait = 'mai', method = 'SK',
+##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
 ##'  
 ##'  model = comp.asr(prep.out = comp_mat, 
 ##'                   fixed = mai~ age, 
 ##'                   random = ~ block:age, 
-##'                   cor = T, 
+##'                   cor = TRUE, 
 ##'                   maxit = 50)
 ##'  }
 

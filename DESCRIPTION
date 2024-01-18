@@ -7,17 +7,15 @@ Authors@R:
                      comment = c(ORCID = "0000-0002-0694-1798")),
               person("Kaio", "Dias", role = c("aut", "cph"),
                      email = "kaio.o.dias@ufv.br",
-                     comment = c(ORCID = "0000-0002-9171-1021")),
-              person("Filipe", "Ferreira", role = "aut",
-                     email = "ferreira.fmanoel@gmail.com",
-                     comment = c(ORCID = "0000-0002-7847-8333")))
+                     comment = c(ORCID = "0000-0002-9171-1021")))
 Description: Fit spatial-genetic competition models for assessing the competition capacity of genotypes. Contained are functions used to build a competition matrix based on different criteria, fit the spatial-genetic competition model, and extract and visualize the results.
 URL: https://github.com/Kaio-Olimpio/Competition
 BugReports: https://github.com/Kaio-Olimpio/Competition/issues
 License: GPL (>= 3)
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.0
 Imports: 
     asreml,
     ggplot2,

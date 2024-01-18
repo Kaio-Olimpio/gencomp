@@ -22,7 +22,6 @@ Useful links:
 Authors:
 \itemize{
   \item Kaio Dias \email{kaio.o.dias@ufv.br} (\href{https://orcid.org/0000-0002-9171-1021}{ORCID}) [copyright holder]
-  \item Filipe Ferreira \email{ferreira.fmanoel@gmail.com} (\href{https://orcid.org/0000-0002-7847-8333}{ORCID})
 }
 
 }

@@ -7,9 +7,8 @@
 ##' 
 ##' @param data A data frame containing the phenotypic data.
 ##' @param gen,repl,row,col,ind,trait A string. The name of the columns that correspond
-##' to the genotype, replicate, row, column, individual (within plot) and trait information,
-##' respectively. If there is a single plant per plot, or the phenotype is at plot level, 
-##' `ind` should be a column of ones (1).
+##' to the genotype, replicate, row, column, individual and trait information,
+##' respectively. `ind` can also distinguish the plots, if there are multiple plants per plot.
 ##' @param dist.row,dist.col An integer. The distance between rows and columns in the trial.
 ##' @param area A string. The name of the column that corresponds to the area information. 
 ##' Valid if the trial has non-contiguous blocks, for e.g., blocks 1 and 2 in area 1, and
@@ -21,7 +20,7 @@
 ##' It has three options: "MU" for the method proposed by \insertCite{muir_incorporation_2005;textual}{competition}, 
 ##' "CC" for the method proposed by \insertCite{cappa_direct_2008;textual}{competition}, and."SK" for the 
 ##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{competition}.
-##' See details for more information on these methods.
+##' See Details for more information on these methods.
 ##' @param n.dec An integer. The number of decimal digits to be displayed in \eqn{\mathbf{Z}_c}. 
 ##' Defaults to 2.
 ##' @param verbose A logical value. If `TRUE`, a progress bar will be displayed in the 
@@ -103,9 +102,9 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  comp_mat = comp.prep(data = data, gen = 'clone', repl = 'block', area = 'area', 
+##'  comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
-##'                       dist.col = 3, dist.row = 2.5, trait = 'mai', method = 'SK',
+##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
 ##' }
 

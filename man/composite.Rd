@@ -2,9 +2,7 @@
 % Please edit documentation in R/composite.R
 \name{composite}
 \alias{composite}
-\title{@importFrom stats quantile model.matrix model.matrix.lm
-
-@export}
+\title{Simulates a clonal composite}
 \usage{
 composite(
   prep.out,
@@ -17,8 +15,73 @@ composite(
   verbose = TRUE
 )
 }
-\description{
-@importFrom stats quantile model.matrix model.matrix.lm
+\arguments{
+\item{prep.out}{A \code{comp.prep} object.}
 
-@export
+\item{model}{An \code{asreml} object, preferably obtained using the \code{\link[=comp.asr]{comp.asr()}} function.}
+
+\item{resp.out}{A \code{comp.resp} object.}
+
+\item{d.row.col}{A vector of size two. The first element contain the distance between
+rows, and second the distance between columns.}
+
+\item{d.weight}{A logical value. If \code{TRUE} (default) the predicted mean
+of each plant in the grid will be weighted by the inverse of the distance between rows,
+columns and diagonals.}
+
+\item{selected}{A vector with the names of the clones selected to compose the clonal composite.
+The names must be present at \code{comp.resp}.}
+
+\item{nsim}{An integer defining the number grid simulations. If \code{nsim > 1},
+the function will estimate the 95\% confidence interval of the predicted means using
+a bootstrap process. Defaults to 10.}
+
+\item{verbose}{A logical value. If \code{TRUE}, shows the function progress. Defaults to \code{FALSE}.}
+}
+\value{
+The function returns a data.frame with the predicted mean of each clone
+and their respective 95\% confidence interval. The composite performance is obtained by
+averaging the predicted mean of all clones.
+}
+\description{
+This function simulates clonal composites using outputs of a genetic-spatial
+competition model fitted using \code{\link[=comp.asr]{comp.asr()}}
+}
+\details{
+Considering the direct (DGE) and indirect genetic effects (IGE) of the selected clones,
+the function simulates grids. Clones are positioned differently in each simulation,
+which enables the modification of focal tree-neighbour dynamics. In each simulation,
+the expected mean of each clone is predicted using the following equation \insertCite{ferreira_novel_2023}{competition}:
+\deqn{\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{c_j}}
+where \eqn{d_i} is the DGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} focal tree, and
+\eqn{c_j} is the IGE of the j\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} neighbour. If \code{d.weight = TRUE}, the
+IGE is divided by the distance between the focal tree and its neighbours:
+\deqn{\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{\frac{1}{dist_{ij}} \times c_j}}
+}
+\examples{
+\donttest{
+ comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
+                      ind = 'tree', age = 'age', row = 'row', col = 'col', 
+                      dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+                      n.dec = 3, verbose = TRUE)
+ 
+ model = comp.asr(prep.out = comp_mat, 
+                  fixed = mai~ age, 
+                  random = ~ block:age, 
+                  cor = TRUE, 
+                  maxit = 50)
+                  
+ results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+ 
+ cc = composite(prep.out = comp_mat, model = model, resp.out = results,
+                d.row.col = c(3,3), d.weight = TRUE, nsim = 10, verbose = TRUE, 
+                selected = results$blups$main[order(results$blups$main$TGV, 
+                                                    decreasing = TRUE),1][1:10])
+ }
+}
+\references{
+\insertAllCited{}
+}
+\seealso{
+\link{comp.prep}, \link{comp.asr}, \link{comp.resp}
 }

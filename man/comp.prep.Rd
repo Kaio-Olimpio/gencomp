@@ -54,7 +54,7 @@ console. Defaults to \code{FALSE}.}
 The function returns:
 \itemize{
 \item \code{Z} : The \eqn{\mathbf{Z}_c} matrix
-\item \code{data} : A data frame composed of the built \eqn{\mathbf{Z}_c} merged.
+\item \code{data} : A data frame composed of the built \eqn{\mathbf{Z}_c} merged
 with the dataset provided by the user.
 \item \code{neigh_check} : A data frame containing the phenotypic records of each
 focal plant and its neighbours.
@@ -89,7 +89,7 @@ respectively; and \eqn{d_R} and \eqn{d_C} are the inter-row and inter-column dis
 
 \itemize{\item \insertCite{cappa_direct_2008;textual}{competition}: "CC"}
 
-The average compentition intensity depends on the number of neighbours in each direction
+The average competition intensity depends on the number of neighbours in each direction
 
 \deqn{f_{D_v} = \frac{1}{\sqrt{2(n_{C_v} + n_{R_v}) + n_{D_v}}}}
 
@@ -123,7 +123,7 @@ mean number of neighbours in each direction:
 }
 \examples{
 \donttest{
- comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
+ comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                       n.dec = 3, verbose = TRUE)

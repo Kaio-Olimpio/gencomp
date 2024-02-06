@@ -4,7 +4,7 @@
 \alias{comp.asr}
 \title{Fit a genetic-spatial competition model}
 \usage{
-comp.asr(prep.out, fixed, random = ~1, cor = TRUE, maxit = 50, ...)
+comp.asr(prep.out, fixed, random = ~1, cor = TRUE, ...)
 }
 \arguments{
 \item{prep.out}{A \code{comp.prep} object.}
@@ -30,8 +30,6 @@ special model functions. See \code{\link[asreml:asreml]{asreml::asreml()}} for d
 \item{cor}{A logical value. If \code{TRUE} (default), fits a model considering the correlation
 between direct and indirect genetic effects.}
 
-\item{maxit}{An integer. The maximum number of iterations. Defaults to 50.}
-
 \item{...}{
   Arguments passed on to \code{\link[asreml:asreml]{asreml::asreml}}
   \describe{
@@ -41,19 +39,6 @@ same general characteristics as \code{fixed}, but there can be no
 left side to the \code{~} expression. Wald statistics are not
 available for sparse fixed terms in order to reduce the computing
 load (default = \code{~NULL}).}
-    \item{\code{residual}}{A formula object specifying the residual model; any term specified
-on the left of the \code{~} expression is ignored. The default
-is \code{~ units}, where the reserved word \code{units}
-is defined as \code{seq(1,nrow(data))} and is automatically included
-in the model frame.  Variance models for the residual component of
-the model can be specified using special model functions (default = \code{~NULL}).
-
-For single-section univariate models, the residual variance model
-determines the computational mode: If the residual variance model
-specifies a correlation structure (includes \code{id()}), then the
-model is fitted on the gamma scale, otherwise the model is
-fitted on the sigma scale. The default is \code{id(units)} if
-not explicitly specified.}
     \item{\code{G.param}}{Either:
 
 \itemize{
@@ -378,7 +363,7 @@ the DGE \eqn{\times} age interaction, and the IGE \eqn{\times} age interaction.
 }
 \examples{
 \donttest{
- comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
+ comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                       n.dec = 3, verbose = TRUE)
@@ -386,8 +371,7 @@ the DGE \eqn{\times} age interaction, and the IGE \eqn{\times} age interaction.
  model = comp.asr(prep.out = comp_mat, 
                   fixed = mai~ age, 
                   random = ~ block:age, 
-                  cor = TRUE, 
-                  maxit = 50)
+                  cor = TRUE, maxit = 50)
  }
 }
 \seealso{

@@ -1,0 +1,345 @@
+---
+title: "`competition` general usage"
+bibliography: REFERENCES.bib
+csl: apa.csl
+output: 
+  html_document:
+      toc: true
+      toc_float: true
+      theme: flatly
+      highlight: haddock
+      mode: selfcontained
+fontsize: 11pt
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Welcome to `competition`. This package fits genetic-spatial competition models and extracts the main results. In this document, we present a general workflow using the dataset contained within the package as example.
+
+```{r warning=FALSE, message=FALSE, results='hide'}
+library(competition)
+```
+
+# Example dataset: `euca`
+
+This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (`mai`) of 100 eucalyptus clones. The trial was laid out in randomized complete blocks design, with 21 replicates and one tree per plot. This trial did not have contigous blocks: blocks 1-7 were in area 1, blocks 8-14 were in area 2, and blocks 15-21 were in area 3. The `area` columns contains this information. The dataset also has information about the position of each tree in the grid (`row` and `col`). In the row and column directions, the plants are spaced 2 m (dist_row) and 3 m (dist_col) apart, respectively. Data were collected at 3 and 6 years after the trial implementation (information contained in the column `age`).
+
+```{r}
+head(euca)
+```
+
+The dataset has the most complex scenario supported by the package: non-contiguous blocks and several ages. We will show how to use the package's functions for this scenario, so the application in less complex cases can be straightforward.
+
+# Preparations
+
+This is the most important part. Before fitting the model, we must first build the competition matrix ($\mathbf{Z}_c$) and bind it to the dataset. This may be tricky, so we made the `comp_prep` function to do it for you.
+
+Three methods are available for estimating the competition intensity and building $\mathbf{Z}_c$: 
+
+- @muir_incorporation_2005: MU
+
+The average competition intensity is the inverse of the distance between the focal plant and its neighbours:
+
+$$f_{D_v} = \frac{1}{\sqrt{d_R^2 + d_C^2}}$$
+
+$$f_{R_v} = \frac{1}{d_R}$$
+
+$$f_{C_v} = \frac{1}{d_C}$$
+
+where $f_{D_v}$, $f_{R_v}$ and $f_{C_v}$ are the average competition intensities in the diagonal, row, and column directions of the $v^{th}$ clone, respectively; and $d_R$ and $d_C$ are the inter-row and inter-column distances.
+
+- @cappa_direct_2008: "CC"
+
+The average competition intensity depends on the number of neighbours in each direction
+
+$$f_{D_v} = \frac{1}{\sqrt{2(n_{C_v} + n_{R_v}) + n_{D_v}}}$$
+
+$$f_{R_v} = \sqrt{\frac{2}{2(n_{C_v} + n_{R_v}) + n_{D_v}}}$$
+
+$$f_{C_v} = \sqrt{\frac{2}{2(n_{C_v} + n_{R_v}) + n_{D_v}}}$$
+
+where $n_{D_v}$, $n_{R_v}$ and $n_{C_v}$ are the number of neighbours in the diagonal, row and column directions of the \eqn{v^{th}} clone, respectively. Note that, in this case, it is assumed that the distance between rows and columns are the same.
+
+-   @costa_e_silva_accounting_2013: "SK"
+
+The average competition intensity depends on both the distance between the focal tree and its neighbours, and the number of neighbours in each direction:
+
+$$f_{D_v} = \frac{p}{\sqrt{(n_{R_v} p^4) + (n_{R_v} p^2) + (n_{C_v} p^2) + (n_{D_v} p^2) + n_{C_v}}}$$
+
+$$f_{R_v} = f_{D_v} \sqrt{1 + p^2}$$
+
+$$f_{C_v} = \frac{f_{D_v} \sqrt{1 + p^2}}{p}$$
+
+where $p = \frac{d_C}{d_R}$.
+
+The overall competition intensity factor ($CIF$) is estimated by taking the mean of the competition intensities provided by the equations described above, and the mean number of neighbours in each direction:
+
+$CIF = \overline{n_D} \overline{f_D} + \overline{n_R} \overline{f_R} + \overline{n_C} \overline{f_C}$
+
+## `comp_prep`
+
+The basic structure of the function is:
+
+```
+comp.prep(data, gen, repl, row, col, ind, trait, dist.row, dist.col, 
+                   method, area = NULL, age = NULL, n.dec = 2, 
+                   verbose = FALSE)
+```
+`data` is the working dataset. `gen`, `repl`, `row`, `col`, `ind` and `trait` are the columns names in the dataset that conatain the information of genotypes, repetitions, row, column, individuals and trait, respectively. `dist_row` and `dist_col` are the distances between rows and columns, respectively. `method` refers to the method to be used to compute the competition intensity: it should be "MU", "CC" or "SK" (see details above). `area` and `age` are `NULL` by default, but if you have non-contiguous blocks (as we have in our example) and multi-age data, you can add the name of the columns that contain this information in the data frame. `n.dec` is the number of decimal digits to show in $\mathbf{Z}_c$. Finally, `verbose` controls wheter a progress bar is printed in the console or not. 
+
+Let's see how this function works in our example dataset:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+                   ind = 'tree', age = 'age', row = 'row', col = 'col', 
+                   dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+                   n.dec = 2, verbose = FALSE)
+```
+
+The object `comp_mat` contains:
+
+- A data frame with the $\mathbf{Z}_c$ bidden to the working data frame 
+
+```{r}
+comp_mat$data[1:5, c(1:5, (ncol(comp_mat$data)-4):ncol(comp_mat$data))]
+```
+
+- A data frame containing the number of phenotypic records, genotypes, replicates, rows, columns, ages and areas in the dataset provided
+
+```{r}
+comp_mat$control
+```
+
+-   A data frame containing the number of phenotypic records, genotypes, replicates, rows, columns, ages and areas in the dataset provided by the user.
+
+```{r}
+comp_mat$control
+```
+
+-   Lists with age-wise outputs:
+
+a. A data frame containing the phenotypic records of each focal plant and its neighbours.
+
+```{r}
+head(comp_mat$Age_3y$neigh_check)
+```
+    
+b. The $\mathbf{Z}_c$ matrix
+    
+```{r}
+comp_mat$Age_3y$Z[1:6,1:6]
+```
+   
+c. The mean competition intensity factor:
+    
+```{r}
+comp_mat$Age_3y$CIF
+```
+
+The three last outputs will not be within lists if `age = NULL`. 
+
+# Fitting the model
+
+A general genetic-spatial linear mixed model can be represented by: 
+ 
+ $$\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \mathbf{Z}_g \mathbf{g} + \mathbf{Z}_c \mathbf{c} + \mathbf{Z}_p \mathbf{p}  + \boldsymbol{\xi}$$
+ 
+where $\mathbf{y}$ is the vector of phenotypic records, $\boldsymbol{\beta}$ is the vector of fixed effects, $\mathbf{g}$ is the vector of direct genetic effects (DGE), $\mathbf{c}$ is the vector of indirect genetic effects (IGE), $\mathbf{p}$ is the vector of other random effects, and $\boldsymbol{\xi}$ is the vector of spatially correlated errors. $\mathbf{X}$ is the incidence matrix of the fixed effects, $\mathbf{Z}_g$ is the DGE incidence matrix, $\mathbf{Z}_c$ is the IGE incidence matrix (built using `comp.prep`), and $\mathbf{Z}_p$ is the design matrix of other random effects. The dimensions of $\mathbf{Z}_c$ are the same as $\mathbf{Z}_g$. The spatially correlated errors are distributed as 
+ $\boldsymbol{\xi} \sim N\{\mathbf{0}, \sigma^2_\xi[\mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)]\}$, where $\sigma^2_\xi$ is the spatially correlated residual variance, $\mathbf{AR1}(\rho_C)$ and $\mathbf{AR1}(\rho_R)$ are the first-order autoregressive correlation matrices in the column and row directions, and $\otimes$ is the Kronecker product. If `cor = TRUE`, the function will fit a model in which $\mathbf{g}$ and $\mathbf{c}$ are correlated outcomes of the genotypic effects decomposition. They both follow a Gaussian distribution, with mean centred in zero, and covariange given by:
+  
+$$\mathbf{\Sigma_g}=  \begin{bmatrix}\sigma_{\text{g}}^2 & \sigma_{\text{gc}}\\\sigma_{\text{gc}} & \sigma_{\text{c}}^2\\\end{bmatrix}\otimes {{\mathbf I_V}}$$
+  
+where $\sigma_{\text{g}}^2$ is the DGE variance, $\sigma_{\text{c}}^2$ is the IGE variance, and $\sigma_{\text{gc}}$ is the covariance between DGE and IGE.
+  
+If the dataset has multiple age, the model described aboved is expanded with two more effects: the DGE $\times$ age interaction, and the IGE $\times$ age interaction. It is the case of our example dataset.
+
+## `comp.asr` 
+
+This function uses the `asreml` package to fit the genetic-spatial competition model described above. The basic structure is simple: 
+
+```
+comp.asr(prep.out, fixed, random = ~1, cor = TRUE,...)
+```
+`prep.out` is an object that stores the outputs from the `comp.prep` function. `cor` dictates if the function should fit a model considering the covariance between DGE and IGE (`cor = TRUE`) or not (`cor = FALSE`). `fixed` is a formula, declared just like you usually do for regular `asreml` models. `random` is also a formula, but you will only use this argument if you have other random effects than the genotypic effects. This is because all pre-programmed models already consider DGE and IGE and fit a spatial model, as described above. `comp.asr` can receive other arguments passed on to the `asreml` function. 
+
+In the example dataset, we will fit the model as follows: 
+
+```{r}
+model = comp.asr(prep.out = comp_mat, 
+               fixed = mai~ age, 
+               random = ~ block:age, cor = T, maxit = 50)
+```
+
+Note that we had a further random effect: blocks within ages. Since DGE and IGE are an integral part of the models of `comp.asr`, we only needed to declare `random = ~ block:age`. 
+
+`model` is an object of class `asreml`, meaning that you can do with it everything you usually do with `asreml` objects. Actually, don't worry, we created a function to do it for you! 
+
+# Extracting the results
+
+The genetic-spatial competition model provides the direct (DGE) and indirect genetic effects (IGE) of each genotype. The DGE represents the "pure" performance of the genotype, while the IGE is the related to the average effect of the genotype on the genotypic value of its neighbours. The higher the IGE, the more aggressive is the genotype. Here, we use the classification proposed by @ferreira_novel_2023 to define competition classes:
+
+$$\begin{cases} c_i > \overline{c} + sd(c) \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) > c_i > \overline{c} - sd(c) \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \rightarrow \text{Sensitive} \end{cases}$$
+
+where $c_i$ is the IGE of the i<sup>th</sup> genotype, $\overline{c}$ is the mean IGE, and $sd(c)$ is the standard deviation of the IGE. 
+
+When IGE is significant, selection using DGE (which is equivalent to selecting using BLUPs from standard linear mixed models) is biased. In this case, the total genotypic value (TGV) is the most appropriate selection criterion. This value is calculated as follows: 
+
+$$TGV_i =  d_i + CIF \times c_i$$
+
+where $d_i$ is the DGE of the i<sup>th</sup> genotype, and $CIF$ is the overall competition intensity factor, previously computed in the function `comp.prep`.
+
+
+## `comp.resp` 
+
+This function extracts the main results from the `asreml` object obtained using `comp.asr`. The information you need to provide is: 
+
+```
+comp.resp(prep.out, model, weight.tgv)
+```
+`model` is the object that contains the `comp.asr` function output. `weight.tgv` receives a logical value. If `weight.tgv = TRUE`, the DGE and IGE will be multiplied by their respective reliabilities ($r_{d_i}^2$ and $r_{c_i}^2$) when estimating the TGV:
+
+$$wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}$$
+
+In our example, the usage is: 
+
+```{r}
+results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+```
+
+`results` is an object of class `comp.resp` that contains: 
+
+-   `lrt`: a data frame with the Likelihood Ratio Test results.
+
+```{r}
+results$lrt
+```
+
+-   `varcomp`: A data frame with the variance components
+
+```{r}
+results$varcomp
+```
+
+-   `blups`: a data frame with the direct (DGE) and indirect genetic effects (IGE), their standard errors, the competition class of each genotype and the total genotypic value (TGV). Since `age = TRUE` in our case, `blups` is a list with the main effects and the within-ages effects. `blups` also contain the BLUPs of the other random effects declared in the model (if any)
+
+```{r}
+head(results$blups$main)
+head(results$blups$within)
+head(results$blups$coef.random)
+```
+
+-   `plots` A list of plots: 
+
+a.    `IGE.density`: a density plot with the IGE distribution. The area within the distribution is filled according to the competition class.
+
+```{r}
+results$plots$main$IGE.density
+```
+
+b.    `DGEvsIGE`: a scatter plot illustrating the relation between IGE (x-axis) and DGE (y-axis). The dots are coloured according to the competition class.
+
+```{r}
+results$plots$main$DGEvsIGE
+```
+
+c.    `DGE.IGE`: lollipop plots representing the DGE and IGE of each genotype. The plots are in descending order according to the DGE. The dots' colour depicts the DGE's and IGE's reliability of each genotype.
+
+```{r}
+results$plots$main$DGE.IGE
+```
+
+d.    `TGV`: a lollipop plot with the TGV of each genotype, in increasing order.
+
+```{r}
+results$plots$main$TGV
+```
+
+From now on, all plots are particularized per age, and will be accessible from `results$plots$within$...`. This would not be necessary if `age = NULL`.
+
+e.    `n.neigh`: a bar plot depicting the number of different genotypes as neighbours (total and per competition class) of each selection candidate. 
+
+```{r}
+results$plots$within$n.neigh
+```
+
+f.    `grid.pheno`: a heatmap representing the grid. The cells are filled according to the phenotype value of each plot.
+
+```{r}
+results$plots$within$grid.pheno
+```
+
+g    `grid.DGE`: a heatmap representing the grid. The cells are filled according to the DGE value of each genotype.
+
+```{r}
+results$plots$within$grid.DGE
+```
+
+h.    `grid.IGE`: a heatmap representing the grid. The cells are filled according to the IGE value of each genotype.
+
+```{r}
+results$plots$within$grid.IGE
+```
+
+i.    `grid.IGE.class`: a heatmap representing the grid. The cells are filled according to the competition class of each genotype.
+
+```{r}
+results$plots$within$grid.IGE.class
+```
+
+Note that all plots are customizable using resources of the ggplot2 library.
+
+# Bonus: clonal composites
+
+If there are clones that are more competitive and others that can endure the competition more efficiently, there will surely be a mix of clones that will coexist harmoniously. This is the core idea of @ferreira_novel_2023 to propose a method for defining the best composition of a clonal mixture. We implemented a function that simulates a grid considering DGE and IGE of a set of clones. They are positioned differently in each simulation, which enables the modification of focal tree-neighbour dynamics. In each simulation, the expected mean of each clone is predicted using the following equation: 
+
+$$\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{c_j}$$
+
+where $d_i$ is the DGE of the i<sup>th</sup> focal tree, and $c_j$ is the IGE of the j<sup>th</sup> neighbour.
+
+## `composite`
+
+The referred function has the following base structure: 
+
+```
+composite(prep.out, model, resp.out, d.row.col, d.weight = TRUE, selected,
+          nsim = 10, verbose = TRUE)
+```
+Note that we will need every piece of information obtained up to now (`prep.out`, `model` and `resp.out`, which is the object that stores the outputs of the `comp.resp` function). `d.row.col` is a vector of size two, where the first element is the distance between rows and the second the distance between columns **of the simulated grid**. `selected` is a vector with the names of the clones selected to compose the clonal mixture. `nsim` is the number of grid simulations. When `nsim > 1` (default), the function will estimate the 95% confidence interval of the predicted means using a bootstrap process. `d.weight` receives a logical value (which is `TRUE` by default). If `d.weight = TRUE`, the IGE is divided by the distance between the focal tree and its neighbours when the expected mean is estimated:
+
+$$\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{\frac{1}{dist_{ij}} \times c_j}$$
+
+We recommend always using `nsim > 1`. If you want to test different clonal mixtures, you just need to vary the selected clones in the `selected` argument. 
+
+Let's see how a clonal mixture composed by the top ten clones according to the TGV performs: 
+
+```{r}
+sel.clone = results$blups$main[order(results$blups$main$TGV, decreasing = T),1][1:10]
+cc = composite(prep.out = comp_mat, model = model, resp.out = results, 
+                     d.row.col = c(3,3), d.weight = TRUE, nsim = 10, verbose = TRUE,
+                     selected = sel.clone)
+cc
+```
+
+The predicted mean of this clonal mixture was `r round(mean(cc$y.pred),2)`. Let's see what happens if we select the top ten genotypes based on the DGE: 
+
+```{r}
+sel.clone = results$blups$main[order(results$blups$main$DGE, decreasing = T),1][1:10]
+cc = composite(prep.out = comp_mat, model = model, resp.out = results, 
+                     d.row.col = c(3,3), d.weight = TRUE, nsim = 10, verbose = TRUE,
+                     selected = sel.clone)
+cc
+```
+
+The predicted mean of this clonal mixture is `r round(mean(cc$y.pred),2)`, lower than the mixture composed of clones selected based on the TGV.
+
+We believe that competition is a major effect in plant breeding, and can actively affect the selection efficiency. We hope this package is useful for you to consider the competition when making decisions. Feel free to contact us if there any issues or suggestions for improvement.
+
+
+# References
+
+

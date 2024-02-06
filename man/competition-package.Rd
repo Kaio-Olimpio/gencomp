@@ -17,11 +17,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Saulo Chaves \email{saulo.chaves@ufv.br} (\href{https://orcid.org/0000-0002-0694-1798}{ORCID})
+\strong{Maintainer}: Saulo F. S. Chaves \email{saulo.chaves@ufv.br} (\href{https://orcid.org/0000-0002-0694-1798}{ORCID})
 
 Authors:
 \itemize{
-  \item Kaio Dias \email{kaio.o.dias@ufv.br} (\href{https://orcid.org/0000-0002-9171-1021}{ORCID}) [copyright holder]
+  \item Kaio O. G. Dias \email{kaio.o.dias@ufv.br} (\href{https://orcid.org/0000-0002-9171-1021}{ORCID}) [copyright holder]
+  \item Filipe M. Ferreira \email{ferreira.fmanoel@gmail.com} (\href{https://orcid.org/0000-0002-7847-8333}{ORCID})
 }
 
 }

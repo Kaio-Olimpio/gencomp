@@ -8,7 +8,7 @@
 ##' @param model An `asreml` object, preferably obtained using the [competition::comp.asr()] function.
 ##' @param resp.out A `comp.resp` object.
 ##' @param d.row.col A vector of size two. The first element contain the distance between
-##' rows, and second the distance between columns.
+##' rows, and second the distance between columns of the simulated grid.
 ##' @param d.weight A logical value. If `TRUE` (default) the predicted mean 
 ##' of each plant in the grid will be weighted by the inverse of the distance between rows,
 ##' columns and diagonals.
@@ -46,7 +46,7 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
+##'  comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
@@ -54,8 +54,7 @@
 ##'  model = comp.asr(prep.out = comp_mat, 
 ##'                   fixed = mai~ age, 
 ##'                   random = ~ block:age, 
-##'                   cor = TRUE, 
-##'                   maxit = 50)
+##'                   cor = TRUE, maxit = 50)
 ##'                   
 ##'  results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
 ##'  

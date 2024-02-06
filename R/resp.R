@@ -12,6 +12,7 @@
 ##'
 ##' @return The function returns:
 ##' \itemize{
+##' \item \code{lrt} : a data frame with the Likelihood Ratio Test results.
 ##' \item \code{varcomp} : A data frame summarizing the random parameter vector 
 ##' (object$vparameters). Variance component ratios are included if param = "gamma", 
 ##' and a measure of precision (standard error) is included along with boundary 
@@ -23,24 +24,24 @@
 ##' with their BLUPs.
 ##' \item \code{plots} : A list of plots:
 ##'   \itemize{
-##'   \item `IGE.density` a density plot with the IGE distribution. The area within the
+##'   \item `IGE.density`: a density plot with the IGE distribution. The area within the
 ##'   distribution is filled according to the competition class (see Details).
-##'   \item `DGEvsIGE` a scatter plot illustrating the relation between IGE (\emph{x}-axis) 
+##'   \item `DGEvsIGE`: a scatter plot illustrating the relation between IGE (\emph{x}-axis) 
 ##'   and DGE (\emph{y}-axis). The dots are coloured according to the competition class
-##'   \item `DGE.IGE` lollipop plots representing the DGE and IGE of each genotype. The plots 
+##'   \item `DGE.IGE`: a lollipop plots representing the DGE and IGE of each genotype. The plots 
 ##'   are in descending order according to the DGE. The dots' colour depicts the DGE's and IGE's 
 ##'   reliability of each genotype.
-##'   \item `TGV` a lollipop plot with the TGV of each genotype, in increasing order. 
-##'   \item `n.neigh` a bar plot depicting the number of different genotypes as neighbours
+##'   \item `TGV`: lollipop plots with the TGV of each genotype, in increasing order. 
+##'   \item `n.neigh`: a bar plot depicting the number of different genotypes as neighbours
 ##'    (total and per competition class) of each selection candidate. If `age = TRUE`, 
 ##'    there will be a `n.neigh` plot for each age. 
-##'    \item `grid.pheno` a heatmap representing the grid. The cells are filled according
+##'    \item `grid.pheno`: a heatmap representing the grid. The cells are filled according
 ##'    to the phenotype value of each plot. If `age = TRUE`, there will be a `grid.pheno` plot for each age.
-##'    \item `grid.DGE` a heatmap representing the grid. The cells are filled according
+##'    \item `grid.DGE`: a heatmap representing the grid. The cells are filled according
 ##'    to the DGE value of each genotype. If `age = TRUE`, there will be a `grid.DGE` plot for each age.
-##'    \item `grid.IGE` a heatmap representing the grid. The cells are filled according
+##'    \item `grid.IGE`: a heatmap representing the grid. The cells are filled according
 ##'    to the IGE value of each genotype. If `age = TRUE`, there will be a `grid.DGE` plot for each age.
-##'    \item `grid.IGE.class` a heatmap representing the grid. The cells are filled according
+##'    \item `grid.IGE.class`: a heatmap representing the grid. The cells are filled according
 ##'    to the competition class of each genotype. If `age = TRUE`, there will be a `grid.DGE` plot for each age. 
 ##'   }
 ##'   All plots are customizable using resources of the `ggplot2` library.
@@ -85,7 +86,7 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  comp_mat = comp.prep(data = eucalyptus, gen = 'clone', repl = 'block', area = 'area', 
+##'  comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
@@ -93,8 +94,7 @@
 ##'  model = comp.asr(prep.out = comp_mat, 
 ##'                   fixed = mai~ age, 
 ##'                   random = ~ block:age, 
-##'                   cor = TRUE, 
-##'                   maxit = 50)
+##'                   cor = TRUE, maxit = 50)
 ##'                   
 ##'   results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
 ##'  }
@@ -107,6 +107,12 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
   prep.out <<- prep.out
   model = model
   output = list()
+  fixed = model$fixed
+  random = model$random
+
+  if(!model$converge) stop('The model did not converge!')
+  
+  output$lrt = model$lrt
   
   # Variance components ---------------------
   varcomp = summary(model)$varcomp
@@ -906,7 +912,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     }else{
       temp = merge(
         data.frame(prep.out$neigh_check[,1:4], e = model$residuals),
-        main[,c(1,2,5,8)], by.x = 'trat', by.y = names(prep.out$control)[2]
+        main[,c(1,2,5,8)], by.x = 'gen', by.y = names(prep.out$control)[2]
       )
       
       plott = ggpubr::ggarrange(

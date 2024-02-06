@@ -8,3 +8,5 @@
 ^comp_breedR\.R$
 ^bouvet\.R$
 ^README\.Rmd$
+^data_sim\.R$
+^vignettes/articles$

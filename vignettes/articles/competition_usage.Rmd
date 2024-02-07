@@ -27,7 +27,7 @@ library(competition)
 
 # Example dataset: `euca`
 
-This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (`mai`) of 100 eucalyptus clones. The trial was laid out in randomized complete blocks design, with 21 replicates and one tree per plot. This trial did not have contigous blocks: blocks 1-7 were in area 1, blocks 8-14 were in area 2, and blocks 15-21 were in area 3. The `area` columns contains this information. The dataset also has information about the position of each tree in the grid (`row` and `col`). In the row and column directions, the plants are spaced 2 m (dist_row) and 3 m (dist_col) apart, respectively. Data were collected at 3 and 6 years after the trial implementation (information contained in the column `age`).
+This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (`mai`) of 100 eucalyptus clones. The trial was laid out in randomized complete blocks design, with 21 replicates and one tree per plot. This trial did not have contiguous blocks: blocks 1-7 were in area 1, and blocks 8-13 were in area 2. The `area` columns contains this information. The dataset also has information about the position of each tree in the grid (`row` and `col`). In the row and column directions, the plants are spaced 2 m (dist_row) and 3 m (dist_col) apart, respectively. Data were collected at 3 and 6 years after the trial implementation (information contained in the column `age`).
 
 ```{r}
 head(euca)

@@ -648,7 +648,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                 axis.title = element_text(face = 'bold'),
                 legend.position = 'bottom') +
           labs(x = names(prep.out$control)[2], 
-               y = "No of different genotypes as neighbours", fill = 'Class', 
+               y = "No. of different genotypes as neighbours", fill = 'Class', 
                subtitle = paste(names(prep.out$control)[6], 
                                 unique(x[,names(prep.out$control)[6]]))) +
           scale_fill_manual(values = c('#fd8d3c', '#edf8e9', '#6baed6'))

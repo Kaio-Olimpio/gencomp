@@ -80,7 +80,7 @@ composite = function(prep.out, model, resp.out, d.row.col, d.weight = TRUE,
   
   # New dataset: main effects
   dat = resp.out$blups$main
-  dat = dat[which(dat[,1] %in% selected),]
+  dat = droplevels(dat[which(dat[,1] %in% selected),]); rownames(dat) = NULL
   ngen = length(unique(dat[,1]))
   mu = model$coefficients$fixed[grep('Intercept', rownames(model$coefficients$fixed))]
   

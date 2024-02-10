@@ -593,7 +593,8 @@ comp.prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     })
     
     names(Z) = paste0("Age_", names(Z))
-    Z$data = rbind(Z$Age_3$data, Z$Age_6$data)
+    
+    Z$data = do.call(rbind, lapply(Z, function(x) x$data))
     Z$control = control
     
     class(Z) = 'comp.prep'

@@ -119,7 +119,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
   
   ## Dealing with the names --------------------
   if(prep.out$control[,6] > 0){
-    varcomp = varcomp[-grep('!R', rownames(varcomp)),]
+    varcomp = varcomp[-grep('!R$', rownames(varcomp)),]
     rownames(varcomp)[
       rownames(varcomp) == rownames(varcomp[which(grepl('grp', rownames(varcomp)) &
                                                     grepl('_1', rownames(varcomp)) &
@@ -132,6 +132,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                                     grepl(names(prep.out$control)[6],
                                                           rownames(varcomp))),])
     ] = paste("IGE", names(prep.out$control)[6], sep = ':')
+    
     # rownames(varcomp)[
     #   rownames(varcomp) == rownames(varcomp[which(grepl('grp', rownames(varcomp)) &
     #                                                 grepl('cor', rownames(varcomp)) &
@@ -141,7 +142,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     
     if(prep.out$control[,7] > 0){
       rownames(varcomp)[
-        rownames(varcomp) %in% rownames(varcomp[which(grepl(paste(names(prep.out$control)[6], 'cor', sep='!'), 
+        rownames(varcomp) %in% rownames(varcomp[which(grepl(paste(names(prep.out$control)[6], 'cor$', sep='!'), 
                                                             rownames(varcomp))),])
       ] = paste(paste0("R=autocor(", 
                        paste(names(prep.out$control[7]),
@@ -158,40 +159,43 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
                                                     rownames(varcomp))),]))
       rownames(varcomp)[
         rownames(varcomp) %in% 
-          rownames(varcomp[which(grepl('row!',
+          rownames(varcomp[which(grepl(paste0(names(prep.out$control)[4], '!'),
                                        rownames(varcomp))),])
       ] = paste0('R=autocor(row):', 
                  sub('!.*', '', 
-                     rownames(varcomp[which(grepl('row',rownames(varcomp))),])))
+                     rownames(varcomp[which(grepl(names(prep.out$control)[4], 
+                                                  rownames(varcomp))),])))
       rownames(varcomp)[
         rownames(varcomp) %in% 
-          rownames(varcomp[which(grepl('col',
+          rownames(varcomp[which(grepl(paste0(names(prep.out$control)[5], "!"),
                                        rownames(varcomp))),])
       ] = paste0('R=autocor(col):', 
                  sub('!.*', '', 
-                     rownames(varcomp[which(grepl('col',rownames(varcomp))),])))
+                     rownames(varcomp[which(grepl(paste0(names(prep.out$control)[5], "!"),
+                                                  rownames(varcomp))),])))
       
     }else{
       rownames(varcomp)[
-        rownames(varcomp) == rownames(varcomp[which(grepl(paste(names(prep.out$control)[6], 'cor', sep='!'), 
+        rownames(varcomp) == rownames(varcomp[which(grepl(paste(names(prep.out$control)[6], 'cor$', sep='!'), 
                                                           rownames(varcomp))),])
       ] = paste0("R=autocor(", names(prep.out$control)[6],')')
       
       rownames(varcomp)[
-        rownames(varcomp) == rownames(varcomp[which(grepl(paste(names(prep.out$control)[6], '_', sep=''), 
-                                                          rownames(varcomp))),] )
+        rownames(varcomp) %in% rownames(varcomp[which(grepl(paste(names(prep.out$control)[6], '_', sep=''), 
+                                                          rownames(varcomp))),])
       ] = paste0("R=", paste(names(prep.out$control)[6],
-                             1:as.numeric(prep.out$control[6]), sep = '_'))
+                             levels(prep.out$data[,names(prep.out$control)[6]]), 
+                             sep = '_'))
       
       rownames(varcomp)[
         rownames(varcomp) %in% 
-          rownames(varcomp[which(grepl('row!',
+          rownames(varcomp[which(grepl(paste0(names(prep.out$control)[4],'!'),
                                        rownames(varcomp))),])
       ] = 'R=autocor(row)'
       
       rownames(varcomp)[
         rownames(varcomp) %in% 
-          rownames(varcomp[which(grepl('col',
+          rownames(varcomp[which(grepl(paste0(names(prep.out$control)[5],'!'),
                                        rownames(varcomp))),])
       ] = 'R=autocor(col)'
       
@@ -223,17 +227,17 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
       
     }else{
       rownames(varcomp)[
-        rownames(varcomp) %in% rownames(varcomp[which(grepl('!R', 
+        rownames(varcomp) %in% rownames(varcomp[which(grepl('!R$', 
                                                             rownames(varcomp))),])
       ] = 'R'
       rownames(varcomp)[
         rownames(varcomp) %in% 
-          rownames(varcomp[which(grepl('row!',
+          rownames(varcomp[which(grepl(paste0(names(prep.out$control)[4],'!cor'),
                                        rownames(varcomp))),])
       ] = 'R=autocor(row):'
       rownames(varcomp)[
         rownames(varcomp) %in% 
-          rownames(varcomp[which(grepl('col',
+          rownames(varcomp[which(grepl(paste0(names(prep.out$control)[5],'!cor'),
                                        rownames(varcomp))),])
       ] = 'R=autocor(col):'
     }
@@ -250,7 +254,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
   ] = 'IGE'
   rownames(varcomp)[
     rownames(varcomp) == rownames(varcomp[which(grepl('grp', rownames(varcomp)) &
-                                                  grepl('cor', rownames(varcomp))),])
+                                                  grepl('cor$', rownames(varcomp))),])
   ] = "cor(IGE_DGE)"
   
   output$varcomp = varcomp
@@ -266,14 +270,24 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     DGE[,names(prep.out$control)[2]] = gsub(paste0(names(prep.out$control)[2],'_'), 
                                                '', rownames(DGE), fixed = T)
     rownames(DGE) = NULL
+    DGE[,names(prep.out$control)[2]] = as.factor(DGE[,names(prep.out$control)[2]])
+    
+    if(any(grepl(' ',DGE[,names(prep.out$control)[2]]))){
+      DGE[,names(prep.out$control)[2]][grepl(' ',DGE[,names(prep.out$control)[2]])] = 
+        gsub(' ', '.', DGE[,names(prep.out$control)[2]][grepl(' ',DGE[,names(prep.out$control)[2]])])
+      
+    }
+    
     DGE$rel.DGE = 1-(DGE$std.error^2/varcomp['DGE','component'])
     DGE = DGE[,c(3,1,2,4)]; colnames(DGE)[c(2,3)] = c('DGE', 'se.DGE')
     
     IGE = blup[which(grepl('grp', rownames(blup)) & 
                        !grepl(names(prep.out$control)[6], rownames(blup))), -3]
-    IGE[,names(prep.out$control)[2]] = regmatches(rownames(IGE), 
-                                                  m = regexpr(paste(DGE$clone, collapse = "|"),
-                                                              rownames(IGE)))
+    IGE[,names(prep.out$control)[2]] = regmatches(
+      do.call(rbind, strsplit(rownames(IGE), '\\(g1\\)_'))[,2], 
+      m = regexpr(paste(DGE[,names(prep.out$control)[2]], collapse = "|"), 
+                  do.call(rbind, strsplit(rownames(IGE), '\\(g1\\)_'))[,2])
+    )
     rownames(IGE) = NULL
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')
@@ -308,6 +322,13 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     DGE.int[,names(prep.out$control)[6]] = gsub(paste0(names(prep.out$control)[6], '_'),'', 
                                                 gsub('.*:', '', rownames(DGE.int)), fixed = T)
     rownames(DGE.int) = NULL
+    
+    if(any(grepl(' ',DGE.int[,names(prep.out$control)[2]]))){
+      DGE.int[,names(prep.out$control)[2]][grepl(' ',DGE.int[,names(prep.out$control)[2]])] = 
+        gsub(' ', '.', DGE.int[,names(prep.out$control)[2]][grepl(' ',DGE.int[,names(prep.out$control)[2]])])
+      
+    }
+    
     DGE.int$rel.DGE = 1-(DGE.int$std.error^2/varcomp['DGE','component'])
     DGE.int = DGE.int[,c(3,4,1,2,5)]; colnames(DGE.int)[c(3,4)] = c('DGE', 'se.DGE')
     DGE.int = merge(DGE.int, DGE[,c(names(prep.out$control)[2], 'DGE')],
@@ -317,9 +338,11 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
     
     IGE.int = blup[which(grepl('grp', rownames(blup)) & 
                            grepl(names(prep.out$control)[6], rownames(blup))), -3]
-    IGE.int[,names(prep.out$control)[2]] = regmatches(rownames(IGE.int), 
-                                                      m = regexpr(paste(DGE$clone, collapse = "|"),
-                                                                  rownames(IGE.int)))
+    IGE.int[,names(prep.out$control)[2]] = regmatches(
+      do.call(rbind, strsplit(rownames(IGE.int), '\\(g1\\)_'))[,2], 
+      m = regexpr(paste(DGE[,names(prep.out$control)[2]], collapse = "|"), 
+                  do.call(rbind, strsplit(rownames(IGE.int), '\\(g1\\)_'))[,2])
+    )
     IGE.int[,names(prep.out$control)[6]] = gsub(paste0(names(prep.out$control)[6], '_'),'', 
                                                    gsub('.*:', '', rownames(IGE.int)), fixed = T)
     rownames(IGE.int) = NULL
@@ -384,18 +407,27 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
   }else{
     
     ## Main effects --------------
-    DGE = blup[which(grepl(names(prep.out$control)[2], rownames(blup)) & 
-                       !grepl(names(prep.out$control)[6], rownames(blup))), -3]
+    DGE = blup[which(grepl(names(prep.out$control)[2], rownames(blup))), -3]
     DGE[,names(prep.out$control)[2]] = gsub(paste0(names(prep.out$control)[2],'_'), 
                                                '', rownames(DGE), fixed = T)
     rownames(DGE) = NULL
+    DGE[,names(prep.out$control)[2]] = as.factor(DGE[,names(prep.out$control)[2]])
+    
+    if(any(grepl(' ',DGE[,names(prep.out$control)[2]]))){
+      DGE[,names(prep.out$control)[2]][grepl(' ',DGE[,names(prep.out$control)[2]])] = 
+        gsub(' ', '.', DGE[,names(prep.out$control)[2]][grepl(' ',DGE[,names(prep.out$control)[2]])])
+      
+    }
+  
     DGE$rel.DGE = 1-(DGE$std.error^2/varcomp['DGE','component'])
     DGE = DGE[,c(3,1,2,4)]; colnames(DGE)[c(2,3)] = c('DGE', 'se.DGE')
     
-    IGE = blup[which(grepl('grp', rownames(blup)) & 
-                       !grepl(names(prep.out$control)[6], rownames(blup))), -3]
-    IGE[,names(prep.out$control)[2]] = regmatches(rownames(IGE), 
-                                                  m = regexpr(paste(DGE$clone, collapse = "|"), rownames(IGE)))
+    IGE = blup[which(grepl('grp', rownames(blup))), -3]
+    IGE[,names(prep.out$control)[2]] = regmatches(
+      do.call(rbind, strsplit(rownames(IGE), '\\(g1\\)_'))[,2], 
+      m = regexpr(paste(DGE[,names(prep.out$control)[2]], collapse = "|"), 
+                  do.call(rbind, strsplit(rownames(IGE), '\\(g1\\)_'))[,2])
+      )
     rownames(IGE) = NULL
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')
@@ -624,12 +656,20 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
         neigh = do.call(rbind, lapply(
           apply(Z, 1, function(y){
             data.frame(
-              neigh = names(which(y == 1)),
+              neigh = regmatches(
+                names(y), 
+                m = regexpr(paste(within[,names(prep.out$control)[2]], collapse = "|"), 
+                            names(y))
+              )[which(y == 1)],
               class = within[
                 which(within[,2] == unique(x[, names(prep.out$control)[6]])),
                 'class'
               ][
-                match(names(which(y == 1)),
+                match(regmatches(
+                  names(y), 
+                  m = regexpr(paste(within[,names(prep.out$control)[2]], collapse = "|"), 
+                              names(y))
+                )[which(y == 1)],
                       within[which(within[,2] == unique(x[, names(prep.out$control)[6]])),
                              c(names(prep.out$control)[2])])
               ]
@@ -639,7 +679,11 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
           }
         ))
         
-        neigh$gen = substr(rownames(neigh), start = 1, stop = nchar(unique(rownames(Z))))
+        neigh$gen =  regmatches(
+          rownames(neigh), 
+          m = regexpr(paste(within[,names(prep.out$control)[2]], collapse = "|"), 
+                      rownames(neigh))
+        )
         
         ggplot(data = neigh, aes(x = .data$gen, y = .data$Freq, fill = .data$Var1)) +
           geom_bar(stat = "identity", color = 'black') +

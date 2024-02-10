@@ -86,9 +86,10 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
     {
       if(prep.out$control[,6] > 0) ### Multi-ages --------
       {
+        input = input[order(input[,names(prep.out$control)[7]], input[,names(prep.out$control)[6]],
+                            input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+        
         if(cor){
-          input = input[order(input$area, input$age, input$row, input$col),]
-          
           scm = asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
                          paste(paste(as.character(random), collapse = ""), 
@@ -111,8 +112,6 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
                        data = input, ...)
 
         }else{
-          input = input[order(input$area, input$age, input$row, input$col),]
-          
           scm = asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
                          paste(paste(as.character(random), collapse = ""), 
@@ -134,6 +133,9 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
         }
       }else ### Single age ---------------
       {
+        input = input[order(input[,names(prep.out$control)[7]],
+                            input[,names(prep.out$control)[4]], 
+                            input[,names(prep.out$control)[5]]),]
         if(cor){
           scm = asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
@@ -169,8 +171,10 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
       {
         if(prep.out$control[,6] > 0) ### Multi-ages --------
         {
+          input = input[order(input[,names(prep.out$control)[6]],
+                              input[,names(prep.out$control)[4]], 
+                              input[,names(prep.out$control)[5]]),]
           if(cor){
-            input = input[order(input$age, input$row, input$col),]
             scm = asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
@@ -179,7 +183,7 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
                                         colnames(prep.out$control)[2],')) + str(~',
                                         colnames(prep.out$control)[2],':',
                                         colnames(prep.out$control)[6],'+grp(g1):',
-                                        colnames(prep.out$control)[6], ', ~corh(2):id(',
+                                        colnames(prep.out$control)[6], ', ~diag(2):id(',
                                         colnames(prep.out$control)[6], '):id(',
                                         colnames(prep.out$control)[2], '))'))
                          ),
@@ -192,7 +196,6 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
                          data = input, ...)
             
           }else{
-            input = input[order(input$age, input$row, input$col),]
             scm = asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
@@ -212,6 +215,8 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
           }
         }else ### Single age ---------------
         {
+          input = input[order(input[,names(prep.out$control)[4]], 
+                              input[,names(prep.out$control)[5]]),]
           if(cor){
             scm = asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
@@ -249,12 +254,8 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
   {
     if(prep.out$control[,6] > 0) ### Multi-ages --------
     {
-      input = input[order(input$area, input$age, input$row, input$col),]
-      
-      
-        
-        
-      
+      input = input[order(input[,names(prep.out$control)[7]], input[,names(prep.out$control)[6]],
+                          input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
       
       bench = suppressWarnings({asreml::asreml(fixed = fixed,
                              random = stats::as.formula(
@@ -355,6 +356,9 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
       
     }else ### Single age ---------------
     {
+      input = input[order(input[,names(prep.out$control)[7]],
+                          input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+      
       bench = suppressWarnings({
         asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
@@ -408,7 +412,8 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
   {
     if(prep.out$control[,6] > 0) ### Multi-ages --------
     {
-      input = input[order(input$age, input$row, input$col),]
+      input = input[order(input[,names(prep.out$control)[6]],
+                          input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
       bench = suppressWarnings({
         asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
@@ -508,6 +513,8 @@ comp.asr = function(prep.out, fixed, random = ~1, cor = TRUE,...) {
       
     }else ### Single age ---------------
     {
+      input = input[order(input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+      
       bench = suppressWarnings({
         asreml::asreml(fixed = fixed,
                        random = stats::as.formula(

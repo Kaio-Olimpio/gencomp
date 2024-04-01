@@ -16,11 +16,11 @@ composite(
 )
 }
 \arguments{
-\item{prep.out}{A \code{comp.prep} object.}
+\item{prep.out}{A \code{comprep} object.}
 
-\item{model}{An \code{asreml} object, preferably obtained using the \code{\link[=comp.asr]{comp.asr()}} function.}
+\item{model}{An \code{asreml} object, preferably obtained using the \code{\link[=asr]{asr()}} function.}
 
-\item{resp.out}{A \code{comp.resp} object.}
+\item{resp.out}{A \code{comresp} object.}
 
 \item{d.row.col}{A vector of size two. The first element contain the distance between
 rows, and second the distance between columns of the simulated grid.}
@@ -30,7 +30,7 @@ of each plant in the grid will be weighted by the inverse of the distance betwee
 columns and diagonals.}
 
 \item{selected}{A vector with the names of the clones selected to compose the clonal composite.
-The names must be present at \code{comp.resp}.}
+The names must be present in the \code{comresp} object.}
 
 \item{nsim}{An integer defining the number grid simulations. If \code{nsim > 1},
 the function will estimate the 95\% confidence interval of the predicted means using
@@ -45,7 +45,7 @@ averaging the predicted mean of all clones.
 }
 \description{
 This function simulates clonal composites using outputs of a genetic-spatial
-competition model fitted using \code{\link[=comp.asr]{comp.asr()}}
+competition model fitted using \code{\link[=asr]{asr()}}
 }
 \details{
 Considering the direct (DGE) and indirect genetic effects (IGE) of the selected clones,
@@ -60,17 +60,17 @@ IGE is divided by the distance between the focal tree and its neighbours:
 }
 \examples{
 \donttest{
- comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+ comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                       n.dec = 3, verbose = TRUE)
  
- model = comp.asr(prep.out = comp_mat, 
+ model = asr(prep.out = comp_mat, 
                   fixed = mai~ age, 
                   random = ~ block:age, 
                   cor = TRUE, maxit = 50)
                   
- results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+ results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
  
  cc = composite(prep.out = comp_mat, model = model, resp.out = results,
                 d.row.col = c(3,3), d.weight = TRUE, nsim = 10, verbose = TRUE, 
@@ -82,5 +82,5 @@ IGE is divided by the distance between the focal tree and its neighbours:
 \insertAllCited{}
 }
 \seealso{
-\link{comp.prep}, \link{comp.asr}, \link{comp.resp}
+\link{prep}, \link{asr}, \link{resp}
 }

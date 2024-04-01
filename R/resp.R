@@ -2,10 +2,10 @@
 ##' 
 ##' @description
 ##' This function provides responses extracted from the genetic-spatial 
-##' competition model fitted using [competition::comp.asr()]. 
+##' competition model fitted using [competition::asr()]. 
 ##' 
-##' @param prep.out A `comp.prep` object.
-##' @param model An `asreml` object, preferably obtained using the [competition::comp.asr()] function.
+##' @param prep.out A `prep` object.
+##' @param model An `asreml` object, preferably obtained using the [competition::asr()] function.
 ##' @param weight.tgv A logical value. If `TRUE`, the function will use the direct and
 ##' indirect genetic effects' reliability as a weight when estimating the total genotypic
 ##' value. Defaults to `FALSE`. See Details for more information on these methods.
@@ -67,12 +67,12 @@
 ##' 
 ##' where \eqn{d_i} is the DGE of the i<sup>th</sup> genotype, and \eqn{CIF} is 
 ##' the overall competition intensity factor, previously computed in the function 
-##' [competition::comp.prep()]. If `weight.tgv = TRUE`, the DGE and IGE will be 
+##' [competition::prep()]. If `weight.tgv = TRUE`, the DGE and IGE will be 
 ##' multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}):
 ##' 
 ##' \deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
 ##'
-##' @seealso  [competition::comp.prep], [competition::comp.asr], [ggplot2]
+##' @seealso  [competition::prep], [competition::asr], [ggplot2]
 ##' 
 ##' @references 
 ##' \insertAllCited{}
@@ -86,21 +86,21 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
 ##'  
-##'  model = comp.asr(prep.out = comp_mat, 
+##'  model = asr(prep.out = comp_mat, 
 ##'                   fixed = mai~ age, 
 ##'                   random = ~ block:age, 
 ##'                   cor = TRUE, maxit = 50)
 ##'                   
-##'   results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'   results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
 ##'  }
 
 
-comp.resp = function(prep.out, model, weight.tgv = FALSE) {
+resp = function(prep.out, model, weight.tgv = FALSE) {
   
   requireNamespace('ggplot2')
   
@@ -1003,7 +1003,7 @@ comp.resp = function(prep.out, model, weight.tgv = FALSE) {
   }
   remove(prep.out, envir = .GlobalEnv)
   
-  class(output) = 'comp.resp'
+  class(output) = 'comresp'
   
   return(output)
 }

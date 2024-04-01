@@ -2,18 +2,18 @@
 ##'
 ##' @description
 ##' This function simulates clonal composites using outputs of a genetic-spatial
-##' competition model fitted using [competition::comp.asr()]
+##' competition model fitted using [competition::asr()]
 ##' 
-##' @param prep.out A `comp.prep` object.
-##' @param model An `asreml` object, preferably obtained using the [competition::comp.asr()] function.
-##' @param resp.out A `comp.resp` object.
+##' @param prep.out A `comprep` object.
+##' @param model An `asreml` object, preferably obtained using the [competition::asr()] function.
+##' @param resp.out A `comresp` object.
 ##' @param d.row.col A vector of size two. The first element contain the distance between
 ##' rows, and second the distance between columns of the simulated grid.
 ##' @param d.weight A logical value. If `TRUE` (default) the predicted mean 
 ##' of each plant in the grid will be weighted by the inverse of the distance between rows,
 ##' columns and diagonals.
 ##' @param selected A vector with the names of the clones selected to compose the clonal composite. 
-##' The names must be present at `comp.resp`.
+##' The names must be present in the `comresp` object.
 ##' @param nsim An integer defining the number grid simulations. If `nsim > 1`, 
 ##' the function will estimate the 95% confidence interval of the predicted means using 
 ##' a bootstrap process. Defaults to 10.
@@ -37,7 +37,7 @@
 ##' @references 
 ##' \insertAllCited{}
 ##'
-##' @seealso  [competition::comp.prep], [competition::comp.asr], [competition::comp.resp]
+##' @seealso  [competition::prep], [competition::asr], [competition::resp]
 ##' 
 ##' @importFrom Rdpack reprompt
 ##' @importFrom stats quantile model.matrix model.matrix.lm
@@ -46,17 +46,17 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
 ##'  
-##'  model = comp.asr(prep.out = comp_mat, 
+##'  model = asr(prep.out = comp_mat, 
 ##'                   fixed = mai~ age, 
 ##'                   random = ~ block:age, 
 ##'                   cor = TRUE, maxit = 50)
 ##'                   
-##'  results = comp.resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
 ##'  
 ##'  cc = composite(prep.out = comp_mat, model = model, resp.out = results,
 ##'                 d.row.col = c(3,3), d.weight = TRUE, nsim = 10, verbose = TRUE, 

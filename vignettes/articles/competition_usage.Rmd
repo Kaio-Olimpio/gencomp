@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-Welcome to `competition`. This package fits genetic-spatial competition models and extracts the main results. In this document, we present a general workflow using the dataset contained within the package as example.
+Welcome to `competition`, an R-package to fit spatial-genetic competition models and extract their main outputs. In this document, we present a general workflow using the dataset contained within the package as example.
 
 ```{r warning=FALSE, message=FALSE, results='hide'}
 library(competition)
@@ -27,7 +27,7 @@ library(competition)
 
 # Example dataset: `euca`
 
-This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (`mai`) of 100 eucalyptus clones. The trial was laid out in randomized complete blocks design, with 21 replicates and one tree per plot. This trial did not have contiguous blocks: blocks 1-7 were in area 1, and blocks 8-13 were in area 2. The `area` columns contains this information. The dataset also has information about the position of each tree in the grid (`row` and `col`). In the row and column directions, the plants are spaced 2 m (dist_row) and 3 m (dist_col) apart, respectively. Data were collected at 3 and 6 years after the trial implementation (information contained in the column `age`).
+This dataset represents a clonal eucalypt trial. It contains the mean annual increment (`mai`) of 100 eucalypt clones. The trial was laid out in randomized complete blocks design, with 21 replicates and one tree per plot. This trial did not have contiguous blocks: blocks 1-7 were in area 1, and blocks 8-13 were in area 2. The `area` columns contains this information. The dataset also has information about the position of each tree in the grid (`row` and `col`). In the row and column directions, the plants are spaced 2 m (dist_row) and 3 m (dist_col) apart, respectively. Data were collected at 3 and 6 years after the trial implementation (information contained in the column `age`).
 
 ```{r}
 head(euca)
@@ -37,7 +37,7 @@ The dataset has the most complex scenario supported by the package: non-contiguo
 
 # Preparations
 
-This is the most important part. Before fitting the model, we must first build the competition matrix ($\mathbf{Z}_c$) and bind it to the dataset. This may be tricky, so we made the `comp_prep` function to do it for you.
+Before fitting the model, we must first build the competition matrix ($\mathbf{Z}_c$) and bind it to the dataset. This may be tricky, so we made the `comp_prep` function to do it for you.
 
 Three methods are available for estimating the competition intensity and building $\mathbf{Z}_c$: 
 
@@ -77,9 +77,9 @@ $$f_{C_v} = \frac{f_{D_v} \sqrt{1 + p^2}}{p}$$
 
 where $p = \frac{d_C}{d_R}$.
 
-The overall competition intensity factor ($CIF$) is estimated by taking the mean of the competition intensities provided by the equations described above, and the mean number of neighbours in each direction:
+The overall competition intensity factor ($CIF$) is estimated as follows:
 
-$CIF = \overline{n_D} \overline{f_D} + \overline{n_R} \overline{f_R} + \overline{n_C} \overline{f_C}$
+$$CIF = \overline{n_D} \overline{f_D} + \overline{n_R} \overline{f_R} + \overline{n_C} \overline{f_C}$$
 
 ## `comp_prep`
 
@@ -145,7 +145,7 @@ The three last outputs will not be within lists if `age = NULL`.
 
 # Fitting the model
 
-A general genetic-spatial linear mixed model can be represented by: 
+A general spatial-genetic competition model can be represented by: 
  
  $$\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \mathbf{Z}_g \mathbf{g} + \mathbf{Z}_c \mathbf{c} + \mathbf{Z}_p \mathbf{p}  + \boldsymbol{\xi}$$
  

@@ -14,7 +14,7 @@
 ##' Valid if the trial has non-contiguous blocks, for e.g., blocks 1 and 2 in area 1, and
 ##' blocks 3 and 4 in area 2. `NULL` (default) otherwise.
 ##' @param age A string. The name of the column that corresponds to the age information.
-##' Necessary for fitting a multi-age model using [competition::comp.asr()]. `NULL` (default)
+##' Necessary for fitting a multi-age model using [competition::asr()]. `NULL` (default)
 ##' otherwise.
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
 ##' It has three options: "MU" for the method proposed by \insertCite{muir_incorporation_2005;textual}{competition}, 
@@ -102,22 +102,22 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  comp_mat = comp.prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+##'  library(competition)
+##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
 ##' }
 
 
-comp.prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col, 
-                   method, area = NULL, age = NULL, n.dec = 2, 
-                   verbose = FALSE){
+prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col, 
+                     method, area = NULL, age = NULL, n.dec = 2, 
+                     verbose = FALSE){
   
   # Messages and warnings
-  if(length(unique(data[,ind])) != 
-     length(unique(data[,row])) * length(unique(data[,col]))){
-    warning("The trial does not have a rectangular grid!")
-  }
+  stopifnot("The number of individuals must be the product of no. rows * no. columns" = length(unique(data[,ind])) == 
+              length(unique(data[,row])) * length(unique(data[,col])))
+  stopifnot("Please, choose between the available methods ('MU', 'CC' or 'SK')" = method %in% c('MU', 'CC', 'SK'))
   
   # Entry -------------------------------------------------------------------
   p = dist.col/dist.row
@@ -373,7 +373,7 @@ comp.prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     
     Z = list(Z = z, CIF = cif, neigh_check = w, data = input, control = control)
     
-    class(Z) = "comp.prep"
+    class(Z) = "comprep"
     
     return(Z)
     
@@ -597,11 +597,121 @@ comp.prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     Z$data = do.call(rbind, lapply(Z, function(x) x$data))
     Z$control = control
     
-    class(Z) = 'comp.prep'
+    class(Z) = 'comprep'
     
     return(Z)
   }
 }
+
+
+
+#' Print an object of class `comprep`
+#'
+#' Print a `comprep` object in the R console. Alternatively, export the objects to the 
+#' working directory
+#'
+#'
+#' @param object An object of class `comprep`
+#' @param category A string indicating which object to print. Options are "all" for
+#' printing all objects, "data" for printing the data that will be used in the model, 
+#' "matrix" for printing the competition matrix, "check" for printing the `neigh_check`
+#' dataframe, and "CIF" for printing the competition intensity factor. 
+#' @param age A string indicating if objects should be printed per age. Options 
+#' are "all" for printing all ages, or the name of the specific age. Defaults to 
+#' "all", which also serves when data has a single age.
+#' @param export A logical value. If `TRUE`, the function will export the competition 
+#' matrix and the `neigh_check` dataframe into the working directory, in .csv format. 
+#' Defaults to `FALSE`
+#' @param ... Currently not used
+#' @return A tibble with the predicted values for each variable in the model
+#' @method print comprep
+#' 
+#' 
+#' @importFrom data.table data.table
+#' 
+#' 
+#' @export
+#' @examples
+#'\donttest{
+#' library(competition)
+#' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+#'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
+#'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+#'                       n.dec = 3, verbose = TRUE)
+#' print(comp_mat, category = 'all', age = '3y', export = FALSE)
+#' }
+#'
+
+
+print.comprep = function(object, category = 'matrix', age = 'all', export = FALSE, ...){
+  
+  stopifnot("The object must be of class 'comprep'" = class(object) = 'comprep')
+  stopifnot("category should be of size 1" = length(category) == 1)
+  stopifnot("age should be of size 1" = length(age) == 1)
+  
+  if(object$control[,6] == 0) age = 'all'
+  
+  # Data set
+  
+  if(category == 'all' | category == 'data'){
+    
+    if(age == 'all'){
+      
+      cat("\n","===> Data (competition matrix + user-provided data set)")
+      data.table::data.table(object$data)
+      
+    }else{
+      
+      cat("\n","===> Data (competition matrix + user-provided data set), Age:", age, '\n')
+      data.table::data.table(droplevels(object$data[which(object$data[,colnames(object$control)[6]] == age),]))
+      
+    }
+  }
+  
+  # Competition matrix
+  
+  if(category == 'all' | category == 'matrix'){
+    
+    if(age == 'all'){
+      
+      cat("\n","===> Competition matrix")
+      
+      if(object$control[,6] == 0){
+        
+        print(object$Z)
+        
+      }else{
+        
+        for(i in gsub('Age_','',names(object)[grep("Age_*.", names(object))])){
+          
+          cat("\n","==> Age:", i, '\n')
+          
+          print(object[[grep(i, names(object))]][['Z']])
+          
+        }
+      }
+      
+    }else{
+      
+      cat("\n","===> Competition matrix, Age:", age, '\n')
+      print(object[[grep(age, names(object))]][['Z']])
+      
+    }
+  }
+  
+  # Neighbourhood check
+  
+  
+  
+  
+  
+  
+  
+}
+
+
+
+
 
 #Field
 # x$trat_cod = ifelse(is.na(x$trait), paste0(x$trat,'*'), paste(x$trat))

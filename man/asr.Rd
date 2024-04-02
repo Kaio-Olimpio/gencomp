@@ -30,6 +30,9 @@ special model functions. See \code{\link[asreml:asreml]{asreml::asreml()}} for d
 \item{cor}{A logical value. If \code{TRUE} (default), fits a model considering the correlation
 between direct and indirect genetic effects.}
 
+\item{lrtest}{A logical value. If \code{TRUE}, performs a likelihood ratio test to verify
+the significance of the direct and indirect genetic effects. Defaults to \code{FALSE}.}
+
 \item{...}{
   Arguments passed on to \code{\link[asreml:asreml]{asreml::asreml}}
   \describe{
@@ -318,9 +321,6 @@ extension \code{.RDS}. If the model frame is not included in the
 returned \code{asreml} object, this \code{RDS} file is searched for
 by the methods noted previously.}
   }}
-
-\item{lrt}{A logical value. If \code{TRUE}, performs a likelihood ratio test to verify
-the significance of the direct and indirect genetic effects. Defaults to \code{FALSE}.}
 }
 \value{
 An object of class \code{asreml} containing the results of the fitted linear model.
@@ -368,15 +368,17 @@ The likelihood ratio test is performed using a model without the correlation bet
 }
 \examples{
 \donttest{
+ library(GenComp)
  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                       n.dec = 3, verbose = TRUE)
  
  model = asr(prep.out = comp_mat, 
-                  fixed = mai~ age, 
-                  random = ~ block:age, 
-                  cor = TRUE, maxit = 50)
+             fixed = mai~ age, 
+             random = ~ block:age, 
+             cor = TRUE, maxit = 50,
+             lrtest = FALSE)
  }
 }
 \seealso{

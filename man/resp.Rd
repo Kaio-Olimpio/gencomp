@@ -28,29 +28,6 @@ the competition class of each genotype and the total genotypic value (TGV). If \
 \code{blup} is a list containing the main effects and the within-ages DGE and IGE. If
 other random effects were declared in the model, \code{blup} will contain another data frame
 with their BLUPs.
-\item \code{plots} : A list of plots:
-\itemize{
-\item \code{IGE.density}: a density plot with the IGE distribution. The area within the
-distribution is filled according to the competition class (see Details).
-\item \code{DGEvsIGE}: a scatter plot illustrating the relation between IGE (\emph{x}-axis)
-and DGE (\emph{y}-axis). The dots are coloured according to the competition class
-\item \code{DGE.IGE}: a lollipop plots representing the DGE and IGE of each genotype. The plots
-are in descending order according to the DGE. The dots' colour depicts the DGE's and IGE's
-reliability of each genotype.
-\item \code{TGV}: lollipop plots with the TGV of each genotype, in increasing order.
-\item \code{n.neigh}: a bar plot depicting the number of different genotypes as neighbours
-(total and per competition class) of each selection candidate. If \code{age = TRUE},
-there will be a \code{n.neigh} plot for each age.
-\item \code{grid.pheno}: a heatmap representing the grid. The cells are filled according
-to the phenotype value of each plot. If \code{age = TRUE}, there will be a \code{grid.pheno} plot for each age.
-\item \code{grid.DGE}: a heatmap representing the grid. The cells are filled according
-to the DGE value of each genotype. If \code{age = TRUE}, there will be a \code{grid.DGE} plot for each age.
-\item \code{grid.IGE}: a heatmap representing the grid. The cells are filled according
-to the IGE value of each genotype. If \code{age = TRUE}, there will be a \code{grid.DGE} plot for each age.
-\item \code{grid.IGE.class}: a heatmap representing the grid. The cells are filled according
-to the competition class of each genotype. If \code{age = TRUE}, there will be a \code{grid.DGE} plot for each age.
-}
-All plots are customizable using resources of the \code{ggplot2} library.
 }
 }
 \description{
@@ -84,22 +61,24 @@ multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2
 }
 \examples{
 \donttest{
+ library(GenComp)
  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-                      ind = 'tree', age = 'age', row = 'row', col = 'col', 
-                      dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-                      n.dec = 3, verbose = TRUE)
+                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
+                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+                 n.dec = 3, verbose = TRUE)
  
  model = asr(prep.out = comp_mat, 
-                  fixed = mai~ age, 
-                  random = ~ block:age, 
-                  cor = TRUE, maxit = 50)
+             fixed = mai~ age, 
+             random = ~ block:age, 
+             cor = TRUE, maxit = 20,
+             lrtest = FALSE)
                   
-  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+ results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
  }
 }
 \references{
 \insertAllCited{}
 }
 \seealso{
-\link{prep}, \link{asr}, \link{ggplot2}
+\link{prep}, \link{asr}
 }

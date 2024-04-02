@@ -1,4 +1,4 @@
-Package: competition
+Package: GenComp
 Title: Fit Spatial-Genetic Competition Models
 Version: 0.0.0.1
 Authors@R: 
@@ -24,7 +24,8 @@ Imports:
     ggplot2,
     ggpubr,
     rlang,
-    Rdpack
+    Rdpack,
+    data.table
 RdMacros: Rdpack
 Suggests: 
     knitr,

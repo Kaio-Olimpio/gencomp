@@ -58,8 +58,6 @@ The function returns:
 with the dataset provided by the user.
 \item \code{neigh_check} : A data frame containing the phenotypic records of each
 focal plant and its neighbours.
-\item \code{control} : A data frame containing the number of phenotypic records,
-genotypes, replicates, rows, columns, ages and areas in the dataset provided by the user.
 }
 If \code{age} is not \code{NULL}, the function provides the outputs described for each age.
 }
@@ -123,11 +121,11 @@ mean number of neighbours in each direction:
 }
 \examples{
 \donttest{
- library(competition)
+ library(GenComp)
  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-                      ind = 'tree', age = 'age', row = 'row', col = 'col', 
-                      dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-                      n.dec = 3, verbose = TRUE)
+                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
+                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+                 n.dec = 3, verbose = TRUE)
 }
 }
 \references{

@@ -14,7 +14,7 @@
 ##' Valid if the trial has non-contiguous blocks, for e.g., blocks 1 and 2 in area 1, and
 ##' blocks 3 and 4 in area 2. `NULL` (default) otherwise.
 ##' @param age A string. The name of the column that corresponds to the age information.
-##' Necessary for fitting a multi-age model using [competition::asr()]. `NULL` (default)
+##' Necessary for fitting a multi-age model using [GenComp::asr()]. `NULL` (default)
 ##' otherwise.
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
 ##' It has three options: "MU" for the method proposed by \insertCite{muir_incorporation_2005;textual}{competition}, 
@@ -34,8 +34,6 @@
 ##' with the dataset provided by the user.
 ##' \item \code{neigh_check} : A data frame containing the phenotypic records of each
 ##' focal plant and its neighbours.
-##' \item \code{control} : A data frame containing the number of phenotypic records, 
-##' genotypes, replicates, rows, columns, ages and areas in the dataset provided by the user.
 ##' }
 ##' If `age` is not `NULL`, the function provides the outputs described for each age.
 ##' 
@@ -102,11 +100,11 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  library(competition)
+##'  library(GenComp)
 ##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
-##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-##'                       n.dec = 3, verbose = TRUE)
+##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
+##'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+##'                  n.dec = 3, verbose = TRUE)
 ##' }
 
 
@@ -371,10 +369,11 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
       if(!is.factor(input[, area])) input[, area] = as.factor(input[, area])
     }
     
-    Z = list(Z = z, CIF = cif, neigh_check = w, data = input, control = control)
+    Z = list(Z = z, CIF = cif, neigh_check = w, data = input)
     
+    attr(Z, 'control') = control    
     class(Z) = "comprep"
-    
+
     return(Z)
     
   } else # Several ages -----------------------
@@ -595,176 +594,12 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     names(Z) = paste0("Age_", names(Z))
     
     Z$data = do.call(rbind, lapply(Z, function(x) x$data))
-    Z$control = control
-    
+
+    attr(Z, 'control') = control
     class(Z) = 'comprep'
     
     return(Z)
   }
-}
-
-
-
-#' Print an object of class `comprep`
-#'
-#' Print a `comprep` object in the R console. Alternatively, export the objects to the 
-#' working directory
-#'
-#'
-#' @param object An object of class `comprep`
-#' @param category A string indicating which object to print. Options are "all" for
-#' printing all objects, "data" for printing the data that will be used in the model, 
-#' "matrix" for printing the competition matrix, "check" for printing the `neigh_check`
-#' dataframe, and "CIF" for printing the competition intensity factor. 
-#' @param age A string indicating if objects should be printed per age. Options 
-#' are "all" for printing all ages, or the name of the specific age. Defaults to 
-#' "all", which also serves when data has a single age.
-#' 
-#' @method print comprep
-#' 
-#' 
-#' @importFrom data.table data.table
-#' @importFrom utils write.csv
-#' 
-#' 
-#' @export
-#' 
-#' @examples
-#'\donttest{
-#' library(competition)
-#' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-#'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
-#'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-#'                       n.dec = 3, verbose = TRUE)
-#' print(comp_mat, category = 'data', age = '6y')
-#' print(comp_mat, category = 'matrix', age = 'all')
-#' print(comp_mat, category = 'check', age = '3y')
-#' print(comp_mat, category = 'CIF', age = 'all')
-#' 
-#' # Note that the ages are labeled as "3y" and "6y" in the example dataset 
-#' }
-#'
-
-
-print.comprep = function(object, category = 'matrix', age = 'all'){
-  
-  stopifnot("The object must be of class 'comprep'" = class(object) == 'comprep')
-  stopifnot("'category' should be of size 1" = length(category) == 1)
-  stopifnot("'age' should be of size 1" = length(age) == 1)
-  stopifnot("'age' does not exist" = age %in% c('all',gsub('Age_','',names(object)[grep("Age_*.", names(object))])))
-  
-  if(object$control[,6] == 0) age = 'all'
-  
-  # Data set
-  
-  if(category == 'all' | category == 'data'){
-    
-    if(age == 'all'){
-      
-      cat("\n","===> Data (competition matrix + user-provided data set)", "\n")
-      print(data.table::data.table(object$data))
-      
-    }else{
-      
-      cat("\n","===> Data (competition matrix + user-provided data set), Age:", age, '\n')
-      print(data.table::data.table(droplevels(object$data[which(object$data[,colnames(object$control)[6]] == age),])))
-      
-    }
-  }
-  
-  # Competition matrix
-  
-  if(category == 'all' | category == 'matrix'){
-    
-    if(age == 'all'){
-      
-      cat("\n","===> Competition matrix", '\n')
-      
-      if(object$control[,6] == 0){
-        
-        print(object$Z)
-        
-      }else{
-        
-        for(i in gsub('Age_','',names(object)[grep("Age_*.", names(object))])){
-          
-          cat("\n","==> Age:", i, '\n')
-          
-          print(object[[grep(i, names(object))]][['Z']])
-          
-        }
-      }
-      
-    }else{
-      
-      cat("\n","===> Competition matrix, Age:", age, '\n')
-      print(object[[grep(age, names(object))]][['Z']])
-      
-    }
-  }
-  
-  # Neighbourhood check
-  
-  if(category == 'all' | category == 'check'){
-    
-    if(age == 'all'){
-      
-      cat("\n","===> Neighbourhood check", "\n")
-      
-      if(object$control[,6] == 0){
-        
-      print(data.table::data.table(object$neigh_check))
-        
-      }else{
-        
-        for(i in gsub('Age_','',names(object)[grep("Age_*.", names(object))])){
-          
-          cat("\n","==> Age:", i, '\n')
-          
-          print(data.table(object[[grep(i, names(object))]][['neigh_check']]))
-          
-        }
-      }
-      
-    }else{
-      
-      cat("\n","===> Neighbourhood check, Age:", age, '\n')
-      print(data.table(object[[grep(age, names(object))]][['neigh_check']]))
-      
-    }
-  }
-  
-  # CIF
-  
-  if(category == 'all' | category == 'CIF'){
-    
-    if(age == 'all'){
-      
-      cat("\n","===> Competition intensity factor", "\n")
-      
-      if(object$control[,6] == 0){
-        
-        print(object$CIF)
-        
-      }else{
-        
-        for(i in gsub('Age_','',names(object)[grep("Age_*.", names(object))])){
-          
-          cat("\n","==> Age:", i, '\n')
-          
-          print(object[[grep(i, names(object))]][['CIF']])
-          
-        }
-      }
-      
-    }else{
-      
-      cat("\n","===> Competition intensity factor, Age:", age, '\n')
-      print(object[[grep(age, names(object))]][['CIF']])
-      
-    }
-  }
-
 }
 
 
@@ -793,9 +628,9 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
 #'\donttest{
 #' library(competition)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-#'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
-#'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-#'                       n.dec = 3, verbose = TRUE)
+#'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
+#'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+#'                 n.dec = 3, verbose = TRUE)
 #' print(comp_mat, category = 'data', age = '6y')
 #' print(comp_mat, category = 'matrix', age = 'all')
 #' print(comp_mat, category = 'check', age = '3y')
@@ -813,7 +648,9 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
   stopifnot("'age' should be of size 1" = length(age) == 1)
   stopifnot("'age' does not exist" = age %in% c('all',gsub('Age_','',names(object)[grep("Age_*.", names(object))])))
   
-  if(object$control[,6] == 0) age = 'all'
+  control = attr(object, 'control')
+  
+  if(control[,6] == 0) age = 'all'
   
   # Data set
   
@@ -827,7 +664,7 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
     }else{
       
       cat("\n","===> Data (competition matrix + user-provided data set), Age:", age, '\n')
-      print(data.table::data.table(droplevels(object$data[which(object$data[,colnames(object$control)[6]] == age),])))
+      print(data.table::data.table(droplevels(object$data[which(object$data[,colnames(control)[6]] == age),])))
       
     }
   }
@@ -840,7 +677,7 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
       
       cat("\n","===> Competition matrix", '\n')
       
-      if(object$control[,6] == 0){
+      if(control[,6] == 0){
         
         print(object$Z)
         
@@ -871,7 +708,7 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
       
       cat("\n","===> Neighbourhood check", "\n")
       
-      if(object$control[,6] == 0){
+      if(control[,6] == 0){
         
         print(data.table::data.table(object$neigh_check))
         
@@ -902,7 +739,7 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
       
       cat("\n","===> Competition intensity factor", "\n")
       
-      if(object$control[,6] == 0){
+      if(control[,6] == 0){
         
         print(object$CIF)
         
@@ -939,15 +776,20 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
 #' @param category A string indicating which plot to build. Options are "heatmap" for
 #' plotting the field grid, or "boxplot" for plotting the boxplots of phenotypic 
 #' performance.
+#' @param age A string indicating if plots should be built per age. Options are 
+#' "all" for plotting all ages using facets, or the name of the specific age. Defaults
+#' to "all", which also serves when data has a single age
 #' 
 #' @method plot comprep
 #' 
 #' @details
-#' All plots are built using the [ggplot2::ggplot()] library, so they are all 
-#' customizable using "+ ggfun"
+#' All plots are built using the [ggplot2] library, so they are all 
+#' customizable using "+ ggfun()"
 #' 
+#' @seealso  [ggplot2]
 #' 
 #' @importFrom ggplot2 ggplot
+#' @importFrom rlang .data
 #' 
 #' @export
 #' 
@@ -955,80 +797,140 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
 #'\donttest{
 #' library(competition)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-#'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
-#'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-#'                       n.dec = 3, verbose = TRUE)
-#'                       
+#'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
+#'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+#'                 n.dec = 3, verbose = TRUE)
+#' plot(comp_mat, category = 'heatmap', age = "all")
+#' plot(comp_mat, category = 'boxplot', age = "3y")
 #' 
+#' # Note that the ages are labeled as "3y" and "6y" in the example dataset 
 #' }
 #'
 
-plot.comprep = function(object, category){
+plot.comprep = function(object, category, age = 'all'){
  
   stopifnot("The object must be of class 'comprep'" = class(object) == 'comprep')
   stopifnot("'category' should be of size 1" = length(category) == 1)
   stopifnot("Please, choose between the available categories ('heatmap' or 'boxplot')" = category %in% c('heatmap', 'boxplot'))
+  stopifnot("'age' should be of size 1" = length(age) == 1)
+  stopifnot("'age' does not exist" = age %in% c('all',gsub('Age_','',names(object)[grep("Age_*.", names(object))])))
   
+  control = attr(object, 'control')
   
   if(category == 'heatmap'){
     
-    if(object$control[,6] > 0){
-      if(object$control[,7] > 0){
+    if(control[,6] > 0){
+      
+      if(age == 'all'){
         
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,6,7,1)]]
-        
-        facet.label.col = paste(names(object$control)[7], unique(dat[,names(object$control)[7]]))
-        names(facet.label.col) = unique(dat[,names(object$control)[7]])
-        facet.label.row =  paste(names(object$control)[6], unique(dat[,names(object$control)[6]]))
-        names(facet.label.row) = unique(dat[,names(object$control)[6]])
-        
-        colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
-        
-        ggplot(data = dat, 
-               aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
-                   fill = .data$y)) + 
-          geom_tile(color = 'black') + 
-          facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
-                     scales = 'free_x', 
-                     labeller = labeller(.cols = facet.label.col,
-                                         .rows = facet.label.row)) +
-          scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
-          labs(x = "Row", y = 'Column', fill = 'Y') + 
-          theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
-                panel.background = element_blank(), 
-                panel.grid = element_line(colour = 'lightgrey'))
-        
-        
+        if(control[,7] > 0){
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          
+          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
+          names(facet.label.col) = unique(dat[,names(control)[7]])
+          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.row) = unique(dat[,names(control)[6]])
+          
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
+          
+          ggplot(data = dat, 
+                 aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
+                     fill = .data$y)) + 
+            geom_tile(color = 'black') + 
+            facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
+                       scales = 'free_x', 
+                       labeller = labeller(.cols = facet.label.col,
+                                           .rows = facet.label.row)) +
+            scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
+            labs(x = "Row", y = 'Column', fill = 'Y') + 
+            theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
+                  panel.background = element_blank(), 
+                  panel.grid = element_line(colour = 'lightgrey'))
+          
+          
+        } else {
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          
+          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.row) = unique(dat[,names(control)[6]])
+          
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
+          
+          ggplot(data = dat, 
+                 aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
+                     fill = .data$y)) + 
+            geom_tile(color = 'black') + 
+            facet_grid(rows = vars(.data$age),
+                       scales = 'free_x', 
+                       labeller = labeller(.rows = facet.label.row)) +
+            scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
+            labs(x = "Row", y = 'Column', fill = 'Y') + 
+            theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
+                  panel.background = element_blank(), 
+                  panel.grid = element_line(colour = 'lightgrey'))
+          
+        }
       } else {
         
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,6,1)]]
-        
-        facet.label.row =  paste(names(object$control)[6], unique(dat[,names(object$control)[6]]))
-        names(facet.label.row) = unique(dat[,names(object$control)[6]])
-        
-        colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
-        
-        ggplot(data = dat, 
-               aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
-                   fill = .data$y)) + 
-          geom_tile(color = 'black') + 
-          facet_grid(rows = vars(.data$age),
-                     scales = 'free_x', 
-                     labeller = labeller(.rows = facet.label.row)) +
-          scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
-          labs(x = "Row", y = 'Column', fill = 'Y') + 
-          theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
-                panel.background = element_blank(), 
-                panel.grid = element_line(colour = 'lightgrey'))
-        
+        if(control[,7] > 0){
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          
+          dat = dat[which(dat[names(control)[6]] == age),]
+          
+          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
+          names(facet.label.col) = unique(dat[,names(control)[7]])
+
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
+          
+          ggplot(data = dat, 
+                 aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
+                     fill = .data$y)) + 
+            geom_tile(color = 'black') + 
+            facet_grid(cols = vars(.data$area), 
+                       scales = 'free_x', 
+                       labeller = labeller(.cols = facet.label.col)) +
+            scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
+            labs(x = "Row", y = 'Column', fill = 'Y',
+                 title = paste(names(control)[6],'-',age)) + 
+            theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
+                  panel.background = element_blank(), 
+                  panel.grid = element_line(colour = 'lightgrey'))
+          
+          
+        } else {
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          
+          dat = dat[which(dat[names(control)[6]] == age),]
+          
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
+          
+          ggplot(data = dat, 
+                 aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
+                     fill = .data$y)) + 
+            geom_tile(color = 'black') + 
+            scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
+            labs(x = "Row", y = 'Column', fill = 'Y',
+                 title = paste(names(control)[6],'-',age)) + 
+            theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
+                  panel.background = element_blank(), 
+                  panel.grid = element_line(colour = 'lightgrey'))
+          
+        }
       }
+      
+      
+      
     } else {
-      if(object$control[,7] > 0){
+      if(control[,7] > 0){
         
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,7,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,7,1)]]
         
-        facet.label.col = paste(names(object$control)[7], unique(dat[,names(object$control)[7]]))
-        names(facet.label.col) = unique(dat[,names(object$control)[7]])
+        facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
+        names(facet.label.col) = unique(dat[,names(control)[7]])
         
         colnames(dat) = c('gen', 'row', 'col', 'area', 'y')
         
@@ -1048,7 +950,7 @@ plot.comprep = function(object, category){
         
       } else {
         
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,1)]]
 
         colnames(dat) = c('gen', 'row', 'col', 'y')
         
@@ -1066,57 +968,104 @@ plot.comprep = function(object, category){
     }
   }else if(category == 'boxplot'){
 
-    if(object$control[,6] > 0){
-      if(object$control[,7] > 0){
+    if(control[,6] > 0){
+      
+      if(age == 'all'){
         
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,6,7,1)]]
-        
-        facet.label.col = paste(names(object$control)[7], unique(dat[,names(object$control)[7]]))
-        names(facet.label.col) = unique(dat[,names(object$control)[7]])
-        facet.label.row =  paste(names(object$control)[6], unique(dat[,names(object$control)[6]]))
-        names(facet.label.row) = unique(dat[,names(object$control)[6]])
-        
-        colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
-        
-        suppressWarnings({
-          ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
-            geom_boxplot() + 
-            theme_bw() + 
-            theme(axis.text.x = element_text(angle = 90)) + 
-            facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
-                       labeller = labeller(.cols = facet.label.col,
-                                           .rows = facet.label.row)) + 
-            labs(x = 'Genotype', y = 'Y')
-        })
-
-        
+        if(control[,7] > 0){
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          
+          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
+          names(facet.label.col) = unique(dat[,names(control)[7]])
+          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.row) = unique(dat[,names(control)[6]])
+          
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
+          
+          suppressWarnings({
+            ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
+              geom_boxplot() + 
+              theme_bw() + 
+              theme(axis.text.x = element_text(angle = 90)) + 
+              facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
+                         labeller = labeller(.cols = facet.label.col,
+                                             .rows = facet.label.row)) + 
+              labs(x = 'Genotype', y = 'Y')
+          })
+          
+          
+        } else {
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          
+          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.row) = unique(dat[,names(control)[6]])
+          
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
+          
+          suppressWarnings({
+            ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
+              geom_boxplot() + 
+              theme_bw() + 
+              theme(axis.text.x = element_text(angle = 90)) + 
+              facet_grid(rows = vars(.data$age), 
+                         labeller = labeller(.rows = facet.label.row)) + 
+              labs(x = 'Genotype', y = 'Y')
+          })
+          
+        }
       } else {
-        
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,6,1)]]
-        
-        facet.label.row =  paste(names(object$control)[6], unique(dat[,names(object$control)[6]]))
-        names(facet.label.row) = unique(dat[,names(object$control)[6]])
-        
-        colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
-        
-        suppressWarnings({
-          ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
-            geom_boxplot() + 
-            theme_bw() + 
-            theme(axis.text.x = element_text(angle = 90)) + 
-            facet_grid(rows = vars(.data$age), 
-                       labeller = labeller(.rows = facet.label.row)) + 
-            labs(x = 'Genotype', y = 'Y')
-        })
+        if(control[,7] > 0){
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          
+          dat = dat[which(dat[names(control)[6]] == age),]
+          
+          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
+          names(facet.label.col) = unique(dat[,names(control)[7]])
+
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
+          
+          suppressWarnings({
+            ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
+              geom_boxplot() + 
+              theme_bw() + 
+              theme(axis.text.x = element_text(angle = 90)) + 
+              facet_grid(cols = vars(.data$area), 
+                         labeller = labeller(.cols = facet.label.col)) + 
+              labs(x = 'Genotype', y = 'Y', 
+                   title = paste(names(control)[6],'-',age))
+          })
+          
+          
+        } else {
+          
+          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          
+          dat = dat[which(dat[names(control)[6]] == age),]
+          
+          colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
+          
+          suppressWarnings({
+            ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
+              geom_boxplot() + 
+              theme_bw() + 
+              theme(axis.text.x = element_text(angle = 90)) + 
+              labs(x = 'Genotype', y = 'Y', 
+                   title = paste(names(control)[6],'-',age))
+          })
+          
+        }
         
       }
     } else {
-      if(object$control[,7] > 0){
+      if(control[,7] > 0){
         
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,7,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,7,1)]]
         
-        facet.label.col = paste(names(object$control)[7], unique(dat[,names(object$control)[7]]))
-        names(facet.label.col) = unique(dat[,names(object$control)[7]])
+        facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
+        names(facet.label.col) = unique(dat[,names(control)[7]])
         
         colnames(dat) = c('gen', 'row', 'col', 'area', 'y')
         
@@ -1133,7 +1082,7 @@ plot.comprep = function(object, category){
         
       } else {
         
-        dat = as.data.frame(object$data)[,names(object$control)[c(2,4,5,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,1)]]
         
         colnames(dat) = c('gen', 'row', 'col', 'y')
         
@@ -1150,6 +1099,34 @@ plot.comprep = function(object, category){
 
   }
 
+}
+
+
+#' Summary of the `comprep` object
+#'
+#' A brief summary of the dataset used.
+#'
+#' @param object An object of class `comprep`
+#' 
+#' @method summary comprep
+#' 
+#' @export
+#' 
+#' @examples
+#'\donttest{
+#' library(competition)
+#' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+#'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
+#'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+#'                 n.dec = 3, verbose = TRUE)
+#' summary(comp_mat)
+#' }
+#'
+
+summary.comprep = function(object){
+  
+  print(attr(object, 'control'))
+  
 }
 
 

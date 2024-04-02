@@ -13,7 +13,7 @@
 ##'  special model functions. See [asreml::asreml()] for details.
 ##' @param cor A logical value. If `TRUE` (default), fits a model considering the correlation 
 ##' between direct and indirect genetic effects.
-##' @param lrt A logical value. If `TRUE`, performs a likelihood ratio test to verify
+##' @param lrtest A logical value. If `TRUE`, performs a likelihood ratio test to verify
 ##' the significance of the direct and indirect genetic effects. Defaults to `FALSE`.
 ##' @inheritDotParams asreml::asreml -fixed -random -data -residual
 ##' 
@@ -35,7 +35,7 @@
 ##' and \eqn{\boldsymbol{\xi}} is the vector of spatially correlated errors. 
 ##' \eqn{\mathbf{X}} is the incidence matrix of the fixed effects, \eqn{\mathbf{Z}_g} 
 ##' is the DGE incidence matrix, \eqn{\mathbf{Z}_c} is the IGE incidence matrix (built 
-##' using [competition::prep]), and \eqn{\mathbf{Z}_p} is the design matrix of 
+##' using [GenComp::prep]), and \eqn{\mathbf{Z}_p} is the design matrix of 
 ##' other random effects. The dimensions of \eqn{\mathbf{Z}_c} are the same 
 ##' as \eqn{\mathbf{Z}_g}. The spatially correlated errors are distributed as 
 ##' \eqn{\boldsymbol{\xi} \sim N\{\mathbf{0}, \sigma^2_\xi[\mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)]\}}, 
@@ -58,7 +58,7 @@
 ##'  The likelihood ratio test is performed using a model without the correlation between DGE and IGE.
 ##'  
 ##'
-##' @seealso  [competition::prep], [asreml::asreml.options], [asreml::asreml.object], [asreml::family_dist]
+##' @seealso  [GenComp::prep], [asreml::asreml.options], [asreml::asreml.object], [asreml::family_dist]
 ##'
 ##' @import asreml
 ##' @importFrom stats as.formula
@@ -67,15 +67,17 @@
 ##' 
 ##' @examples
 ##' \donttest{
+##'  library(GenComp)
 ##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                       n.dec = 3, verbose = TRUE)
 ##'  
 ##'  model = asr(prep.out = comp_mat, 
-##'                   fixed = mai~ age, 
-##'                   random = ~ block:age, 
-##'                   cor = TRUE, maxit = 50)
+##'              fixed = mai~ age, 
+##'              random = ~ block:age, 
+##'              cor = TRUE, maxit = 50,
+##'              lrtest = FALSE)
 ##'  }
 
 asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
@@ -83,35 +85,36 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
   requireNamespace('asreml')
   
   prep.out <<- prep.out
+  control <<- attr(prep.out, 'control')
   
   input = prep.out$data
   
-  if(prep.out$control[,7] > 0) ### Multi-areas ------------
+  if(control[,7] > 0) ### Multi-areas ------------
     {
-      if(prep.out$control[,6] > 0) ### Multi-ages --------
+      if(control[,6] > 0) ### Multi-ages --------
       {
-        input = input[order(input[,names(prep.out$control)[7]], input[,names(prep.out$control)[6]],
-                            input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+        input = input[order(input[,names(control)[7]], input[,names(control)[6]],
+                            input[,names(control)[4]], input[,names(control)[5]]),]
         
         if(cor){
           scm = asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
                          paste(paste(as.character(random), collapse = ""), 
-                               paste0('+ str(~', colnames(prep.out$control)[2],
+                               paste0('+ str(~', colnames(control)[2],
                                       '+ grp(g1), ~corh(2):id(',
-                                      colnames(prep.out$control)[2],')) + str(~',
-                                      colnames(prep.out$control)[2],':',
-                                      colnames(prep.out$control)[6],'+grp(g1):',
-                                      colnames(prep.out$control)[6], ', ~diag(2):id(',
-                                      colnames(prep.out$control)[6], '):id(',
-                                      colnames(prep.out$control)[2], '))'))
+                                      colnames(control)[2],')) + str(~',
+                                      colnames(control)[2],':',
+                                      colnames(control)[6],'+grp(g1):',
+                                      colnames(control)[6], ', ~diag(2):id(',
+                                      colnames(control)[6], '):id(',
+                                      colnames(control)[2], '))'))
                        ),
-                       group = list(g1 = 1:prep.out$control[,2]),
+                       group = list(g1 = 1:control[,2]),
                        residual = stats::as.formula(paste0(
-                         '~dsum(~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                         colnames(prep.out$control)[4],'):ar1(',
-                         colnames(prep.out$control)[5],')|',
-                         colnames(prep.out$control)[7],')')
+                         '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                         colnames(control)[4],'):ar1(',
+                         colnames(control)[5],')|',
+                         colnames(control)[7],')')
                        ),
                        data = input, ...)
 
@@ -119,83 +122,83 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
           scm = asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
                          paste(paste(as.character(random), collapse = ""), 
-                               paste0('+', colnames(prep.out$control)[2],
+                               paste0('+', colnames(control)[2],
                                       '+ grp(g1) +',
-                                      colnames(prep.out$control)[2],':',
-                                      colnames(prep.out$control)[6],'+grp(g1):',
-                                      colnames(prep.out$control)[6]))
+                                      colnames(control)[2],':',
+                                      colnames(control)[6],'+grp(g1):',
+                                      colnames(control)[6]))
                        ),
-                       group = list(g1 = 1:prep.out$control[,2]),
+                       group = list(g1 = 1:control[,2]),
                        residual = stats::as.formula(paste0(
-                         '~dsum(~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                         colnames(prep.out$control)[4],'):ar1(',
-                         colnames(prep.out$control)[5],')|',
-                         colnames(prep.out$control)[7],')')
+                         '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                         colnames(control)[4],'):ar1(',
+                         colnames(control)[5],')|',
+                         colnames(control)[7],')')
                        ),
                        data = input, ...)
 
         }
       }else ### Single age ---------------
       {
-        input = input[order(input[,names(prep.out$control)[7]],
-                            input[,names(prep.out$control)[4]], 
-                            input[,names(prep.out$control)[5]]),]
+        input = input[order(input[,names(control)[7]],
+                            input[,names(control)[4]], 
+                            input[,names(control)[5]]),]
         if(cor){
           scm = asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
                          paste(paste(as.character(random), collapse = ""), 
-                               paste0('+ str(~', colnames(prep.out$control)[2],
+                               paste0('+ str(~', colnames(control)[2],
                                       '+ grp(g1), ~corh(2):id(',
-                                      colnames(prep.out$control)[2],'))'))
+                                      colnames(control)[2],'))'))
                        ),
-                       group = list(g1 = 1:prep.out$control[,2]),
+                       group = list(g1 = 1:control[,2]),
                        residual = stats::as.formula(paste0(
-                         '~dsum(~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                         colnames(prep.out$control)[5],')|',
-                         colnames(prep.out$control)[7],')')
+                         '~dsum(~ar1(', colnames(control)[4],'):ar1(',
+                         colnames(control)[5],')|',
+                         colnames(control)[7],')')
                        ),
                        data = input, ...)
         }else{
           scm = asreml::asreml(fixed = fixed,
                        random = stats::as.formula(
                          paste(paste(as.character(random), collapse = ""), 
-                               paste0('+', colnames(prep.out$control)[2],
+                               paste0('+', colnames(control)[2],
                                       '+ grp(g1)'))
                        ),
-                       group = list(g1 = 1:prep.out$control[,2]),
+                       group = list(g1 = 1:control[,2]),
                        residual = stats::as.formula(paste0(
-                         '~dsum(~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                         colnames(prep.out$control)[5],')|',
-                         colnames(prep.out$control)[7],')')
+                         '~dsum(~ar1(', colnames(control)[4],'):ar1(',
+                         colnames(control)[5],')|',
+                         colnames(control)[7],')')
                        ),
                        data = input, ...)
         }
       } 
     }else ### Single area -----------
       {
-        if(prep.out$control[,6] > 0) ### Multi-ages --------
+        if(control[,6] > 0) ### Multi-ages --------
         {
-          input = input[order(input[,names(prep.out$control)[6]],
-                              input[,names(prep.out$control)[4]], 
-                              input[,names(prep.out$control)[5]]),]
+          input = input[order(input[,names(control)[6]],
+                              input[,names(control)[4]], 
+                              input[,names(control)[5]]),]
           if(cor){
             scm = asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
-                                 paste0('+ str(~', colnames(prep.out$control)[2],
+                                 paste0('+ str(~', colnames(control)[2],
                                         '+ grp(g1), ~corh(2):id(',
-                                        colnames(prep.out$control)[2],')) + str(~',
-                                        colnames(prep.out$control)[2],':',
-                                        colnames(prep.out$control)[6],'+grp(g1):',
-                                        colnames(prep.out$control)[6], ', ~diag(2):id(',
-                                        colnames(prep.out$control)[6], '):id(',
-                                        colnames(prep.out$control)[2], '))'))
+                                        colnames(control)[2],')) + str(~',
+                                        colnames(control)[2],':',
+                                        colnames(control)[6],'+grp(g1):',
+                                        colnames(control)[6], ', ~diag(2):id(',
+                                        colnames(control)[6], '):id(',
+                                        colnames(control)[2], '))'))
                          ),
-                         group = list(g1 = 1:prep.out$control[,2]),
+                         group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                           colnames(prep.out$control)[4],'):ar1(',
-                           colnames(prep.out$control)[5],')')
+                           '~ar1h(', colnames(control)[6],'):ar1(',
+                           colnames(control)[4],'):ar1(',
+                           colnames(control)[5],')')
                          ),
                          data = input, ...)
             
@@ -203,49 +206,49 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
             scm = asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
-                                 paste0('+', colnames(prep.out$control)[2],
+                                 paste0('+', colnames(control)[2],
                                         '+ grp(g1) +',
-                                        colnames(prep.out$control)[2],':',
-                                        colnames(prep.out$control)[6],'+grp(g1):',
-                                        colnames(prep.out$control)[6]))
+                                        colnames(control)[2],':',
+                                        colnames(control)[6],'+grp(g1):',
+                                        colnames(control)[6]))
                          ),
-                         group = list(g1 = 1:prep.out$control[,2]),
+                         group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                           colnames(prep.out$control)[4],'):ar1(',
-                           colnames(prep.out$control)[5],')')
+                           '~ar1h(', colnames(control)[6],'):ar1(',
+                           colnames(control)[4],'):ar1(',
+                           colnames(control)[5],')')
                          ),
                          data = input, ...)
           }
         }else ### Single age ---------------
         {
-          input = input[order(input[,names(prep.out$control)[4]], 
-                              input[,names(prep.out$control)[5]]),]
+          input = input[order(input[,names(control)[4]], 
+                              input[,names(control)[5]]),]
           if(cor){
             scm = asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
-                                 paste0('+ str(~', colnames(prep.out$control)[2],
+                                 paste0('+ str(~', colnames(control)[2],
                                         '+ grp(g1), ~corh(2):id(',
-                                        colnames(prep.out$control)[2],'))'))
+                                        colnames(control)[2],'))'))
                          ),
-                         group = list(g1 = 1:prep.out$control[,2]),
+                         group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                           colnames(prep.out$control)[5],')')
+                           '~ar1(', colnames(control)[4],'):ar1(',
+                           colnames(control)[5],')')
                          ),
                          data = input, ...)
           }else{
             scm = asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
-                                 paste0('+', colnames(prep.out$control)[2],
+                                 paste0('+', colnames(control)[2],
                                         '+ grp(g1)'))
                          ),
-                         group = list(g1 = 1:prep.out$control[,2]),
+                         group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                           colnames(prep.out$control)[5],')')
+                           '~ar1(', colnames(control)[4],'):ar1(',
+                           colnames(control)[5],')')
                          ),
                          data = input, ...)
           }
@@ -253,30 +256,30 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
       }
   
   # LRT ---------------------
-  
   if(lrtest){
-    if(prep.out$control[,7] > 0) ### Multi-areas ------------
+    message("====> Starting likelihood ratio tests")
+    if(control[,7] > 0) ### Multi-areas ------------
     {
-      if(prep.out$control[,6] > 0) ### Multi-ages --------
+      if(control[,6] > 0) ### Multi-ages --------
       {
-        input = input[order(input[,names(prep.out$control)[7]], input[,names(prep.out$control)[6]],
-                            input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+        input = input[order(input[,names(control)[7]], input[,names(control)[6]],
+                            input[,names(control)[4]], input[,names(control)[5]]),]
         
         bench = suppressWarnings({asreml::asreml(fixed = fixed,
                                                  random = stats::as.formula(
                                                    paste(paste(as.character(random), collapse = ""), 
-                                                         paste0('+', colnames(prep.out$control)[2],
+                                                         paste0('+', colnames(control)[2],
                                                                 '+ grp(g1) +',
-                                                                colnames(prep.out$control)[2],':',
-                                                                colnames(prep.out$control)[6],'+grp(g1):',
-                                                                colnames(prep.out$control)[6]))
+                                                                colnames(control)[2],':',
+                                                                colnames(control)[6],'+grp(g1):',
+                                                                colnames(control)[6]))
                                                  ),
-                                                 group = list(g1 = 1:prep.out$control[,2]),
+                                                 group = list(g1 = 1:control[,2]),
                                                  residual = stats::as.formula(paste0(
-                                                   '~dsum(~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                                                   colnames(prep.out$control)[4],'):ar1(',
-                                                   colnames(prep.out$control)[5],')|',
-                                                   colnames(prep.out$control)[7],')')
+                                                   '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                                                   colnames(control)[4],'):ar1(',
+                                                   colnames(control)[5],')|',
+                                                   colnames(control)[7],')')
                                                  ),
                                                  data = input,...)})
         
@@ -284,16 +287,16 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                                         asreml::asreml(fixed = fixed,
                                                        random = stats::as.formula(
                                                          paste(paste(as.character(random), collapse = ""), 
-                                                               paste0('+', colnames(prep.out$control)[2],
+                                                               paste0('+', colnames(control)[2],
                                                                       '+ grp(g1)','+grp(g1):',
-                                                                      colnames(prep.out$control)[6]))
+                                                                      colnames(control)[6]))
                                                        ),
-                                                       group = list(g1 = 1:prep.out$control[,2]),
+                                                       group = list(g1 = 1:control[,2]),
                                                        residual = stats::as.formula(paste0(
-                                                         '~dsum(~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                                                         colnames(prep.out$control)[4],'):ar1(',
-                                                         colnames(prep.out$control)[5],')|',
-                                                         colnames(prep.out$control)[7],')')
+                                                         '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                                                         colnames(control)[4],'):ar1(',
+                                                         colnames(control)[5],')|',
+                                                         colnames(control)[7],')')
                                                        ),
                                                        data = input,...))})
         
@@ -302,17 +305,17 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
               asreml::asreml(fixed = fixed,
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
-                                     paste0('+', colnames(prep.out$control)[2],
+                                     paste0('+', colnames(control)[2],
                                             '+ grp(g1) +',
-                                            colnames(prep.out$control)[2],':',
-                                            colnames(prep.out$control)[6]))
+                                            colnames(control)[2],':',
+                                            colnames(control)[6]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~dsum(~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                               colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')|',
-                               colnames(prep.out$control)[7],')')
+                               '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                               colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')|',
+                               colnames(control)[7],')')
                              ),
                              data = input, ...))
         }) 
@@ -323,14 +326,14 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
                                      paste0('+ grp(g1)','+grp(g1):',
-                                            colnames(prep.out$control)[6]))
+                                            colnames(control)[6]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~dsum(~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                               colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')|',
-                               colnames(prep.out$control)[7],')')
+                               '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                               colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')|',
+                               colnames(control)[7],')')
                              ),
                              data = input,...))
         }) 
@@ -340,17 +343,17 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
               asreml::asreml(fixed = fixed,
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
-                                     paste0('+', colnames(prep.out$control)[2],
+                                     paste0('+', colnames(control)[2],
                                             '+',
-                                            colnames(prep.out$control)[2],':',
-                                            colnames(prep.out$control)[6]))
+                                            colnames(control)[2],':',
+                                            colnames(control)[6]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~dsum(~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                               colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')|',
-                               colnames(prep.out$control)[7],')')
+                               '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                               colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')|',
+                               colnames(control)[7],')')
                              ),
                              data = input,...))
         }) 
@@ -361,21 +364,21 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
         
       }else ### Single age ---------------
       {
-        input = input[order(input[,names(prep.out$control)[7]],
-                            input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+        input = input[order(input[,names(control)[7]],
+                            input[,names(control)[4]], input[,names(control)[5]]),]
         
         bench = suppressWarnings({
           asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
-                                 paste0('+', colnames(prep.out$control)[2],
+                                 paste0('+', colnames(control)[2],
                                         '+ grp(g1)'))
                          ),
-                         group = list(g1 = 1:prep.out$control[,2]),
+                         group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~dsum(~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                           colnames(prep.out$control)[5],')|',
-                           colnames(prep.out$control)[7],')')
+                           '~dsum(~ar1(', colnames(control)[4],'):ar1(',
+                           colnames(control)[5],')|',
+                           colnames(control)[7],')')
                          ),
                          data = input, ...)
         }) 
@@ -386,11 +389,11 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                                        paste(paste(as.character(random), collapse = ""), 
                                              paste0('+ grp(g1)'))
                                      ),
-                                     group = list(g1 = 1:prep.out$control[,2]),
+                                     group = list(g1 = 1:control[,2]),
                                      residual = stats::as.formula(paste0(
-                                       '~dsum(~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                                       colnames(prep.out$control)[5],')|',
-                                       colnames(prep.out$control)[7],')')
+                                       '~dsum(~ar1(', colnames(control)[4],'):ar1(',
+                                       colnames(control)[5],')|',
+                                       colnames(control)[7],')')
                                      ),
                                      data = input, ...))
         }) 
@@ -399,13 +402,13 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
           lrt(bench, asreml::asreml(fixed = fixed,
                                     random = stats::as.formula(
                                       paste(paste(as.character(random), collapse = ""), 
-                                            paste0('+', colnames(prep.out$control)[2]))
+                                            paste0('+', colnames(control)[2]))
                                     ),
-                                    group = list(g1 = 1:prep.out$control[,2]),
+                                    group = list(g1 = 1:control[,2]),
                                     residual = stats::as.formula(paste0(
-                                      '~dsum(~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                                      colnames(prep.out$control)[5],')|',
-                                      colnames(prep.out$control)[7],')')
+                                      '~dsum(~ar1(', colnames(control)[4],'):ar1(',
+                                      colnames(control)[5],')|',
+                                      colnames(control)[7],')')
                                     ),
                                     data = input, ...))
         }) 
@@ -415,25 +418,25 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
       } 
     }else ### Single area -----------
     {
-      if(prep.out$control[,6] > 0) ### Multi-ages --------
+      if(control[,6] > 0) ### Multi-ages --------
       {
-        input = input[order(input[,names(prep.out$control)[6]],
-                            input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+        input = input[order(input[,names(control)[6]],
+                            input[,names(control)[4]], input[,names(control)[5]]),]
         bench = suppressWarnings({
           asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
-                                 paste0('+', colnames(prep.out$control)[2],
+                                 paste0('+', colnames(control)[2],
                                         '+ grp(g1) +',
-                                        colnames(prep.out$control)[2],':',
-                                        colnames(prep.out$control)[6],'+grp(g1):',
-                                        colnames(prep.out$control)[6]))
+                                        colnames(control)[2],':',
+                                        colnames(control)[6],'+grp(g1):',
+                                        colnames(control)[6]))
                          ),
-                         group = list(g1 = 1:prep.out$control[,2]),
+                         group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                           colnames(prep.out$control)[4],'):ar1(',
-                           colnames(prep.out$control)[5],')')
+                           '~ar1h(', colnames(control)[6],'):ar1(',
+                           colnames(control)[4],'):ar1(',
+                           colnames(control)[5],')')
                          ),
                          data = input, ...)
         }) 
@@ -443,15 +446,15 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
               asreml::asreml(fixed = fixed,
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
-                                     paste0('+', colnames(prep.out$control)[2],
+                                     paste0('+', colnames(control)[2],
                                             '+ grp(g1)','+grp(g1):',
-                                            colnames(prep.out$control)[6]))
+                                            colnames(control)[6]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                               colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')')
+                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')')
                              ),
                              data = input, ...))
         }) 
@@ -461,16 +464,16 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
               asreml::asreml(fixed = fixed,
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
-                                     paste0('+', colnames(prep.out$control)[2],
+                                     paste0('+', colnames(control)[2],
                                             '+ grp(g1) +',
-                                            colnames(prep.out$control)[2],':',
-                                            colnames(prep.out$control)[6]))
+                                            colnames(control)[2],':',
+                                            colnames(control)[6]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                               colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')')
+                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')')
                              ),
                              data = input, ...))
         }) 
@@ -481,13 +484,13 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
                                      paste0('+ grp(g1) + grp(g1):',
-                                            colnames(prep.out$control)[6]))
+                                            colnames(control)[6]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                               colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')')
+                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')')
                              ),
                              data = input, ...))
         })
@@ -497,16 +500,16 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
               asreml::asreml(fixed = fixed,
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
-                                     paste0('+', colnames(prep.out$control)[2],
+                                     paste0('+', colnames(control)[2],
                                             ' +',
-                                            colnames(prep.out$control)[2],':',
-                                            colnames(prep.out$control)[6]))
+                                            colnames(control)[2],':',
+                                            colnames(control)[6]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(prep.out$control)[6],'):ar1(',
-                               colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')')
+                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')')
                              ),
                              data = input, ...))
         }) 
@@ -518,19 +521,19 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
         
       }else ### Single age ---------------
       {
-        input = input[order(input[,names(prep.out$control)[4]], input[,names(prep.out$control)[5]]),]
+        input = input[order(input[,names(control)[4]], input[,names(control)[5]]),]
         
         bench = suppressWarnings({
           asreml::asreml(fixed = fixed,
                          random = stats::as.formula(
                            paste(paste(as.character(random), collapse = ""), 
-                                 paste0('+', colnames(prep.out$control)[2],
+                                 paste0('+', colnames(control)[2],
                                         '+ grp(g1)'))
                          ),
-                         group = list(g1 = 1:prep.out$control[,2]),
+                         group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                           colnames(prep.out$control)[5],')')
+                           '~ar1(', colnames(control)[4],'):ar1(',
+                           colnames(control)[5],')')
                          ),
                          data = input, ...)
         }) 
@@ -542,10 +545,10 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                                paste(paste(as.character(random), collapse = ""), 
                                      paste0('+ grp(g1)'))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')')
+                               '~ar1(', colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')')
                              ),
                              data = input, ...))
         }) 
@@ -555,12 +558,12 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
               asreml::asreml(fixed = fixed,
                              random = stats::as.formula(
                                paste(paste(as.character(random), collapse = ""), 
-                                     paste0('+', colnames(prep.out$control)[2]))
+                                     paste0('+', colnames(control)[2]))
                              ),
-                             group = list(g1 = 1:prep.out$control[,2]),
+                             group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1(', colnames(prep.out$control)[4],'):ar1(',
-                               colnames(prep.out$control)[5],')')
+                               '~ar1(', colnames(control)[4],'):ar1(',
+                               colnames(control)[5],')')
                              ),
                              data = input, ...))
         }) 
@@ -575,7 +578,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
   }
 
   remove(prep.out, envir = .GlobalEnv)
-  
+  remove(control, envir = .GlobalEnv)
 
   
   return(scm)

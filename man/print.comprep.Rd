@@ -19,20 +19,19 @@ are "all" for printing all ages, or the name of the specific age. Defaults to
 "all", which also serves when data has a single age.}
 }
 \description{
-Print a \code{comprep} object in the R console. Alternatively, export the objects to the
-working directory
+Print a \code{comprep} object in the R console.
 }
 \examples{
 \donttest{
 library(competition)
 comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-                      ind = 'tree', age = 'age', row = 'row', col = 'col', 
-                      dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-                      n.dec = 3, verbose = TRUE)
-print(comp_mat, category = 'data', age = '6y', export = FALSE)
-print(comp_mat, category = 'matrix', age = 'all', export = FALSE)
-print(comp_mat, category = 'check', age = '3y', export = FALSE)
-print(comp_mat, category = 'CIF', age = 'all', export = FALSE)
+                ind = 'tree', age = 'age', row = 'row', col = 'col', 
+                dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+                n.dec = 3, verbose = TRUE)
+print(comp_mat, category = 'data', age = '6y')
+print(comp_mat, category = 'matrix', age = 'all')
+print(comp_mat, category = 'check', age = '3y')
+print(comp_mat, category = 'CIF', age = 'all')
 
 # Note that the ages are labeled as "3y" and "6y" in the example dataset 
 }

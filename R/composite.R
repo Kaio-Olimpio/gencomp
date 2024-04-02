@@ -2,10 +2,10 @@
 ##'
 ##' @description
 ##' This function simulates clonal composites using outputs of a genetic-spatial
-##' competition model fitted using [competition::asr()]
+##' competition model fitted using [GenComp::asr()]
 ##' 
 ##' @param prep.out A `comprep` object.
-##' @param model An `asreml` object, preferably obtained using the [competition::asr()] function.
+##' @param model An `asreml` object, preferably obtained using the [GenComp::asr()] function.
 ##' @param resp.out A `comresp` object.
 ##' @param d.row.col A vector of size two. The first element contain the distance between
 ##' rows, and second the distance between columns of the simulated grid.
@@ -37,7 +37,7 @@
 ##' @references 
 ##' \insertAllCited{}
 ##'
-##' @seealso  [competition::prep], [competition::asr], [competition::resp]
+##' @seealso  [GenComp::prep], [GenComp::asr], [GenComp::resp]
 ##' 
 ##' @importFrom Rdpack reprompt
 ##' @importFrom stats quantile model.matrix model.matrix.lm

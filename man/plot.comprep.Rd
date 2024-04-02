@@ -36,7 +36,7 @@ comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
 plot(comp_mat, category = 'heatmap', age = "all")
 plot(comp_mat, category = 'boxplot', age = "3y")
 
-# Note that the ages are labeled as "3y" and "6y" in the example dataset 
+# Note that the ages are labelled as "3y" and "6y" in the example dataset 
 }
 
 }

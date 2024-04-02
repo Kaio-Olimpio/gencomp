@@ -24,8 +24,8 @@ The function returns:
 and a measure of precision (standard error) is included along with boundary
 constraints at termination and the percentage change in the final iteration.
 \item \code{blups} : The direct (DGE) and indirect genetic effects (IGE), their standard errors,
-the competition class of each genotype and the total genotypic value (TGV). If \code{age = TRUE},
-\code{blup} is a list containing the main effects and the within-ages DGE and IGE. If
+the competition class of each genotype and the total genotypic value (TGV). If \code{age = TRUE} in
+\code{\link[=prep]{prep()}}, \code{blup} is a list containing the main effects and the within-ages DGE and IGE. If
 other random effects were declared in the model, \code{blup} will contain another data frame
 with their BLUPs.
 }

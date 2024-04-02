@@ -7,18 +7,18 @@
 \method{plot}{comresp}(object, category = "DGE.IGE", level = "main", age = "all")
 }
 \arguments{
-\item{object}{An object of class \code{comresp}}
+\item{object}{An object of class \code{comresp}.}
 
-\item{category}{A string indicating which plot to build. See options in the Details section}
+\item{category}{A string indicating which plot to build. See options in the Details section.}
 
 \item{level}{A string indicating the information level to be used for building
 the plots. Options are "main" for focusing on the main effects, or "within" to
 focus on the within-age effects effects (main + interaction effects). Defaults
 to "main", which also serves when data has a single age.}
 
-\item{age}{A string indicating if plots should be built per age. Options are
-"all" for plotting all ages, or the name of the specific age. Defaults
-to "all", which also serves when data has a single age.}
+\item{age}{If \code{level = 'within'}, a string indicating if plots should be built per age.
+Options are "all" for plotting all ages, or the name of the specific age. Defaults
+to "all", which serves when data has a single age.}
 }
 \description{
 Build plots using the outputs stored in the \code{comresp} object.
@@ -61,6 +61,17 @@ to the competition class of each genotype.
              lrtest = FALSE)
                   
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+ 
+ plot(results, category = 'DGEvIGE', level = 'within', age = '6y')
+ plot(results, category = 'grid.res', level = 'main', age = '3y')
+ plot(results, category = 'nneigh', level = 'main')
+ plot(results, category = 'DGE.IGE', level = 'within', age ='all')
+ plot(results, category = 'grid.dge', level = 'within', age ='3y')
+ plot(results, category = 'grid.ige', level = 'within', age ='6y')
+ plot(results, category = 'grid.class', level = 'within', age ='all')
+ plot(results, category = 'class', level = 'main')
+ plot(results, category = 'TGV', level = 'within')
+ # Note that the ages are labelled as "3y" and "6y" in the example dataset 
  }
 }
 \seealso{

@@ -4,7 +4,7 @@
 ##' This function provides responses extracted from the genetic-spatial 
 ##' competition model fitted using [GenComp::asr()]. 
 ##' 
-##' @param prep.out A `prep` object.
+##' @param prep.out A `comprep` object.
 ##' @param model An `asreml` object, preferably obtained using the [GenComp::asr()] function.
 ##' @param weight.tgv A logical value. If `TRUE`, the function will use the direct and
 ##' indirect genetic effects' reliability as a weight when estimating the total genotypic
@@ -18,8 +18,8 @@
 ##' and a measure of precision (standard error) is included along with boundary 
 ##' constraints at termination and the percentage change in the final iteration.
 ##' \item \code{blups} : The direct (DGE) and indirect genetic effects (IGE), their standard errors, 
-##' the competition class of each genotype and the total genotypic value (TGV). If `age = TRUE`, 
-##' `blup` is a list containing the main effects and the within-ages DGE and IGE. If 
+##' the competition class of each genotype and the total genotypic value (TGV). If `age = TRUE` in 
+##' [GenComp::prep()], `blup` is a list containing the main effects and the within-ages DGE and IGE. If 
 ##' other random effects were declared in the model, `blup` will contain another data frame 
 ##' with their BLUPs.
 ##' }
@@ -458,8 +458,8 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #' Build plots using the outputs stored in the `comresp` object.
 #'
 #'
-#' @param object An object of class `comresp`
-#' @param category A string indicating which plot to build. See options in the Details section
+#' @param object An object of class `comresp`.
+#' @param category A string indicating which plot to build. See options in the Details section.
 #' @param level A string indicating the information level to be used for building
 #' the plots. Options are "main" for focusing on the main effects, or "within" to 
 #' focus on the within-age effects effects (main + interaction effects). Defaults
@@ -517,6 +517,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #'              lrtest = FALSE)
 #'                   
 #'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+#'  
 #'  plot(results, category = 'DGEvIGE', level = 'within', age = '6y')
 #'  plot(results, category = 'grid.res', level = 'main', age = '3y')
 #'  plot(results, category = 'nneigh', level = 'main')
@@ -526,6 +527,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #'  plot(results, category = 'grid.class', level = 'within', age ='all')
 #'  plot(results, category = 'class', level = 'main')
 #'  plot(results, category = 'TGV', level = 'within')
+#'  # Note that the ages are labelled as "3y" and "6y" in the example dataset 
 #'  }
 
 plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all'){

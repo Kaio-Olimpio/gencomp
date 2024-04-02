@@ -14,7 +14,7 @@ prep(
   trait,
   dist.row,
   dist.col,
-  method,
+  method = "SK",
   area = NULL,
   age = NULL,
   n.dec = 2,
@@ -33,7 +33,7 @@ respectively. \code{ind} can also distinguish the plots, if there are multiple p
 \item{method}{A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}.
 It has three options: "MU" for the method proposed by \insertCite{muir_incorporation_2005;textual}{competition},
 "CC" for the method proposed by \insertCite{cappa_direct_2008;textual}{competition}, and."SK" for the
-method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{competition}.
+method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{competition} (Default).
 See Details for more information on these methods.}
 
 \item{area}{A string. The name of the column that corresponds to the area information.

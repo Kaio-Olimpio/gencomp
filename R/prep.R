@@ -19,7 +19,7 @@
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
 ##' It has three options: "MU" for the method proposed by \insertCite{muir_incorporation_2005;textual}{competition}, 
 ##' "CC" for the method proposed by \insertCite{cappa_direct_2008;textual}{competition}, and."SK" for the 
-##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{competition}.
+##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{competition} (Default).
 ##' See Details for more information on these methods.
 ##' @param n.dec An integer. The number of decimal digits to be displayed in \eqn{\mathbf{Z}_c}. 
 ##' Defaults to 2.
@@ -109,7 +109,7 @@
 
 
 prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col, 
-                     method, area = NULL, age = NULL, n.dec = 2, 
+                     method = "SK", area = NULL, age = NULL, n.dec = 2, 
                      verbose = FALSE){
   
   # Messages and warnings
@@ -803,7 +803,7 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
 #' plot(comp_mat, category = 'heatmap', age = "all")
 #' plot(comp_mat, category = 'boxplot', age = "3y")
 #' 
-#' # Note that the ages are labeled as "3y" and "6y" in the example dataset 
+#' # Note that the ages are labelled as "3y" and "6y" in the example dataset 
 #' }
 #'
 

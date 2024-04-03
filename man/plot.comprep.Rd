@@ -4,18 +4,20 @@
 \alias{plot.comprep}
 \title{Plots for data overview}
 \usage{
-\method{plot}{comprep}(object, category, age = "all")
+\method{plot}{comprep}(object, category = "heatmap", age = "all", ...)
 }
 \arguments{
 \item{object}{An object of class \code{comprep}}
 
-\item{category}{A string indicating which plot to build. Options are "heatmap" for
-plotting the field grid, or "boxplot" for plotting the boxplots of phenotypic
+\item{category}{A string indicating which plot to build. Options are \code{"heatmap"} for
+plotting the field grid (default), or \code{"boxplot"} for plotting the boxplots of phenotypic
 performance.}
 
 \item{age}{A string indicating if plots should be built per age. Options are
-"all" for plotting all ages using facets, or the name of the specific age. Defaults
-to "all", which also serves when data has a single age}
+\code{"all"} for plotting all ages using facets, or the name of the specific age. Defaults
+to \code{"all"}, which also serves when data has a single age}
+
+\item{...}{Currently not used.}
 }
 \description{
 The function generates two types of plots: i) a heatmap representing the grid.
@@ -28,18 +30,18 @@ customizable using "+ ggfun()"
 }
 \examples{
 \donttest{
-library(competition)
+library(GenComp)
 comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                 n.dec = 3, verbose = TRUE)
+                
 plot(comp_mat, category = 'heatmap', age = "all")
 plot(comp_mat, category = 'boxplot', age = "3y")
-
 # Note that the ages are labelled as "3y" and "6y" in the example dataset 
 }
 
 }
 \seealso{
-\link{ggplot2}
+\link{ggplot2}, \link{prep}
 }

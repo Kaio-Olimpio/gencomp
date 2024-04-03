@@ -4,22 +4,28 @@
 \alias{summary.comprep}
 \title{Summary of the \code{comprep} object}
 \usage{
-\method{summary}{comprep}(object)
+\method{summary}{comprep}(object, ...)
 }
 \arguments{
 \item{object}{An object of class \code{comprep}}
+
+\item{...}{Currently not used.}
 }
 \description{
 A brief summary of the dataset used.
 }
 \examples{
 \donttest{
-library(competition)
+library(GenComp)
 comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                 n.dec = 3, verbose = TRUE)
+                
 summary(comp_mat)
 }
 
+}
+\seealso{
+\link{prep}
 }

@@ -17,9 +17,9 @@
 ##' Necessary for fitting a multi-age model using [GenComp::asr()]. `NULL` (default)
 ##' otherwise.
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
-##' It has three options: "MU" for the method proposed by \insertCite{muir_incorporation_2005;textual}{competition}, 
-##' "CC" for the method proposed by \insertCite{cappa_direct_2008;textual}{competition}, and."SK" for the 
-##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{competition} (Default).
+##' It has three options: `"MU"` for the method proposed by \insertCite{muir_incorporation_2005;textual}{GenComp}, 
+##' `"CC"` for the method proposed by \insertCite{cappa_direct_2008;textual}{GenComp}, and `"SK"` for the 
+##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{GenComp} (default).
 ##' See Details for more information on these methods.
 ##' @param n.dec An integer. The number of decimal digits to be displayed in \eqn{\mathbf{Z}_c}. 
 ##' Defaults to 2.
@@ -41,7 +41,7 @@
 ##' Three methods are available for estimating the competition intensity and building
 ##' the \eqn{\mathbf{Z}_c}, the genetic competition matrix: 
 ##' 
-##' \itemize{\item \insertCite{muir_incorporation_2005;textual}{competition}: "MU"}
+##' \itemize{\item \insertCite{muir_incorporation_2005;textual}{GenComp}: "MU"}
 ##' 
 ##' The average competition intensity is the inverse of the distance between the focal 
 ##' plant and its neighbours:
@@ -56,7 +56,7 @@
 ##' in the diagonal, row, and column directions of the \eqn{v^{th}} clone, 
 ##' respectively; and \eqn{d_R} and \eqn{d_C} are the inter-row and inter-column distances. 
 ##'
-##' \itemize{\item \insertCite{cappa_direct_2008;textual}{competition}: "CC"}
+##' \itemize{\item \insertCite{cappa_direct_2008;textual}{GenComp}: "CC"}
 ##' 
 ##' The average competition intensity depends on the number of neighbours in each direction
 ##' 
@@ -71,7 +71,7 @@
 ##' Note that, in this case, it is assumed that the distance between rows and 
 ##' columns are the same.
 ##' 
-##' \itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{competition}: "SK"}
+##' \itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{GenComp}: "SK"}
 ##' 
 ##' The average competition intensity depends on both the distance between the focal 
 ##' tree and its neighbours, and the number of neighbours in each direction:
@@ -609,15 +609,18 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
 #'
 #'
 #' @param object An object of class `comprep`
-#' @param category A string indicating which object to print. Options are "all" for
-#' printing all objects, "data" for printing the data that will be used in the model, 
-#' "matrix" for printing the competition matrix, "check" for printing the `neigh_check`
-#' dataframe, and "CIF" for printing the competition intensity factor. 
+#' @param category A string indicating which object to print. Options are `"all"` for
+#' printing all objects, `"data"` for printing the data that will be used in the model, 
+#' `"matrix"` for printing the competition matrix, `"check"` for printing the `neigh_check`
+#' dataframe, and `"CIF"` for printing the competition intensity factor. 
 #' @param age A string indicating if objects should be printed per age. Options 
-#' are "all" for printing all ages, or the name of the specific age. Defaults to 
-#' "all", which also serves when data has a single age.
+#' are `"all"` for printing all ages, or the name of the specific age. Defaults to 
+#' `"all"`, which also serves when data has a single age.
+#' @param ... Currently not used.
 #' 
 #' @method print comprep
+#' 
+#' @seealso [GenComp::prep]
 #' 
 #' 
 #' @importFrom data.table data.table 
@@ -626,22 +629,22 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
 #' 
 #' @examples
 #'\donttest{
-#' library(competition)
+#' library(GenComp)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 #'                 n.dec = 3, verbose = TRUE)
+#'                 
 #' print(comp_mat, category = 'data', age = '6y')
 #' print(comp_mat, category = 'matrix', age = 'all')
 #' print(comp_mat, category = 'check', age = '3y')
 #' print(comp_mat, category = 'CIF', age = 'all')
-#' 
 #' # Note that the ages are labeled as "3y" and "6y" in the example dataset 
 #' }
 #'
 
 
-print.comprep = function(object, category = 'matrix', age = 'all'){
+print.comprep = function(object, category = 'matrix', age = 'all', ...){
   
   stopifnot("The object must be of class 'comprep'" = class(object) == 'comprep')
   stopifnot("'category' should be of size 1" = length(category) == 1)
@@ -773,12 +776,13 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
 #'
 #'
 #' @param object An object of class `comprep`
-#' @param category A string indicating which plot to build. Options are "heatmap" for
-#' plotting the field grid, or "boxplot" for plotting the boxplots of phenotypic 
+#' @param category A string indicating which plot to build. Options are `"heatmap"` for
+#' plotting the field grid (default), or `"boxplot"` for plotting the boxplots of phenotypic 
 #' performance.
 #' @param age A string indicating if plots should be built per age. Options are 
-#' "all" for plotting all ages using facets, or the name of the specific age. Defaults
-#' to "all", which also serves when data has a single age
+#' `"all"` for plotting all ages using facets, or the name of the specific age. Defaults
+#' to `"all"`, which also serves when data has a single age
+#' @param ... Currently not used.
 #' 
 #' @method plot comprep
 #' 
@@ -786,7 +790,7 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
 #' All plots are built using the [ggplot2] library, so they are all 
 #' customizable using "+ ggfun()"
 #' 
-#' @seealso  [ggplot2]
+#' @seealso  [ggplot2], [GenComp::prep]
 #' 
 #' @importFrom ggplot2 ggplot
 #' @importFrom rlang .data
@@ -795,19 +799,19 @@ print.comprep = function(object, category = 'matrix', age = 'all'){
 #' 
 #' @examples
 #'\donttest{
-#' library(competition)
+#' library(GenComp)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 #'                 n.dec = 3, verbose = TRUE)
+#'                 
 #' plot(comp_mat, category = 'heatmap', age = "all")
 #' plot(comp_mat, category = 'boxplot', age = "3y")
-#' 
 #' # Note that the ages are labelled as "3y" and "6y" in the example dataset 
 #' }
 #'
 
-plot.comprep = function(object, category, age = 'all'){
+plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
  
   stopifnot("The object must be of class 'comprep'" = class(object) == 'comprep')
   stopifnot("'category' should be of size 1" = length(category) == 1)
@@ -1107,23 +1111,27 @@ plot.comprep = function(object, category, age = 'all'){
 #' A brief summary of the dataset used.
 #'
 #' @param object An object of class `comprep`
+#' @param ... Currently not used.
 #' 
 #' @method summary comprep
+#' 
+#' @seealso [GenComp::prep]
 #' 
 #' @export
 #' 
 #' @examples
 #'\donttest{
-#' library(competition)
+#' library(GenComp)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 #'                 n.dec = 3, verbose = TRUE)
+#'                 
 #' summary(comp_mat)
 #' }
 #'
 
-summary.comprep = function(object){
+summary.comprep = function(object, ...){
   
   print(attr(object, 'control'))
   

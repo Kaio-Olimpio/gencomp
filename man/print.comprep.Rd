@@ -4,36 +4,41 @@
 \alias{print.comprep}
 \title{Print an object of class \code{comprep}}
 \usage{
-\method{print}{comprep}(object, category = "matrix", age = "all")
+\method{print}{comprep}(object, category = "matrix", age = "all", ...)
 }
 \arguments{
 \item{object}{An object of class \code{comprep}}
 
-\item{category}{A string indicating which object to print. Options are "all" for
-printing all objects, "data" for printing the data that will be used in the model,
-"matrix" for printing the competition matrix, "check" for printing the \code{neigh_check}
-dataframe, and "CIF" for printing the competition intensity factor.}
+\item{category}{A string indicating which object to print. Options are \code{"all"} for
+printing all objects, \code{"data"} for printing the data that will be used in the model,
+\code{"matrix"} for printing the competition matrix, \code{"check"} for printing the \code{neigh_check}
+dataframe, and \code{"CIF"} for printing the competition intensity factor.}
 
 \item{age}{A string indicating if objects should be printed per age. Options
-are "all" for printing all ages, or the name of the specific age. Defaults to
-"all", which also serves when data has a single age.}
+are \code{"all"} for printing all ages, or the name of the specific age. Defaults to
+\code{"all"}, which also serves when data has a single age.}
+
+\item{...}{Currently not used.}
 }
 \description{
 Print a \code{comprep} object in the R console.
 }
 \examples{
 \donttest{
-library(competition)
+library(GenComp)
 comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                 n.dec = 3, verbose = TRUE)
+                
 print(comp_mat, category = 'data', age = '6y')
 print(comp_mat, category = 'matrix', age = 'all')
 print(comp_mat, category = 'check', age = '3y')
 print(comp_mat, category = 'CIF', age = 'all')
-
 # Note that the ages are labeled as "3y" and "6y" in the example dataset 
 }
 
+}
+\seealso{
+\link{prep}
 }

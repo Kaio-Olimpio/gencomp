@@ -4,7 +4,7 @@
 \alias{plot.comresp}
 \title{Plots for the \code{comresp} object}
 \usage{
-\method{plot}{comresp}(object, category = "DGE.IGE", level = "main", age = "all")
+\method{plot}{comresp}(object, category = "DGE.IGE", level = "main", age = "all", ...)
 }
 \arguments{
 \item{object}{An object of class \code{comresp}.}
@@ -12,13 +12,15 @@
 \item{category}{A string indicating which plot to build. See options in the Details section.}
 
 \item{level}{A string indicating the information level to be used for building
-the plots. Options are "main" for focusing on the main effects, or "within" to
+the plots. Options are \code{"main"} for focusing on the main effects, or \code{"within"} to
 focus on the within-age effects effects (main + interaction effects). Defaults
-to "main", which also serves when data has a single age.}
+to \code{"main"}, which also serves when data has a single age.}
 
 \item{age}{If \code{level = 'within'}, a string indicating if plots should be built per age.
-Options are "all" for plotting all ages, or the name of the specific age. Defaults
-to "all", which serves when data has a single age.}
+Options are \code{"all"} for plotting all ages, or the name of the specific age. Defaults
+to \code{"all"}, which serves when data has a single age.}
+
+\item{...}{Currently not used.}
 }
 \description{
 Build plots using the outputs stored in the \code{comresp} object.
@@ -53,13 +55,11 @@ to the competition class of each genotype.
                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                  n.dec = 3, verbose = TRUE)
- 
  model = asr(prep.out = comp_mat, 
              fixed = mai~ age, 
              random = ~ block:age, 
              cor = TRUE, maxit = 20,
              lrtest = FALSE)
-                  
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
  
  plot(results, category = 'DGEvIGE', level = 'within', age = '6y')

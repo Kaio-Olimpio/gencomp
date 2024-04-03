@@ -7,7 +7,7 @@
 resp(prep.out, model, weight.tgv = FALSE)
 }
 \arguments{
-\item{prep.out}{A \code{prep} object.}
+\item{prep.out}{A \code{comprep} object.}
 
 \item{model}{An \code{asreml} object, preferably obtained using the \code{\link[=asr]{asr()}} function.}
 
@@ -23,7 +23,7 @@ The function returns:
 (object$vparameters). Variance component ratios are included if param = "gamma",
 and a measure of precision (standard error) is included along with boundary
 constraints at termination and the percentage change in the final iteration.
-\item \code{blups} : The direct (DGE) and indirect genetic effects (IGE), their standard errors,
+\item \code{blups} : A list containing the direct (DGE) and indirect genetic effects (IGE), their standard errors,
 the competition class of each genotype and the total genotypic value (TGV). If \code{age = TRUE} in
 \code{\link[=prep]{prep()}}, \code{blup} is a list containing the main effects and the within-ages DGE and IGE. If
 other random effects were declared in the model, \code{blup} will contain another data frame
@@ -39,7 +39,7 @@ The genetic-spatial competition model provides the direct (DGE) and indirect
 genetic effects (IGE) of each genotype. The DGE represents the "pure" performance
 of the genotype, while the IGE is the related to the average effect of the genotype on
 the genotypic value of its neighbours. The higher the IGE, the more aggressive is the genotype.
-Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{competition}
+Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{GenComp}
 to define competition classes:
 
 \deqn{\begin{cases} c_i > \overline{c} + sd(c) \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) > c_i > \overline{c} - sd(c) \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \rightarrow \text{Sensitive} \end{cases}}
@@ -66,7 +66,6 @@ multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2
                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                  n.dec = 3, verbose = TRUE)
- 
  model = asr(prep.out = comp_mat, 
              fixed = mai~ age, 
              random = ~ block:age, 

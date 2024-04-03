@@ -51,7 +51,7 @@ competition model fitted using \code{\link[=asr]{asr()}}
 Considering the direct (DGE) and indirect genetic effects (IGE) of the selected clones,
 the function simulates grids. Clones are positioned differently in each simulation,
 which enables the modification of focal tree-neighbour dynamics. In each simulation,
-the expected mean of each clone is predicted using the following equation \insertCite{ferreira_novel_2023}{competition}:
+the expected mean of each clone is predicted using the following equation \insertCite{ferreira_novel_2023}{GenComp}:
 \deqn{\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{c_j}}
 where \eqn{d_i} is the DGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} focal tree, and
 \eqn{c_j} is the IGE of the j\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} neighbour. If \code{d.weight = TRUE}, the
@@ -60,6 +60,7 @@ IGE is divided by the distance between the focal tree and its neighbours:
 }
 \examples{
 \donttest{
+library(GenComp)
  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
@@ -68,7 +69,8 @@ IGE is divided by the distance between the focal tree and its neighbours:
  model = asr(prep.out = comp_mat, 
                   fixed = mai~ age, 
                   random = ~ block:age, 
-                  cor = TRUE, maxit = 50)
+                  cor = TRUE, maxit = 50,
+                  lrtest = TRUE)
                   
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
  

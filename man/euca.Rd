@@ -27,7 +27,7 @@ euca
 }
 \description{
 This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (\code{mai}) of 100
-eucalyptus clones. The trial was laid out
+clones. The trial was laid out
 in randomized complete blocks design, with 13 replicates and one tree per plot.
 This trial did not have contiguous blocks: blocks 1-7 were in area 1 and blocks 8-14 were in
 area 2. The \code{area} column contains this information.

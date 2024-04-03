@@ -17,7 +17,7 @@
 ##' (object$vparameters). Variance component ratios are included if param = "gamma", 
 ##' and a measure of precision (standard error) is included along with boundary 
 ##' constraints at termination and the percentage change in the final iteration.
-##' \item \code{blups} : The direct (DGE) and indirect genetic effects (IGE), their standard errors, 
+##' \item \code{blups} : A list containing the direct (DGE) and indirect genetic effects (IGE), their standard errors, 
 ##' the competition class of each genotype and the total genotypic value (TGV). If `age = TRUE` in 
 ##' [GenComp::prep()], `blup` is a list containing the main effects and the within-ages DGE and IGE. If 
 ##' other random effects were declared in the model, `blup` will contain another data frame 
@@ -29,7 +29,7 @@
 ##' genetic effects (IGE) of each genotype. The DGE represents the "pure" performance
 ##' of the genotype, while the IGE is the related to the average effect of the genotype on
 ##' the genotypic value of its neighbours. The higher the IGE, the more aggressive is the genotype. 
-##' Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{competition} 
+##' Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{GenComp} 
 ##' to define competition classes: 
 ##' 
 ##' \deqn{\begin{cases} c_i > \overline{c} + sd(c) \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) > c_i > \overline{c} - sd(c) \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \rightarrow \text{Sensitive} \end{cases}}
@@ -67,7 +67,6 @@
 ##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 ##'                  n.dec = 3, verbose = TRUE)
-##'  
 ##'  model = asr(prep.out = comp_mat, 
 ##'              fixed = mai~ age, 
 ##'              random = ~ block:age, 
@@ -435,7 +434,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
                                  !grepl(names(control)[2], rownames(blup))), -3]
       output$blups = list(main = main, coef.random = coef.random)
     }else{
-      output$blups = main
+      output$blups = list(main = main)
     }
   }
   
@@ -461,12 +460,13 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #' @param object An object of class `comresp`.
 #' @param category A string indicating which plot to build. See options in the Details section.
 #' @param level A string indicating the information level to be used for building
-#' the plots. Options are "main" for focusing on the main effects, or "within" to 
+#' the plots. Options are `"main"` for focusing on the main effects, or `"within"` to 
 #' focus on the within-age effects effects (main + interaction effects). Defaults
-#' to "main", which also serves when data has a single age.
+#' to `"main"`, which also serves when data has a single age.
 #' @param age If `level = 'within'`, a string indicating if plots should be built per age. 
-#' Options are "all" for plotting all ages, or the name of the specific age. Defaults
-#' to "all", which serves when data has a single age.
+#' Options are `"all"` for plotting all ages, or the name of the specific age. Defaults
+#' to `"all"`, which serves when data has a single age.
+#' @param ... Currently not used.
 #' 
 #' @method plot comresp
 #' 
@@ -509,13 +509,11 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
 #'                  n.dec = 3, verbose = TRUE)
-#'  
 #'  model = asr(prep.out = comp_mat, 
 #'              fixed = mai~ age, 
 #'              random = ~ block:age, 
 #'              cor = TRUE, maxit = 20,
 #'              lrtest = FALSE)
-#'                   
 #'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
 #'  
 #'  plot(results, category = 'DGEvIGE', level = 'within', age = '6y')
@@ -530,7 +528,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #'  # Note that the ages are labelled as "3y" and "6y" in the example dataset 
 #'  }
 
-plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all'){
+plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all', ...){
   
   ### Messages and warnings
   stopifnot("The object must be of class 'comresp'" = class(object) == 'comresp')
@@ -540,13 +538,12 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
   stopifnot("'level' should be of size 1" = length(level) == 1)
   stopifnot("Please, choose between the available levels ('main' or 'within')" = level %in% c('main','within'))
 
-  
-  
+
   control = attr(object, 'control')
   main = object$blups$main
   dat = attr(object, 'data')
   rownames(dat) = NULL
-  dat$resid = c(attr(results, 'residuals'))
+  dat$resid = c(attr(object, 'residuals'))
   
   stopifnot("'age' should be of size 1" = length(age) == 1)
   stopifnot("'age' does not exist" = age %in% c('all', levels(dat[,colnames(control)[6]])))
@@ -564,9 +561,9 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
         geom_density(aes(x = .data$IGE, after_stat(density), fill = 'Homeostatic'), 
                      alpha = .8)
       d = ggplot2::ggplot_build(den.ige.main)$data[[1]]
-      den.ige.main + geom_area(data = subset(d, x > mean(main$IGE) + stats::sd(main$IGE)), 
+      den.ige.main + geom_area(data = subset(d, d$x > mean(main$IGE) + stats::sd(main$IGE)), 
                                aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-        geom_area(data = subset(d, x < mean(main$IGE) - stats::sd(main$IGE)), 
+        geom_area(data = subset(d, subset = d$x < mean(main$IGE) - stats::sd(main$IGE)), 
                   aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
         geom_density(data = main, aes(x = .data$IGE, after_stat(density)), 
                      color = 'black', linewidth = 1.2, show.legend = F) +
@@ -847,12 +844,12 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
           ggpubr::ggarrange, 
           c(lapply(temp, function(df){
             aa = ggplot(data = df) + 
-              geom_density(aes(x = IGE, after_stat(density), fill = 'Homeostatic'), 
+              geom_density(aes(x = .data$IGE, after_stat(density), fill = 'Homeostatic'), 
                            alpha = .8)
             d = ggplot2::ggplot_build(aa)$data[[1]]
-            aa = aa + geom_area(data = subset(d, x > mean(df$IGE) + stats::sd(df$IGE)), 
+            aa = aa + geom_area(data = subset(d, d$x > mean(df$IGE) + stats::sd(df$IGE)), 
                                 aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-              geom_area(data = subset(d, x < mean(df$IGE) - stats::sd(df$IGE)), 
+              geom_area(data = subset(d, d$x < mean(df$IGE) - stats::sd(df$IGE)), 
                         aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
               geom_density(data = df, aes(x = .data$IGE, after_stat(density)), 
                            color = 'black', linewidth = 1.2, show.legend = F) +
@@ -1223,12 +1220,12 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
       if(category == 'class'){
         
         aa = ggplot(data = temp) + 
-          geom_density(aes(x = IGE, after_stat(density), fill = 'Homeostatic'), 
+          geom_density(aes(x = .data$IGE, after_stat(density), fill = 'Homeostatic'), 
                        alpha = .8)
         d = ggplot2::ggplot_build(aa)$data[[1]]
-        aa + geom_area(data = subset(d, x > mean(temp$IGE) + stats::sd(temp$IGE)), 
+        aa + geom_area(data = subset(d, d$x > mean(temp$IGE) + stats::sd(temp$IGE)), 
                        aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-          geom_area(data = subset(d, x < mean(temp$IGE) - stats::sd(temp$IGE)), 
+          geom_area(data = subset(d, d$x < mean(temp$IGE) - stats::sd(temp$IGE)), 
                     aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
           geom_density(data = temp, aes(x = .data$IGE, after_stat(density)), 
                        color = 'black', linewidth = 1.2, show.legend = F) +
@@ -1534,13 +1531,193 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
 }
 
 
+#' Print an object of class `comresp`
+#'
+#' Print a `comresp` object in the R console.
+#'
+#' @param object An object of class `comresp`.
+#' @param category A string indicating which object to print. Options are `"all"`
+#' for printing all objects, `"summar"` for printing the variance components and the 
+#' likelihood ratio test (if `lrt = TRUE` in [GenComp::asr]), `"blup.main"` (Default) for printing
+#' the DGE, IGE and TGV (the main effects if a multi-age model was fitted), and 
+#' `"blup.within"` for printing the DGE, IGE and TGV within ages (if a multi-age model 
+#' was fitted).
+#' @param age If `category = 'blup.within'`, a string indicating if this object should be printed per age. 
+#' Options are `"all"` for printing all ages, or the name of the specific age. Defaults
+#' to `"all"`.
+#' @param ... Currently not used.
+#' 
+#' @method print comresp
+#' 
+#' @seealso  [GenComp::resp]
+#' 
+#' @importFrom data.table data.table 
+#' 
+#' @export
+#' 
+#' @examples
+#' \donttest{
+#'  library(GenComp)
+#'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+#'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
+#'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+#'                  n.dec = 3, verbose = TRUE)
+#'  
+#'  model = asr(prep.out = comp_mat, 
+#'              fixed = mai~ age, 
+#'              random = ~ block:age, 
+#'              cor = TRUE, maxit = 20,
+#'              lrtest = FALSE)
+#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+#'  
+#'  print(results)
+#'  print(results, category = 'summar')
+#'  print(results, category = 'blup.main')
+#'  print(results, category = 'blup.within')
+#'  print(results, category = 'blup.within', age = '6y')
+#'  # Note that the ages are labelled as "3y" and "6y" in the example dataset 
+#'  }
+
+print.comresp = function(object, category = 'blup.main', age = 'all', ...){
+  
+  stopifnot("The object must be of class 'comresp'" = class(object) == 'comresp')
+  stopifnot("'category' should be of size 1" = length(category) == 1)
+  stopifnot("Please, choose between the available categories ('all', 'summar', 'blup.main' or 'blup.within')" = category %in% 
+              c('all', 'summar', 'blup.main', 'blup.within'))
+
+  control = attr(object, 'control')
+  main = object$blups$main
+  dat = attr(object, 'data')
+  rownames(dat) = NULL
+  dat$resid = c(attr(object, 'residuals'))
+  
+  stopifnot("'age' should be of size 1" = length(age) == 1)
+  stopifnot("'age' does not exist" = age %in% c('all', levels(dat[,colnames(control)[6]])))
+  
+  if(control[,6] == 0) age = 'all'
+  
+  
+  if(category == 'all' | category == 'summar'){
+
+    cat("\n","===> Likelihood ratio tests", "\n")
+    if('lrt' %in% names(object)) print(object$lrt)
+    
+    cat("\n","===> Variance components", "\n")
+    print(object$varcomp)
+  }
+  
+  
+  if(category == 'all' | category == 'blup.main'){
+    
+    cat("\n","===> DGE, IGE and TGV", "\n")
+    
+    print(data.table(object$blups$main))
+  }
+  
+  
+  if(category == 'all' | category == 'blup.within'){
+    
+    if(age == 'all'){
+      
+      cat("\n","===> DGE, IGE and TGV (all ages)", "\n")
+      
+      print(data.table(object$blups$within))
+      
+      
+    }else{
+      
+      cat("\n","===> DGE, IGE and TGV", paste0('(',age,')'), "\n")
+      
+      print(data.table(object$blups$within[which(object$blups$within[,2] == age),]))
+      
+    }
+    
+  }
+  
+}
 
 
+#' Summary of the `comresp` object
+#'
+#' A brief summary of the `comresp` object.
+#'
+#' @param object An object of class `comresp`
+#' @param ... Currently not used.
+#' 
+#' @method summary comresp
+#' 
+#' @return The function returns a list with the variance components (`varcomp`)
+#' and a dataframe informing which genotypes had the highest DGE, the highest and 
+#' the lowest IGE, and the highest TGV. This dataframe also informs the number of 
+#' aggressive, homeostatic and sensitive. If a multi-age model was fitted, the output
+#' list will have another dataframe with the same information for each age.
+#' 
+#' @seealso [GenComp::resp]
+#' 
+#' @export
+#' 
+#' @examples
+#'\donttest{
+#' library(GenComp)
+#' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
+#'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
+#'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
+#'                 n.dec = 3, verbose = TRUE)
+#'  model = asr(prep.out = comp_mat, 
+#'              fixed = mai~ age, 
+#'              random = ~ block:age, 
+#'              cor = TRUE, maxit = 20,
+#'              lrtest = FALSE)
+#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+#'  
+#'  summary(results)
+#' }
+#'
 
-
-
-
-
-
-
-
+summary.comresp = function(object, ...){
+  
+  output = list()
+  main = object$blups$main
+  
+  output$varcomp = object$varcomp
+  
+  output$blup = data.frame(
+    topDGE = as.matrix(main[order(main$DGE, decreasing = TRUE),1][1]),
+    topIGE = as.matrix(main[order(main$IGE, decreasing = TRUE),1][1]),
+    bottomIGE = as.matrix(main[order(main$DGE, decreasing = FALSE),1][1]),
+    topTGV = main[order(main$TGV, decreasing = TRUE),'clone'][1],
+    no.Aggressive = table(main$class)['Aggressive'],
+    no.Homeostatic = table(main$class)['Homeostatic'],
+    no.Sensitive = table(main$class)['Sensitive'],
+    row.names = NULL
+  )
+  
+  if('within' %in% names(object$blups)){
+    
+    within = object$blups$within
+    
+    temp = split(within, within[,2])
+    
+    temp = do.call(rbind, lapply(temp, function(df){
+      
+      data.frame(
+        age = unique(df[,2]),
+        topDGE = as.matrix(df[order(df$DGE, decreasing = TRUE),1][1]),
+        topIGE = as.matrix(df[order(df$IGE, decreasing = TRUE),1][1]),
+        bottomIGE = as.matrix(df[order(df$DGE, decreasing = FALSE),1][1]),
+        topTGV = df[order(df$TGV, decreasing = TRUE),'clone'][1],
+        no.Aggressive = table(df$class)['Aggressive'],
+        no.Homeostatic = table(df$class)['Homeostatic'],
+        no.Sensitive = table(df$class)['Sensitive'],
+        row.names = NULL
+      )
+      
+    }))
+    rownames(temp) = NULL
+    
+    output$blup.within = temp
+    
+  }
+  
+return(output)
+}

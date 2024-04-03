@@ -84,8 +84,10 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
   
   requireNamespace('asreml')
   
+  control = attr(prep.out, 'control')
+  
   prep.out <<- prep.out
-  control <<- attr(prep.out, 'control')
+  control <<- control
   
   input = prep.out$data
   

@@ -2,10 +2,10 @@
 ##' 
 ##' @description
 ##' This function provides responses extracted from the genetic-spatial 
-##' competition model fitted using [GenComp::asr()]. 
+##' competition model fitted using [gencomp::asr()]. 
 ##' 
 ##' @param prep.out A `comprep` object.
-##' @param model An `asreml` object, preferably obtained using the [GenComp::asr()] function.
+##' @param model An `asreml` object, preferably obtained using the [gencomp::asr()] function.
 ##' @param weight.tgv A logical value. If `TRUE`, the function will use the direct and
 ##' indirect genetic effects' reliability as a weight when estimating the total genotypic
 ##' value. Defaults to `FALSE`. See Details for more information on these methods.
@@ -17,10 +17,10 @@
 ##' (object$vparameters). Variance component ratios are included if param = "gamma", 
 ##' and a measure of precision (standard error) is included along with boundary 
 ##' constraints at termination and the percentage change in the final iteration.
-##' \item \code{blups} : A list containing the direct (DGE) and indirect genetic effects (IGE), their standard errors, 
+##' \item \code{blups} : A list with a dataframe containing the direct (DGE) and indirect genetic effects (IGE), their standard errors, 
 ##' the competition class of each genotype and the total genotypic value (TGV). If `age = TRUE` in 
-##' [GenComp::prep()], `blup` is a list containing the main effects and the within-ages DGE and IGE. If 
-##' other random effects were declared in the model, `blup` will contain another data frame 
+##' [gencomp::prep()], `blup` will contain a further dataframe the within-ages DGE and IGE. If 
+##' other random effects were declared in the model, `blup` will contain a last data frame 
 ##' with their BLUPs.
 ##' }
 ##'
@@ -29,7 +29,7 @@
 ##' genetic effects (IGE) of each genotype. The DGE represents the "pure" performance
 ##' of the genotype, while the IGE is the related to the average effect of the genotype on
 ##' the genotypic value of its neighbours. The higher the IGE, the more aggressive is the genotype. 
-##' Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{GenComp} 
+##' Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{gencomp} 
 ##' to define competition classes: 
 ##' 
 ##' \deqn{\begin{cases} c_i > \overline{c} + sd(c) \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) > c_i > \overline{c} - sd(c) \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \rightarrow \text{Sensitive} \end{cases}}
@@ -44,12 +44,12 @@
 ##' 
 ##' where \eqn{d_i} is the DGE of the i<sup>th</sup> genotype, and \eqn{CIF} is 
 ##' the overall competition intensity factor, previously computed in the function 
-##' [GenComp::prep()]. If `weight.tgv = TRUE`, the DGE and IGE will be 
+##' [gencomp::prep()]. If `weight.tgv = TRUE`, the DGE and IGE will be 
 ##' multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}):
 ##' 
 ##' \deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
 ##'
-##' @seealso  [GenComp::prep], [GenComp::asr]
+##' @seealso  [gencomp::prep], [gencomp::asr]
 ##' 
 ##' @references 
 ##' \insertAllCited{}
@@ -62,7 +62,7 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  library(GenComp)
+##'  library(gencomp)
 ##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
@@ -464,7 +464,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #' focus on the within-age effects effects (main + interaction effects). Defaults
 #' to `"main"`, which also serves when data has a single age.
 #' @param age If `level = 'within'`, a string indicating if plots should be built per age. 
-#' Options are `"all"` for plotting all ages, or the name of the specific age. Defaults
+#' Options are `"all"` for plotting all ages, or the name of a specific age. Defaults
 #' to `"all"`, which serves when data has a single age.
 #' @param ... Currently not used.
 #' 
@@ -493,7 +493,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 ##'   }
 #' 
 #' 
-#' @seealso  [ggplot2], [GenComp::resp]
+#' @seealso  [ggplot2], [gencomp::resp]
 #' 
 #' @importFrom ggplot2 ggplot
 #' @importFrom rlang .data
@@ -504,7 +504,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
 #' 
 #' @examples
 #' \donttest{
-#'  library(GenComp)
+#'  library(gencomp)
 #'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
@@ -1538,18 +1538,18 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
 #' @param object An object of class `comresp`.
 #' @param category A string indicating which object to print. Options are `"all"`
 #' for printing all objects, `"summar"` for printing the variance components and the 
-#' likelihood ratio test (if `lrt = TRUE` in [GenComp::asr]), `"blup.main"` (Default) for printing
+#' likelihood ratio test (if `lrt = TRUE` in [gencomp::asr]), `"blup.main"` (Default) for printing
 #' the DGE, IGE and TGV (the main effects if a multi-age model was fitted), and 
 #' `"blup.within"` for printing the DGE, IGE and TGV within ages (if a multi-age model 
 #' was fitted).
 #' @param age If `category = 'blup.within'`, a string indicating if this object should be printed per age. 
-#' Options are `"all"` for printing all ages, or the name of the specific age. Defaults
+#' Options are `"all"` for printing all ages, or the name of a specific age. Defaults
 #' to `"all"`.
 #' @param ... Currently not used.
 #' 
 #' @method print comresp
 #' 
-#' @seealso  [GenComp::resp]
+#' @seealso  [gencomp::resp]
 #' 
 #' @importFrom data.table data.table 
 #' 
@@ -1557,7 +1557,7 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
 #' 
 #' @examples
 #' \donttest{
-#'  library(GenComp)
+#'  library(gencomp)
 #'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
@@ -1652,13 +1652,13 @@ print.comresp = function(object, category = 'blup.main', age = 'all', ...){
 #' aggressive, homeostatic and sensitive. If a multi-age model was fitted, the output
 #' list will have another dataframe with the same information for each age.
 #' 
-#' @seealso [GenComp::resp]
+#' @seealso [gencomp::resp]
 #' 
 #' @export
 #' 
 #' @examples
 #'\donttest{
-#' library(GenComp)
+#' library(gencomp)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

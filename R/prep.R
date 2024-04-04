@@ -14,12 +14,12 @@
 ##' Valid if the trial has non-contiguous blocks, for e.g., blocks 1 and 2 in area 1, and
 ##' blocks 3 and 4 in area 2. `NULL` (default) otherwise.
 ##' @param age A string. The name of the column that corresponds to the age information.
-##' Necessary for fitting a multi-age model using [GenComp::asr()]. `NULL` (default)
+##' Necessary for fitting a multi-age model using [gencomp::asr()]. `NULL` (default)
 ##' otherwise.
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
-##' It has three options: `"MU"` for the method proposed by \insertCite{muir_incorporation_2005;textual}{GenComp}, 
-##' `"CC"` for the method proposed by \insertCite{cappa_direct_2008;textual}{GenComp}, and `"SK"` for the 
-##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{GenComp} (default).
+##' It has three options: `"MU"` for the method proposed by \insertCite{muir_incorporation_2005;textual}{gencomp}, 
+##' `"CC"` for the method proposed by \insertCite{cappa_direct_2008;textual}{gencomp}, and `"SK"` for the 
+##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{gencomp} (default).
 ##' See Details for more information on these methods.
 ##' @param n.dec An integer. The number of decimal digits to be displayed in \eqn{\mathbf{Z}_c}. 
 ##' Defaults to 2.
@@ -41,7 +41,7 @@
 ##' Three methods are available for estimating the competition intensity and building
 ##' the \eqn{\mathbf{Z}_c}, the genetic competition matrix: 
 ##' 
-##' \itemize{\item \insertCite{muir_incorporation_2005;textual}{GenComp}: "MU"}
+##' \itemize{\item \insertCite{muir_incorporation_2005;textual}{gencomp}: "MU"}
 ##' 
 ##' The average competition intensity is the inverse of the distance between the focal 
 ##' plant and its neighbours:
@@ -56,7 +56,7 @@
 ##' in the diagonal, row, and column directions of the \eqn{v^{th}} clone, 
 ##' respectively; and \eqn{d_R} and \eqn{d_C} are the inter-row and inter-column distances. 
 ##'
-##' \itemize{\item \insertCite{cappa_direct_2008;textual}{GenComp}: "CC"}
+##' \itemize{\item \insertCite{cappa_direct_2008;textual}{gencomp}: "CC"}
 ##' 
 ##' The average competition intensity depends on the number of neighbours in each direction
 ##' 
@@ -71,7 +71,7 @@
 ##' Note that, in this case, it is assumed that the distance between rows and 
 ##' columns are the same.
 ##' 
-##' \itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{GenComp}: "SK"}
+##' \itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{gencomp}: "SK"}
 ##' 
 ##' The average competition intensity depends on both the distance between the focal 
 ##' tree and its neighbours, and the number of neighbours in each direction:
@@ -100,7 +100,7 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  library(GenComp)
+##'  library(gencomp)
 ##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
@@ -620,7 +620,7 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
 #' 
 #' @method print comprep
 #' 
-#' @seealso [GenComp::prep]
+#' @seealso [gencomp::prep]
 #' 
 #' 
 #' @importFrom data.table data.table 
@@ -629,7 +629,7 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
 #' 
 #' @examples
 #'\donttest{
-#' library(GenComp)
+#' library(gencomp)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
@@ -790,7 +790,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
 #' All plots are built using the [ggplot2] library, so they are all 
 #' customizable using "+ ggfun()"
 #' 
-#' @seealso  [ggplot2], [GenComp::prep]
+#' @seealso  [ggplot2], [gencomp::prep]
 #' 
 #' @importFrom ggplot2 ggplot
 #' @importFrom rlang .data
@@ -799,7 +799,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
 #' 
 #' @examples
 #'\donttest{
-#' library(GenComp)
+#' library(gencomp)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
@@ -1115,13 +1115,13 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
 #' 
 #' @method summary comprep
 #' 
-#' @seealso [GenComp::prep]
+#' @seealso [gencomp::prep]
 #' 
 #' @export
 #' 
 #' @examples
 #'\donttest{
-#' library(GenComp)
+#' library(gencomp)
 #' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 #'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
 #'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

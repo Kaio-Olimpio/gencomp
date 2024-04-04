@@ -1,4 +1,4 @@
 
-# Package `Competition`
+# Package `GenComp`
 
-`Competition` is in its infancy. Coming soon……..
+`GenComp` is in its infancy. Coming soon……..

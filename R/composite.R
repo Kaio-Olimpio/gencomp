@@ -2,10 +2,10 @@
 ##'
 ##' @description
 ##' This function simulates clonal composites using outputs of a genetic-spatial
-##' competition model fitted using [GenComp::asr()]
+##' competition model fitted using [gencomp::asr()]
 ##' 
 ##' @param prep.out A `comprep` object.
-##' @param model An `asreml` object, preferably obtained using the [GenComp::asr()] function.
+##' @param model An `asreml` object, preferably obtained using the [gencomp::asr()] function.
 ##' @param resp.out A `comresp` object.
 ##' @param d.row.col A vector of size two. The first element contain the distance between
 ##' rows, and second the distance between columns of the simulated grid.
@@ -27,7 +27,7 @@
 ##' Considering the direct (DGE) and indirect genetic effects (IGE) of the selected clones, 
 ##' the function simulates grids. Clones are positioned differently in each simulation, 
 ##' which enables the modification of focal tree-neighbour dynamics. In each simulation, 
-##' the expected mean of each clone is predicted using the following equation \insertCite{ferreira_novel_2023}{GenComp}:
+##' the expected mean of each clone is predicted using the following equation \insertCite{ferreira_novel_2023}{gencomp}:
 ##' \deqn{\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{c_j}}
 ##' where \eqn{d_i} is the DGE of the i<sup>th</sup> focal tree, and 
 ##' \eqn{c_j} is the IGE of the j<sup>th</sup> neighbour. If `d.weight = TRUE`, the
@@ -37,7 +37,7 @@
 ##' @references 
 ##' \insertAllCited{}
 ##'
-##' @seealso  [GenComp::prep], [GenComp::asr], [GenComp::resp]
+##' @seealso  [gencomp::prep], [gencomp::asr], [gencomp::resp]
 ##' 
 ##' @importFrom Rdpack reprompt
 ##' @importFrom stats quantile model.matrix model.matrix.lm
@@ -46,7 +46,7 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##' library(GenComp)
+##' library(gencomp)
 ##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

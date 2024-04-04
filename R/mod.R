@@ -35,7 +35,7 @@
 ##' and \eqn{\boldsymbol{\xi}} is the vector of spatially correlated errors. 
 ##' \eqn{\mathbf{X}} is the incidence matrix of the fixed effects, \eqn{\mathbf{Z}_g} 
 ##' is the DGE incidence matrix, \eqn{\mathbf{Z}_c} is the IGE incidence matrix (built 
-##' using [GenComp::prep]), and \eqn{\mathbf{Z}_p} is the design matrix of 
+##' using [gencomp::prep]), and \eqn{\mathbf{Z}_p} is the design matrix of 
 ##' other random effects. The dimensions of \eqn{\mathbf{Z}_c} are the same 
 ##' as \eqn{\mathbf{Z}_g}. The spatially correlated errors are distributed as 
 ##' \eqn{\boldsymbol{\xi} \sim N\{\mathbf{0}, \sigma^2_\xi[\mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)]\}}, 
@@ -58,7 +58,7 @@
 ##'  The likelihood ratio test is performed using a model without the correlation between DGE and IGE.
 ##'  
 ##'
-##' @seealso  [GenComp::prep], [asreml::asreml.options], [asreml::asreml.object], [asreml::family_dist]
+##' @seealso  [gencomp::prep], [asreml::asreml.options], [asreml::asreml.object], [asreml::family_dist]
 ##'
 ##' @import asreml
 ##' @importFrom stats as.formula
@@ -67,7 +67,7 @@
 ##' 
 ##' @examples
 ##' \donttest{
-##'  library(GenComp)
+##'  library(gencomp)
 ##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
 ##'                       ind = 'tree', age = 'age', row = 'row', col = 'col', 
 ##'                       dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

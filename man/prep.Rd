@@ -31,9 +31,9 @@ respectively. \code{ind} can also distinguish the plots, if there are multiple p
 \item{dist.row, dist.col}{An integer. The distance between rows and columns in the trial.}
 
 \item{method}{A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}.
-It has three options: \code{"MU"} for the method proposed by \insertCite{muir_incorporation_2005;textual}{GenComp},
-\code{"CC"} for the method proposed by \insertCite{cappa_direct_2008;textual}{GenComp}, and \code{"SK"} for the
-method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{GenComp} (default).
+It has three options: \code{"MU"} for the method proposed by \insertCite{muir_incorporation_2005;textual}{gencomp},
+\code{"CC"} for the method proposed by \insertCite{cappa_direct_2008;textual}{gencomp}, and \code{"SK"} for the
+method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{gencomp} (default).
 See Details for more information on these methods.}
 
 \item{area}{A string. The name of the column that corresponds to the area information.
@@ -70,7 +70,7 @@ computes the competition intensity factor.
 Three methods are available for estimating the competition intensity and building
 the \eqn{\mathbf{Z}_c}, the genetic competition matrix:
 
-\itemize{\item \insertCite{muir_incorporation_2005;textual}{GenComp}: "MU"}
+\itemize{\item \insertCite{muir_incorporation_2005;textual}{gencomp}: "MU"}
 
 The average competition intensity is the inverse of the distance between the focal
 plant and its neighbours:
@@ -85,7 +85,7 @@ where \eqn{f_{D_v}}, \eqn{f_{R_v}} and \eqn{f_{C_v}} are the average competition
 in the diagonal, row, and column directions of the \eqn{v^{th}} clone,
 respectively; and \eqn{d_R} and \eqn{d_C} are the inter-row and inter-column distances.
 
-\itemize{\item \insertCite{cappa_direct_2008;textual}{GenComp}: "CC"}
+\itemize{\item \insertCite{cappa_direct_2008;textual}{gencomp}: "CC"}
 
 The average competition intensity depends on the number of neighbours in each direction
 
@@ -100,7 +100,7 @@ diagonal, row and column directions of the \eqn{v^{th}} clone, respectively.
 Note that, in this case, it is assumed that the distance between rows and
 columns are the same.
 
-\itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{GenComp}: "SK"}
+\itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{gencomp}: "SK"}
 
 The average competition intensity depends on both the distance between the focal
 tree and its neighbours, and the number of neighbours in each direction:
@@ -121,7 +121,7 @@ mean number of neighbours in each direction:
 }
 \examples{
 \donttest{
- library(GenComp)
+ library(gencomp)
  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

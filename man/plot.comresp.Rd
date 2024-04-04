@@ -17,7 +17,7 @@ focus on the within-age effects effects (main + interaction effects). Defaults
 to \code{"main"}, which also serves when data has a single age.}
 
 \item{age}{If \code{level = 'within'}, a string indicating if plots should be built per age.
-Options are \code{"all"} for plotting all ages, or the name of the specific age. Defaults
+Options are \code{"all"} for plotting all ages, or the name of a specific age. Defaults
 to \code{"all"}, which serves when data has a single age.}
 
 \item{...}{Currently not used.}
@@ -50,7 +50,7 @@ to the competition class of each genotype.
 }
 \examples{
 \donttest{
- library(GenComp)
+ library(gencomp)
  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

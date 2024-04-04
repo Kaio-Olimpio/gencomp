@@ -10,3 +10,6 @@
 ^README\.Rmd$
 ^data_sim\.R$
 ^vignettes/articles$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

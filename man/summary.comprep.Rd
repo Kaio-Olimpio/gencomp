@@ -16,7 +16,7 @@ A brief summary of the dataset used.
 }
 \examples{
 \donttest{
-library(GenComp)
+library(gencomp)
 comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

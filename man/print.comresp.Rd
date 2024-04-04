@@ -17,7 +17,7 @@ the DGE, IGE and TGV (the main effects if a multi-age model was fitted), and
 was fitted).}
 
 \item{age}{If \code{category = 'blup.within'}, a string indicating if this object should be printed per age.
-Options are \code{"all"} for printing all ages, or the name of the specific age. Defaults
+Options are \code{"all"} for printing all ages, or the name of a specific age. Defaults
 to \code{"all"}.}
 
 \item{...}{Currently not used.}
@@ -27,7 +27,7 @@ Print a \code{comresp} object in the R console.
 }
 \examples{
 \donttest{
- library(GenComp)
+ library(gencomp)
  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',

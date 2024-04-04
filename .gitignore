@@ -13,3 +13,5 @@ real_data/Bouvet et al. 2015
 bouvet.R
 data_sim.R
 inst/doc
+docs
+manuscript

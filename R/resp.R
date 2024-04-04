@@ -9,6 +9,8 @@
 ##' @param weight.tgv A logical value. If `TRUE`, the function will use the direct and
 ##' indirect genetic effects' reliability as a weight when estimating the total genotypic
 ##' value. Defaults to `FALSE`. See Details for more information on these methods.
+##' @param sd.class A numeric value defining the weight to establish competition classes. 
+##' Defaults to 1. See Details for more information.
 ##'
 ##' @return The function returns:
 ##' \itemize{
@@ -32,10 +34,11 @@
 ##' Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{gencomp} 
 ##' to define competition classes: 
 ##' 
-##' \deqn{\begin{cases} c_i > \overline{c} + sd(c) \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) > c_i > \overline{c} - sd(c) \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \rightarrow \text{Sensitive} \end{cases}}
+##' \deqn{\begin{cases} c_i > \overline{c} + sd(c) \times \alpha \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) \times \alpha > c_i > \overline{c} - sd(c) \times \alpha \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \times \alpha \rightarrow \text{Sensitive} \end{cases}}
 ##' 
 ##' where \eqn{c_i} is the IGE of the i<sup>th</sup> genotype, \eqn{\overline{c}} is 
-##' the mean IGE, and \eqn{sd(c)} is the standard deviation of the IGE. This classification is 
+##' the mean IGE, \eqn{sd(c)} is the standard deviation of the IGE and 
+##' \eqn{\alpha} is a weight (defaults to 1). This classification is 
 ##' detailed in the plot `IGE.density`.
 ##' 
 ##' The total genotypic value (TGV) is given by: 
@@ -74,10 +77,17 @@
 ##'              lrtest = FALSE)
 ##'                   
 ##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'  
+##'  results$varcomp  # Variance components
+##'  results$blups$main  # BLUPs (DGE, IGE and TGV, main effects)
+##'  results$blups$within  # BLUPs (DGE, IGE and TGV, within-age effects)
+##'  
+##'  # To export these results to the working directory, use:
+##'  # write.csv(results$blups$main, file = "working/directory/filename.csv")
 ##'  }
 
 
-resp = function(prep.out, model, weight.tgv = FALSE) {
+resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   
   requireNamespace('ggplot2')
   
@@ -272,8 +282,8 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')
     
-    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + stats::sd(IGE$IGE), 'Sensitive', 
-                       ifelse(IGE$IGE < mean(IGE$IGE) - stats::sd(IGE$IGE), 'Aggressive', 
+    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + stats::sd(IGE$IGE) * sd.class, 'Sensitive', 
+                       ifelse(IGE$IGE < mean(IGE$IGE) - stats::sd(IGE$IGE) * sd.class, 'Aggressive', 
                               'Homeostatic'))
     
     main = merge(DGE, IGE, by = names(control)[2])
@@ -333,8 +343,8 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
     IGE.int$IGE = IGE.int$IGE.x + IGE.int$IGE.y
     IGE.int = IGE.int[,c(1, 2, 7, 4, 5)]
     IGE.int$class = do.call(c, lapply(split(IGE.int, IGE.int[,2]), function(x){
-      ifelse(x$IGE > mean(x$IGE) + stats::sd(x$IGE), 'Sensitive', 
-             ifelse(x$IGE < mean(x$IGE) - stats::sd(x$IGE), 'Aggressive', 
+      ifelse(x$IGE > mean(x$IGE) + stats::sd(x$IGE) * sd.class, 'Sensitive', 
+             ifelse(x$IGE < mean(x$IGE) - stats::sd(x$IGE) * sd.class, 'Aggressive', 
                     'Homeostatic'))
     }))
     
@@ -412,8 +422,8 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
     IGE$rel.IGE = 1-(IGE$std.error^2/varcomp['IGE','component'])
     IGE = IGE[,c(3,1,2,4)]; colnames(IGE)[c(2,3)] = c('IGE', 'se.IGE')
     
-    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + stats::sd(IGE$IGE), 'Sensitive', 
-                       ifelse(IGE$IGE < mean(IGE$IGE) - stats::sd(IGE$IGE), 'Aggressive', 
+    IGE$class = ifelse(IGE$IGE > mean(IGE$IGE) + stats::sd(IGE$IGE) * sd.class, 'Sensitive', 
+                       ifelse(IGE$IGE < mean(IGE$IGE) - stats::sd(IGE$IGE) * sd.class, 'Aggressive', 
                               'Homeostatic'))
     
     main = merge(DGE, IGE, by = names(control)[2])    
@@ -441,6 +451,7 @@ resp = function(prep.out, model, weight.tgv = FALSE) {
   attr(output, 'control') = control
   attr(output, 'data') = prep.out$data
   attr(output, 'residuals') = model$residuals
+  attr(output, 'sd.class') = sd.class
   remove(prep.out, envir = .GlobalEnv)
   
   class(output) = 'comresp'
@@ -544,6 +555,7 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
   dat = attr(object, 'data')
   rownames(dat) = NULL
   dat$resid = c(attr(object, 'residuals'))
+  sd.class = attr(object, 'sd.class')
   
   stopifnot("'age' should be of size 1" = length(age) == 1)
   stopifnot("'age' does not exist" = age %in% c('all', levels(dat[,colnames(control)[6]])))
@@ -561,9 +573,9 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
         geom_density(aes(x = .data$IGE, after_stat(density), fill = 'Homeostatic'), 
                      alpha = .8)
       d = ggplot2::ggplot_build(den.ige.main)$data[[1]]
-      den.ige.main + geom_area(data = subset(d, d$x > mean(main$IGE) + stats::sd(main$IGE)), 
+      den.ige.main + geom_area(data = subset(d, d$x > mean(main$IGE) + stats::sd(main$IGE) * sd.class), 
                                aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-        geom_area(data = subset(d, subset = d$x < mean(main$IGE) - stats::sd(main$IGE)), 
+        geom_area(data = subset(d, subset = d$x < mean(main$IGE) - stats::sd(main$IGE) * sd.class), 
                   aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
         geom_density(data = main, aes(x = .data$IGE, after_stat(density)), 
                      color = 'black', linewidth = 1.2, show.legend = F) +
@@ -847,9 +859,9 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
               geom_density(aes(x = .data$IGE, after_stat(density), fill = 'Homeostatic'), 
                            alpha = .8)
             d = ggplot2::ggplot_build(aa)$data[[1]]
-            aa = aa + geom_area(data = subset(d, d$x > mean(df$IGE) + stats::sd(df$IGE)), 
+            aa = aa + geom_area(data = subset(d, d$x > mean(df$IGE) + stats::sd(df$IGE) * sd.class), 
                                 aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-              geom_area(data = subset(d, d$x < mean(df$IGE) - stats::sd(df$IGE)), 
+              geom_area(data = subset(d, d$x < mean(df$IGE) - stats::sd(df$IGE) * sd.class), 
                         aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
               geom_density(data = df, aes(x = .data$IGE, after_stat(density)), 
                            color = 'black', linewidth = 1.2, show.legend = F) +
@@ -1223,9 +1235,9 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
           geom_density(aes(x = .data$IGE, after_stat(density), fill = 'Homeostatic'), 
                        alpha = .8)
         d = ggplot2::ggplot_build(aa)$data[[1]]
-        aa + geom_area(data = subset(d, d$x > mean(temp$IGE) + stats::sd(temp$IGE)), 
+        aa + geom_area(data = subset(d, d$x > mean(temp$IGE) + stats::sd(temp$IGE) * sd.class), 
                        aes(x = .data$x, y = .data$y, fill = 'Sensitive'), alpha = 0.8) + 
-          geom_area(data = subset(d, d$x < mean(temp$IGE) - stats::sd(temp$IGE)), 
+          geom_area(data = subset(d, d$x < mean(temp$IGE) - stats::sd(temp$IGE) * sd.class), 
                     aes(x = .data$x, y = .data$y, fill = 'Aggressive'), alpha = .8) +
           geom_density(data = temp, aes(x = .data$IGE, after_stat(density)), 
                        color = 'black', linewidth = 1.2, show.legend = F) +

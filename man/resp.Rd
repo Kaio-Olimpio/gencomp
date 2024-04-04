@@ -4,7 +4,7 @@
 \alias{resp}
 \title{Extract outputs from the genetic-spatial competition model}
 \usage{
-resp(prep.out, model, weight.tgv = FALSE)
+resp(prep.out, model, weight.tgv = FALSE, sd.class = 1)
 }
 \arguments{
 \item{prep.out}{A \code{comprep} object.}
@@ -14,6 +14,9 @@ resp(prep.out, model, weight.tgv = FALSE)
 \item{weight.tgv}{A logical value. If \code{TRUE}, the function will use the direct and
 indirect genetic effects' reliability as a weight when estimating the total genotypic
 value. Defaults to \code{FALSE}. See Details for more information on these methods.}
+
+\item{sd.class}{A numeric value defining the weight to establish competition classes.
+Defaults to 1. See Details for more information.}
 }
 \value{
 The function returns:
@@ -42,10 +45,11 @@ the genotypic value of its neighbours. The higher the IGE, the more aggressive i
 Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{gencomp}
 to define competition classes:
 
-\deqn{\begin{cases} c_i > \overline{c} + sd(c) \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) > c_i > \overline{c} - sd(c) \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \rightarrow \text{Sensitive} \end{cases}}
+\deqn{\begin{cases} c_i > \overline{c} + sd(c) \times \alpha \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) \times \alpha > c_i > \overline{c} - sd(c) \times \alpha \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \times \alpha \rightarrow \text{Sensitive} \end{cases}}
 
 where \eqn{c_i} is the IGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} genotype, \eqn{\overline{c}} is
-the mean IGE, and \eqn{sd(c)} is the standard deviation of the IGE. This classification is
+the mean IGE, \eqn{sd(c)} is the standard deviation of the IGE and
+\eqn{\alpha} is a weight (defaults to 1). This classification is
 detailed in the plot \code{IGE.density}.
 
 The total genotypic value (TGV) is given by:
@@ -73,6 +77,13 @@ multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2
              lrtest = FALSE)
                   
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+ 
+ results$varcomp  # Variance components
+ results$blups$main  # BLUPs (DGE, IGE and TGV, main effects)
+ results$blups$within  # BLUPs (DGE, IGE and TGV, within-age effects)
+ 
+ # To export these results to the working directory, use:
+ # write.csv(results$blups$main, file = "working/directory/filename.csv")
  }
 }
 \references{

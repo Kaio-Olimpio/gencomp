@@ -995,7 +995,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
               facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
                          labeller = labeller(.cols = facet.label.col,
                                              .rows = facet.label.row)) + 
-              labs(x = 'Genotype', y = 'Y')
+              labs(x = names(control)[2], y = 'Y')
           })
           
           
@@ -1015,7 +1015,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
               theme(axis.text.x = element_text(angle = 90)) + 
               facet_grid(rows = vars(.data$age), 
                          labeller = labeller(.rows = facet.label.row)) + 
-              labs(x = 'Genotype', y = 'Y')
+              labs(x = names(control)[2], y = 'Y')
           })
           
         }
@@ -1038,7 +1038,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
               theme(axis.text.x = element_text(angle = 90)) + 
               facet_grid(cols = vars(.data$area), 
                          labeller = labeller(.cols = facet.label.col)) + 
-              labs(x = 'Genotype', y = 'Y', 
+              labs(x = names(control)[2], y = 'Y', 
                    title = paste(names(control)[6],'-',age))
           })
           
@@ -1056,7 +1056,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
               geom_boxplot() + 
               theme_bw() + 
               theme(axis.text.x = element_text(angle = 90)) + 
-              labs(x = 'Genotype', y = 'Y', 
+              labs(x = names(control)[2], y = 'Y', 
                    title = paste(names(control)[6],'-',age))
           })
           
@@ -1080,7 +1080,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
             theme(axis.text.x = element_text(angle = 90)) + 
             facet_grid(cols = vars(.data$area), 
                        labeller = labeller(.cols = facet.label.col)) + 
-            labs(x = 'Genotype', y = 'Y')
+            labs(x = names(control)[2], y = 'Y')
         })
         
         
@@ -1095,7 +1095,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
             geom_boxplot() + 
             theme_bw() + 
             theme(axis.text.x = element_text(angle = 90)) + 
-            labs(x = 'Genotype', y = 'Y')
+            labs(x = names(control)[2], y = 'Y')
         })
         
       }

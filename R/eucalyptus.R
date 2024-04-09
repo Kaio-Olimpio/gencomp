@@ -3,7 +3,7 @@
 ##' This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (`mai`) of 100 
 ##' clones. The trial was laid out 
 ##' in randomized complete blocks design, with 13 replicates and one tree per plot. 
-##' This trial did not have contiguous blocks: blocks 1-7 were in area 1 and blocks 8-14 were in
+##' This trial did not have contiguous blocks: the first six blocks were in area 1 and the last seven were in
 ##' area 2. The `area` column contains this information.
 ##' The dataset also has information about the position of each tree in the grid (`row` and `col`). 
 ##' In the row and column directions, the plants are spaced 

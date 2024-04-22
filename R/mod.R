@@ -53,7 +53,9 @@
 ##'  and \eqn{\sigma_{\text{gc}}} is the covariance between DGE and IGE.
 ##'  
 ##'  If the dataset has multiple ages, the model described aboved is expanded with two more effects:
-##'  the DGE \eqn{\times} age interaction, and the IGE \eqn{\times} age interaction.
+##'  the DGE \eqn{\times} age interaction, and the IGE \eqn{\times} age interaction. A further \eqn{\mathbf{AR1}}
+##'  matrix is added to the residual covariance structure in a three-way autoregressive process: 
+##'  \eqn{\mathbf{AR1}(\rho_A) \otimes \mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)}
 ##'  
 ##'  The likelihood ratio test is performed using a model without the correlation between DGE and IGE.
 ##'  
@@ -113,7 +115,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                        ),
                        group = list(g1 = 1:control[,2]),
                        residual = stats::as.formula(paste0(
-                         '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                         '~dsum(~ar1(', colnames(control)[6],'):ar1(',
                          colnames(control)[4],'):ar1(',
                          colnames(control)[5],')|',
                          colnames(control)[7],')')
@@ -132,7 +134,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                        ),
                        group = list(g1 = 1:control[,2]),
                        residual = stats::as.formula(paste0(
-                         '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                         '~dsum(~ar1(', colnames(control)[6],'):ar1(',
                          colnames(control)[4],'):ar1(',
                          colnames(control)[5],')|',
                          colnames(control)[7],')')
@@ -198,7 +200,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                          ),
                          group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1h(', colnames(control)[6],'):ar1(',
+                           '~ar1(', colnames(control)[6],'):ar1(',
                            colnames(control)[4],'):ar1(',
                            colnames(control)[5],')')
                          ),
@@ -216,7 +218,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                          ),
                          group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1h(', colnames(control)[6],'):ar1(',
+                           '~ar1(', colnames(control)[6],'):ar1(',
                            colnames(control)[4],'):ar1(',
                            colnames(control)[5],')')
                          ),
@@ -278,7 +280,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                                                  ),
                                                  group = list(g1 = 1:control[,2]),
                                                  residual = stats::as.formula(paste0(
-                                                   '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                                                   '~dsum(~ar1(', colnames(control)[6],'):ar1(',
                                                    colnames(control)[4],'):ar1(',
                                                    colnames(control)[5],')|',
                                                    colnames(control)[7],')')
@@ -295,7 +297,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                                                        ),
                                                        group = list(g1 = 1:control[,2]),
                                                        residual = stats::as.formula(paste0(
-                                                         '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                                                         '~dsum(~ar1(', colnames(control)[6],'):ar1(',
                                                          colnames(control)[4],'):ar1(',
                                                          colnames(control)[5],')|',
                                                          colnames(control)[7],')')
@@ -314,7 +316,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              ),
                              group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                               '~dsum(~ar1(', colnames(control)[6],'):ar1(',
                                colnames(control)[4],'):ar1(',
                                colnames(control)[5],')|',
                                colnames(control)[7],')')
@@ -332,7 +334,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              ),
                              group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                               '~dsum(~ar1(', colnames(control)[6],'):ar1(',
                                colnames(control)[4],'):ar1(',
                                colnames(control)[5],')|',
                                colnames(control)[7],')')
@@ -352,7 +354,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              ),
                              group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~dsum(~ar1h(', colnames(control)[6],'):ar1(',
+                               '~dsum(~ar1(', colnames(control)[6],'):ar1(',
                                colnames(control)[4],'):ar1(',
                                colnames(control)[5],')|',
                                colnames(control)[7],')')
@@ -436,7 +438,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                          ),
                          group = list(g1 = 1:control[,2]),
                          residual = stats::as.formula(paste0(
-                           '~ar1h(', colnames(control)[6],'):ar1(',
+                           '~ar1(', colnames(control)[6],'):ar1(',
                            colnames(control)[4],'):ar1(',
                            colnames(control)[5],')')
                          ),
@@ -454,7 +456,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              ),
                              group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               '~ar1(', colnames(control)[6],'):ar1(',
                                colnames(control)[4],'):ar1(',
                                colnames(control)[5],')')
                              ),
@@ -473,7 +475,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              ),
                              group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               '~ar1(', colnames(control)[6],'):ar1(',
                                colnames(control)[4],'):ar1(',
                                colnames(control)[5],')')
                              ),
@@ -490,7 +492,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              ),
                              group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               '~ar1(', colnames(control)[6],'):ar1(',
                                colnames(control)[4],'):ar1(',
                                colnames(control)[5],')')
                              ),
@@ -509,7 +511,7 @@ asr = function(prep.out, fixed, random = ~1, cor = TRUE, lrtest = FALSE,...) {
                              ),
                              group = list(g1 = 1:control[,2]),
                              residual = stats::as.formula(paste0(
-                               '~ar1h(', colnames(control)[6],'):ar1(',
+                               '~ar1(', colnames(control)[6],'):ar1(',
                                colnames(control)[4],'):ar1(',
                                colnames(control)[5],')')
                              ),

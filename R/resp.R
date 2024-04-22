@@ -14,11 +14,14 @@
 ##'
 ##' @return The function returns:
 ##' \itemize{
-##' \item \code{lrt} : a data frame with the Likelihood Ratio Test results.
+##' \item \code{lrt} : a data frame with the Likelihood Ratio Test results. Available 
+##' if `lrtest = TRUE` in [gencomp::asr()].
 ##' \item \code{varcomp} : A data frame summarizing the random parameter vector 
 ##' (object$vparameters). Variance component ratios are included if param = "gamma", 
 ##' and a measure of precision (standard error) is included along with boundary 
 ##' constraints at termination and the percentage change in the final iteration.
+##' \item \code{heritabilities} : a matrix containing the direct genetic effects heritability and 
+##' the total heritability (see details). Available if `cor = TRUE` in [gencomp::asr()] 
 ##' \item \code{blups} : A list with a dataframe containing the direct (DGE) and indirect genetic effects (IGE), their standard errors, 
 ##' the competition class of each genotype and the total genotypic value (TGV). If `age = TRUE` in 
 ##' [gencomp::prep()], `blup` will contain a further dataframe the within-ages DGE and IGE. If 
@@ -51,6 +54,18 @@
 ##' multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}):
 ##' 
 ##' \deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
+##' 
+##' When `cor = TRUE` in [gencomp::asr], `resp` estimates the DGE heritability and the total 
+##' heritability, given by, respectively:
+##' 
+##' \deqn{H^2 =  \frac{\sigma^2_g}{\sigma^2_p}}
+##' 
+##' \deqn{H^2_t = \frac{\sigma^2_t}{\sigma^2_p}}
+##' 
+##' where \eqn{\sigma^2_g} is the DGE variance, \eqn{\sigma^2_p} is the phenotypic variance, 
+##' and \eqn{\sigma^2_t} is the total heritable variance, given as \eqn{\sigma^2_t = \sigma^2_g + 2 \times CIF \times \sigma_{gc} + CIF^2 \times \sigma^2_c}, 
+##' with \eqn{CIF} being the mean competition intensity factor, \eqn{\sigma_{gc}} being the 
+##' covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance. 
 ##'
 ##' @seealso  [gencomp::prep], [gencomp::asr]
 ##' 
@@ -95,8 +110,8 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   control = attr(prep.out, 'control')
   model = model
   output = list()
-  fixed = model$fixed
-  random = model$random
+  # fixed = model$fixed
+  # random = model$random
   
   ## Messages and warnings
   stopifnot("The model did not converge!" = model$converge)
@@ -109,7 +124,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   
   ## Dealing with the names --------------------
   if(control[,6] > 0){
-    varcomp = varcomp[-grep('!R$', rownames(varcomp)),]
+    # varcomp = varcomp[-grep('!R$', rownames(varcomp)),]
     rownames(varcomp)[
       rownames(varcomp) == rownames(varcomp[which(grepl('grp', rownames(varcomp)) &
                                                     grepl('_1', rownames(varcomp)) &
@@ -132,12 +147,11 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
     
     if(control[,7] > 0){
       rownames(varcomp)[
-        rownames(varcomp) %in% rownames(varcomp[which(grepl(paste(names(control)[6], 'cor$', sep='!'), 
+        rownames(varcomp) %in% rownames(varcomp[which(grepl('!R', 
                                                             rownames(varcomp))),])
-      ] = paste(paste0("R=autocor(", 
-                       paste(names(control[7]),
-                             1:as.numeric(control[7]), sep = '_'), ')'),
-                names(control)[6], sep = '!')
+      ] = paste0("R=", 
+                 sub('!.*', '',
+                     rownames(varcomp[which(grepl('col',rownames(varcomp))),])))
       
       rownames(varcomp)[
         rownames(varcomp) %in% 
@@ -171,11 +185,9 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
       ] = paste0("R=autocor(", names(control)[6],')')
       
       rownames(varcomp)[
-        rownames(varcomp) %in% rownames(varcomp[which(grepl(paste(names(control)[6], '_', sep=''), 
+        rownames(varcomp) %in% rownames(varcomp[which(grepl("!R$", 
                                                             rownames(varcomp))),])
-      ] = paste0("R=", paste(names(control)[6],
-                             levels(prep.out$data[,names(control)[6]]), 
-                             sep = '_'))
+      ] = "R"
       
       rownames(varcomp)[
         rownames(varcomp) %in% 
@@ -248,6 +260,48 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   ] = "cor(IGE_DGE)"
   
   output$varcomp = varcomp
+  
+  
+  # Heritabilities (if cov = TRUE) -------------
+  
+  if(any(grepl("cor\\(IGE\\_DGE\\)", rownames(varcomp)))){
+    Cov = varcomp[grepl("cor\\(IGE\\_DGE\\)", rownames(varcomp)),1] * 
+      sqrt(varcomp[grepl("DGE$", rownames(varcomp)),1]) * 
+      sqrt(varcomp[grepl("IGE$", rownames(varcomp)),1])
+    s2g = varcomp[grepl("DGE$", rownames(varcomp)),1]
+    s2c = varcomp[grepl("IGE$", rownames(varcomp)),1]
+    s2t = s2g + s2c
+    if(control[6]>0){
+      s2ga = varcomp[grepl("DGE:age", rownames(varcomp)),1]
+      s2ca = varcomp[grepl("IGE:age", rownames(varcomp)),1]
+      s2t = s2t + s2ga + s2ca
+      CIF = mean(do.call(c, lapply(prep.out[seq(1, as.numeric(control[6]))], function(x) x$CIF)))
+    }else{
+      CIF = prep.out$CIF
+    }
+
+    
+    if(any(!grepl("grp\\(g1\\)",attr(model$formulae$random, 'term.labels')))){
+      random = model$formulae$random
+      s2p = varcomp[which(rownames(varcomp) %in% 
+                            attr(attr(random, "factors"), "dimnames")[[2]][!grepl("grp\\(", attr(attr(random, "factors"), "dimnames")[[2]])]),1]
+      s2t = s2t + sum(s2p)
+    }
+    
+    if(control[7]>0){
+      s2e = varcomp[grepl(paste0("R=", names(control)[7]), rownames(varcomp)),1]
+      s2t = s2t + mean(s2e)
+    }else{
+      s2e = varcomp[grepl("^R$", rownames(varcomp)),1]
+      s2t = s2t + s2e
+    }
+    
+    h2g = s2g/s2t
+    h2t = (s2g + (2 * CIF * Cov) + (CIF^2 * s2c))/s2t
+    
+    output$heritabilities = matrix(c(h2g, h2t), dimnames = list(c('H2direct', 'H2total'),
+                                                                "Heritability"))
+  }
   
   
   # BLUPs --------------------

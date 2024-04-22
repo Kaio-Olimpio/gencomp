@@ -362,7 +362,9 @@ where \eqn{\sigma_{\text{g}}^2} is the DGE variance, \eqn{\sigma_{\text{c}}^2} i
 and \eqn{\sigma_{\text{gc}}} is the covariance between DGE and IGE.
 
 If the dataset has multiple ages, the model described aboved is expanded with two more effects:
-the DGE \eqn{\times} age interaction, and the IGE \eqn{\times} age interaction.
+the DGE \eqn{\times} age interaction, and the IGE \eqn{\times} age interaction. A further \eqn{\mathbf{AR1}}
+matrix is added to the residual covariance structure in a three-way autoregressive process:
+\eqn{\mathbf{AR1}(\rho_A) \otimes \mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)}
 
 The likelihood ratio test is performed using a model without the correlation between DGE and IGE.
 }

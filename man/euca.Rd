@@ -18,7 +18,7 @@ A data frame with 4200 rows and 10 columns:
 \item{dist_col}{3 meters between columns}
 \item{row}{26 rows}
 \item{col}{44 columns}
-\item{mai}{Mean annual increment of wood volume (m\if{html}{\out{<sup>}}3\if{html}{\out{</sup>}} ha\if{html}{\out{<sup>}}-1\if{html}{\out{</sup>}} year\if{html}{\out{<sup>}}-1\if{html}{\out{</sup>}})}
+\item{MAI}{Mean annual increment of wood volume (m\if{html}{\out{<sup>}}3\if{html}{\out{</sup>}} ha\if{html}{\out{<sup>}}-1\if{html}{\out{</sup>}} year\if{html}{\out{<sup>}}-1\if{html}{\out{</sup>}})}
 }
 }
 }
@@ -26,7 +26,7 @@ A data frame with 4200 rows and 10 columns:
 euca
 }
 \description{
-This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (\code{mai}) of 100
+This dataset represents a clonal eucalyptus trial. It contains the mean annual increment (\code{MAI}) of 100
 clones. The trial was laid out
 in randomized complete blocks design, with 13 replicates and one tree per plot.
 This trial did not have contiguous blocks: the first six blocks were in area 1 and the last seven were in

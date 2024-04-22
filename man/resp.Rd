@@ -21,11 +21,14 @@ Defaults to 1. See Details for more information.}
 \value{
 The function returns:
 \itemize{
-\item \code{lrt} : a data frame with the Likelihood Ratio Test results.
+\item \code{lrt} : a data frame with the Likelihood Ratio Test results. Available
+if \code{lrtest = TRUE} in \code{\link[=asr]{asr()}}.
 \item \code{varcomp} : A data frame summarizing the random parameter vector
 (object$vparameters). Variance component ratios are included if param = "gamma",
 and a measure of precision (standard error) is included along with boundary
 constraints at termination and the percentage change in the final iteration.
+\item \code{heritabilities} : a matrix containing the direct genetic effects heritability and
+the total heritability (see details). Available if \code{cor = TRUE} in \code{\link[=asr]{asr()}}
 \item \code{blups} : A list with a dataframe containing the direct (DGE) and indirect genetic effects (IGE), their standard errors,
 the competition class of each genotype and the total genotypic value (TGV). If \code{age = TRUE} in
 \code{\link[=prep]{prep()}}, \code{blup} will contain a further dataframe the within-ages DGE and IGE. If
@@ -62,6 +65,18 @@ the overall competition intensity factor, previously computed in the function
 multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}):
 
 \deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
+
+When \code{cor = TRUE} in \link{asr}, \code{resp} estimates the DGE heritability and the total
+heritability, given by, respectively:
+
+\deqn{H^2 =  \frac{\sigma^2_g}{\sigma^2_p}}
+
+\deqn{H^2_t = \frac{\sigma^2_t}{\sigma^2_p}}
+
+where \eqn{\sigma^2_g} is the DGE variance, \eqn{\sigma^2_p} is the phenotypic variance,
+and \eqn{\sigma^2_t} is the total heritable variance, given as \eqn{\sigma^2_t = \sigma^2_g + 2 \times CIF \times \sigma_{gc} + CIF^2 \times \sigma^2_c},
+with \eqn{CIF} being the mean competition intensity factor, \eqn{\sigma_{gc}} being the
+covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.##'
 }
 \examples{
 \donttest{

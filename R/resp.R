@@ -73,7 +73,7 @@
 ##' Bijma, P., Muir, W.M., Van Arendonk, J.A.M., 2007. Multilevel Selection 1: 
 ##' Quantitative genetics of inheritance and response to selection. Genetics 175, 
 ##' 277–288. \doi{10.1534/genetics.106.062711}
-
+##' 
 ##' Ferreira, F.M., Chaves, S.F., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
 ##' Sousa, J.E., Resende, M.D., Leite, F.P., Gezan, S.A., Viana, J.M., 
 ##' Fernandes, S.B., Dias, K.O., 2023. A novel strategy to predict clonal composites 

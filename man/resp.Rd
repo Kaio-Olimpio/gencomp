@@ -45,8 +45,7 @@ The genetic-spatial competition model provides the direct (DGE) and indirect
 genetic effects (IGE) of each genotype. The DGE represents the "pure" performance
 of the genotype, while the IGE is the related to the average effect of the genotype on
 the genotypic value of its neighbours. The higher the IGE, the more aggressive is the genotype.
-Here, we use the classification proposed by \insertCite{ferreira_novel_2023;textual}{gencomp}
-to define competition classes:
+Here, we use the classification proposed by Ferreira et al. (2023) to define competition classes:
 
 \deqn{\begin{cases} c_i > \overline{c} + sd(c) \times \alpha \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) \times \alpha > c_i > \overline{c} - sd(c) \times \alpha \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \times \alpha \rightarrow \text{Sensitive} \end{cases}}
 
@@ -62,12 +61,12 @@ The total genotypic value (TGV) is given by:
 where \eqn{d_i} is the DGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} genotype, and \eqn{CIF} is
 the overall competition intensity factor, previously computed in the function
 \code{\link[=prep]{prep()}}. If \code{weight.tgv = TRUE}, the DGE and IGE will be
-multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}):
+multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}) (Ferreira et al., 2024):
 
 \deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
 
 When \code{cor = TRUE} in \link{asr}, \code{resp} estimates the DGE heritability and the total
-heritability, given by, respectively:
+heritability, given by, respectively (Bijma et al., 2007):
 
 \deqn{H^2 =  \frac{\sigma^2_g}{\sigma^2_p}}
 
@@ -76,7 +75,7 @@ heritability, given by, respectively:
 where \eqn{\sigma^2_g} is the DGE variance, \eqn{\sigma^2_p} is the phenotypic variance,
 and \eqn{\sigma^2_t} is the total heritable variance, given as \eqn{\sigma^2_t = \sigma^2_g + 2 \times CIF \times \sigma_{gc} + CIF^2 \times \sigma^2_c},
 with \eqn{CIF} being the mean competition intensity factor, \eqn{\sigma_{gc}} being the
-covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.##'
+covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.
 }
 \examples{
 \donttest{
@@ -85,6 +84,7 @@ covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.##'
                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
                  n.dec = 3, verbose = TRUE)
+                 
  model = asr(prep.out = comp_mat, 
              fixed = mai~ age, 
              random = ~ block:age, 
@@ -102,7 +102,19 @@ covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.##'
  }
 }
 \references{
-\insertAllCited{}
+Bijma, P., Muir, W.M., Van Arendonk, J.A.M., 2007. Multilevel Selection 1:
+Quantitative genetics of inheritance and response to selection. Genetics 175,
+277–288. \doi{10.1534/genetics.106.062711}
+Ferreira, F.M., Chaves, S.F., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
+Sousa, J.E., Resende, M.D., Leite, F.P., Gezan, S.A., Viana, J.M.,
+Fernandes, S.B., Dias, K.O., 2023. A novel strategy to predict clonal composites
+by jointly modeling spatial variation and genetic competition. Forest Ecology
+and Management 548, 121393. \doi{https://doi.org/10.1016/j.foreco.2023.121393}
+
+Ferreira, F.M., Chaves, S.F.S., Santos, O.P., Nunes, A.C.P., Tambarussi, E.V.,
+Pereira, G.S., Santos, G.A., Bhering, L.L., Dias, K.O.G., 2024. Competition
+effects can mislead selection in eucalypt breeding trials. Forest Ecology and
+Management 561, 121892. \doi{10.1016/j.foreco.2024.121892}
 }
 \seealso{
 \link{prep}, \link{asr}

@@ -27,9 +27,7 @@ Imports:
     ggplot2,
     ggpubr,
     rlang,
-    Rdpack,
     data.table
-RdMacros: Rdpack
 Suggests: 
     knitr,
     rmarkdown

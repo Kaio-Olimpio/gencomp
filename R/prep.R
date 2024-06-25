@@ -17,9 +17,9 @@
 ##' Necessary for fitting a multi-age model using [gencomp::asr()]. `NULL` (default)
 ##' otherwise.
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
-##' It has three options: `"MU"` for the method proposed by \insertCite{muir_incorporation_2005;textual}{gencomp}, 
-##' `"CC"` for the method proposed by \insertCite{cappa_direct_2008;textual}{gencomp}, and `"SK"` for the 
-##' method proposed by \insertCite{costa_e_silva_accounting_2013;textual}{gencomp} (default).
+##' It has three options: `"MU"` for the method proposed by Muir (2005), 
+##' `"CC"` for the method proposed by Cappa and Cantet (2008), and `"SK"` for the 
+##' method proposed by Costa e Silva and Kerr (2013) (default).
 ##' See Details for more information on these methods.
 ##' @param n.dec An integer. The number of decimal digits to be displayed in \eqn{\mathbf{Z}_c}. 
 ##' Defaults to 2.
@@ -41,7 +41,7 @@
 ##' Three methods are available for estimating the competition intensity and building
 ##' the \eqn{\mathbf{Z}_c}, the genetic competition matrix: 
 ##' 
-##' \itemize{\item \insertCite{muir_incorporation_2005;textual}{gencomp}: "MU"}
+##' \itemize{\item Muir (2005): "MU"}
 ##' 
 ##' The average competition intensity is the inverse of the distance between the focal 
 ##' plant and its neighbours:
@@ -56,7 +56,7 @@
 ##' in the diagonal, row, and column directions of the \eqn{v^{th}} clone, 
 ##' respectively; and \eqn{d_R} and \eqn{d_C} are the inter-row and inter-column distances. 
 ##'
-##' \itemize{\item \insertCite{cappa_direct_2008;textual}{gencomp}: "CC"}
+##' \itemize{\item Cappa and Cantet (2008): "CC"}
 ##' 
 ##' The average competition intensity depends on the number of neighbours in each direction
 ##' 
@@ -71,7 +71,7 @@
 ##' Note that, in this case, it is assumed that the distance between rows and 
 ##' columns are the same.
 ##' 
-##' \itemize{\item \insertCite{costa_e_silva_accounting_2013;textual}{gencomp}: "SK"}
+##' \itemize{\item Costa e Silva and Kerr (2013): "SK"}
 ##' 
 ##' The average competition intensity depends on both the distance between the focal 
 ##' tree and its neighbours, and the number of neighbours in each direction:
@@ -91,9 +91,15 @@
 ##' \deqn{CIF = \overline{n_D} \overline{f_D} + \overline{n_R} \overline{f_R} + \overline{n_C} \overline{f_C}}
 ##' 
 ##' @references 
-##' \insertAllCited{}
+##' Cappa, E.P., Cantet, R.J.C., 2008. Direct and competition additive effects in
+##' tree breeding: Bayesian estimation from an individual tree mixed model. 
+##' Silvae Genetica 57, 45–56. \doi{10.1515/sg-2008-0008}
 ##' 
-##' @importFrom Rdpack reprompt
+##' Costa e Silva, J., Kerr, R.J., 2013. Accounting for competition in genetic analysis, 
+##' with particular emphasis on forest genetic trials. Tree Genetics & Genomes 9, 1–17. \doi{10.1007/s11295-012-0521-8}
+##' 
+##' Muir, W.M., 2005. Incorporation of competitive effects in forest tree or animal 
+##' breeding programs. Genetics 170, 1247–1259. \doi{10.1534/genetics.104.035956}
 ##' 
 ##' @export
 ##' 

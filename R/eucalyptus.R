@@ -10,7 +10,6 @@
 ##' 2 m (dist_row) and 3 m (dist_col) apart, respectively. Data were collected at 3 and 6 years after 
 ##' the trial implementation (information contained in the column `age`).
 ##' 
-##' 
 ##' @docType data
 ##' 
 ##' @keywords dataset

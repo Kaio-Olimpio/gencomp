@@ -80,18 +80,17 @@ covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
-                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-                 n.dec = 3, verbose = TRUE)
-                 
+ comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
+ 
  model = asr(prep.out = comp_mat, 
-             fixed = mai~ age, 
+             fixed = MAI~ age, 
              random = ~ block:age, 
-             cor = TRUE, maxit = 20,
+             cor = TRUE, maxit = 50,
              lrtest = FALSE)
-                  
- results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+             
+ results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  
  results$varcomp  # Variance components
  results$blups$main  # BLUPs (DGE, IGE and TGV, main effects)
@@ -105,6 +104,7 @@ covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.
 Bijma, P., Muir, W.M., Van Arendonk, J.A.M., 2007. Multilevel Selection 1:
 Quantitative genetics of inheritance and response to selection. Genetics 175,
 277–288. \doi{10.1534/genetics.106.062711}
+
 Ferreira, F.M., Chaves, S.F., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
 Sousa, J.E., Resende, M.D., Leite, F.P., Gezan, S.A., Viana, J.M.,
 Fernandes, S.B., Dias, K.O., 2023. A novel strategy to predict clonal composites

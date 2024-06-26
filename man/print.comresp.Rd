@@ -28,17 +28,17 @@ Print a \code{comresp} object in the R console.
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
-                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-                 n.dec = 3, verbose = TRUE)
+ comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
  
  model = asr(prep.out = comp_mat, 
-             fixed = mai~ age, 
+             fixed = MAI~ age, 
              random = ~ block:age, 
-             cor = TRUE, maxit = 20,
+             cor = TRUE, maxit = 50,
              lrtest = FALSE)
- results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+             
+ results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  
  print(results)
  print(results, category = 'summar')

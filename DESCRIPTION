@@ -5,7 +5,7 @@ Authors@R:
     c(person("Saulo F. S.", "Chaves", role = c("aut", "cre"),
                      email = "saulo.chaves@ufv.br",
                      comment = c(ORCID = "0000-0002-0694-1798")),
-              person("Kaio O. G.", "Dias", role = c("aut", "cph"),
+              person("Kaio Olimpio G.", "Dias", role = c("aut", "cph"),
                      email = "kaio.o.dias@ufv.br",
                      comment = c(ORCID = "0000-0002-9171-1021")),
               person("Filipe M.", "Ferreira", role = "aut",
@@ -13,7 +13,10 @@ Authors@R:
                      comment = c(ORCID = "0000-0002-7847-8333")),
               person("Getúlio C.", "Ferreira", role = "aut",
                      email = "getuliocaifer@gmail.com",
-                     comment = c(ORCID = "0000-0003-4982-8274")))
+                     comment = c(ORCID = "0000-0003-4982-8274")),
+              person("Salvador A.", "Gezan", role = "aut",
+                     email = "forestats.sg@gmail.com",
+                     comment = c(ORCID = "0000-0002-5025-2658")))
 Description: Fit spatial-genetic competition models for assessing the competition capacity of genotypes. Contained are functions used to build a competition matrix based on different criteria, fit the spatial-genetic competition model, and extract and visualize the results.
 URL: https://github.com/Kaio-Olimpio/gencomp
 BugReports: https://github.com/Kaio-Olimpio/gencomp/issues

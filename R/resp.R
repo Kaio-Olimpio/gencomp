@@ -94,18 +94,17 @@
 ##' @examples
 ##' \donttest{
 ##'  library(gencomp)
-##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
-##'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-##'                  n.dec = 3, verbose = TRUE)
-##'                  
+##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
+##'  
 ##'  model = asr(prep.out = comp_mat, 
-##'              fixed = mai~ age, 
+##'              fixed = MAI~ age, 
 ##'              random = ~ block:age, 
-##'              cor = TRUE, maxit = 20,
+##'              cor = TRUE, maxit = 50,
 ##'              lrtest = FALSE)
-##'                   
-##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'              
+#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
 ##'  
 ##'  results$varcomp  # Variance components
 ##'  results$blups$main  # BLUPs (DGE, IGE and TGV, main effects)
@@ -584,16 +583,17 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
 #' @examples
 #' \donttest{
 #'  library(gencomp)
-#'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-#'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
-#'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-#'                  n.dec = 3, verbose = TRUE)
-#'  model = asr(prep.out = comp_mat, 
-#'              fixed = mai~ age, 
-#'              random = ~ block:age, 
-#'              cor = TRUE, maxit = 20,
-#'              lrtest = FALSE)
-#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
+##'  
+##'  model = asr(prep.out = comp_mat, 
+##'              fixed = MAI~ age, 
+##'              random = ~ block:age, 
+##'              cor = TRUE, maxit = 50,
+##'              lrtest = FALSE)
+##'              
+#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
 #'  
 #'  plot(results, category = 'DGEvIGE', level = 'within', age = '6y')
 #'  plot(results, category = 'grid.res', level = 'main', age = '3y')
@@ -1638,17 +1638,17 @@ plot.comresp = function(object, category = 'DGE.IGE', level = 'main', age = 'all
 #' @examples
 #' \donttest{
 #'  library(gencomp)
-#'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-#'                  ind = 'tree', age = 'age', row = 'row', col = 'col', 
-#'                  dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-#'                  n.dec = 3, verbose = TRUE)
-#'  
-#'  model = asr(prep.out = comp_mat, 
-#'              fixed = mai~ age, 
-#'              random = ~ block:age, 
-#'              cor = TRUE, maxit = 20,
-#'              lrtest = FALSE)
-#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
+##'  
+##'  model = asr(prep.out = comp_mat, 
+##'              fixed = MAI~ age, 
+##'              random = ~ block:age, 
+##'              cor = TRUE, maxit = 50,
+##'              lrtest = FALSE)
+##'              
+#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
 #'  
 #'  print(results)
 #'  print(results, category = 'summar')
@@ -1739,16 +1739,17 @@ print.comresp = function(object, category = 'blup.main', age = 'all', ...){
 #' @examples
 #'\donttest{
 #' library(gencomp)
-#' comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-#'                 ind = 'tree', age = 'age', row = 'row', col = 'col', 
-#'                 dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-#'                 n.dec = 3, verbose = TRUE)
-#'  model = asr(prep.out = comp_mat, 
-#'              fixed = mai~ age, 
-#'              random = ~ block:age, 
-#'              cor = TRUE, maxit = 20,
-#'              lrtest = FALSE)
-#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
+##'  
+##'  model = asr(prep.out = comp_mat, 
+##'              fixed = MAI~ age, 
+##'              random = ~ block:age, 
+##'              cor = TRUE, maxit = 50,
+##'              lrtest = FALSE)
+##'              
+#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
 #'  
 #'  summary(results)
 #' }

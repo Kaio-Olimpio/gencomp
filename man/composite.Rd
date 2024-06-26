@@ -51,28 +51,27 @@ competition model fitted using \code{\link[=asr]{asr()}}
 Considering the direct (DGE) and indirect genetic effects (IGE) of the selected clones,
 the function simulates grids. Clones are positioned differently in each simulation,
 which enables the modification of focal tree-neighbour dynamics. In each simulation,
-the expected mean of each clone is predicted using the following equation \insertCite{ferreira_novel_2023}{gencomp}:
-\deqn{\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{c_j}}
+the expected mean of each clone is predicted using the following equation (Ferreira et al., 2023):
+\deqn{\hat{y}_{ij} = \hat{\mu} + \hat{d}_i + \sum^n_{i \neq j}{\hat{c}_j}}
 where \eqn{d_i} is the DGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} focal tree, and
 \eqn{c_j} is the IGE of the j\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} neighbour. If \code{d.weight = TRUE}, the
 IGE is divided by the distance between the focal tree and its neighbours:
-\deqn{\hat{y}_{ij} = \mu + d_i + \sum^n_{i \neq j}{\frac{1}{dist_{ij}} \times c_j}}
+\deqn{\hat{y}_{ij} = \hat{\mu} + \hat{d}_i + \sum^n_{i \neq j}{\frac{1}{dist_{ij}} \times \hat{c}_j}}
 }
 \examples{
 \donttest{
 library(gencomp)
- comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-                      ind = 'tree', age = 'age', row = 'row', col = 'col', 
-                      dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-                      n.dec = 3, verbose = TRUE)
+ comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
  
  model = asr(prep.out = comp_mat, 
-                  fixed = mai~ age, 
-                  random = ~ block:age, 
-                  cor = TRUE, maxit = 50,
-                  lrtest = TRUE)
-                  
- results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE)
+             fixed = MAI~ age, 
+             random = ~ block:age, 
+             cor = TRUE, maxit = 50,
+             lrtest = FALSE)
+             
+ results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  
  cc = composite(prep.out = comp_mat, model = model, resp.out = results,
                 d.row.col = c(3,3), d.weight = TRUE, nsim = 10, verbose = TRUE, 
@@ -81,7 +80,11 @@ library(gencomp)
  }
 }
 \references{
-\insertAllCited{}
+Ferreira, F.M., Chaves, S.F., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
+Sousa, J.E., Resende, M.D., Leite, F.P., Gezan, S.A., Viana, J.M.,
+Fernandes, S.B., Dias, K.O., 2023. A novel strategy to predict clonal composites
+by jointly modeling spatial variation and genetic competition. Forest Ecology
+and Management 548, 121393. \doi{https://doi.org/10.1016/j.foreco.2023.121393}
 }
 \seealso{
 \link{prep}, \link{asr}, \link{resp}

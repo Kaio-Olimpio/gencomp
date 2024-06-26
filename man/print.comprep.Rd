@@ -26,10 +26,9 @@ Print a \code{comprep} object in the R console.
 \examples{
 \donttest{
 library(gencomp)
-comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area', 
-                ind = 'tree', age = 'age', row = 'row', col = 'col', 
-                dist.col = 3, dist.row = 2, trait = 'mai', method = 'SK',
-                n.dec = 3, verbose = TRUE)
+ comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
+                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
+                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
                 
 print(comp_mat, category = 'data', age = '6y')
 print(comp_mat, category = 'matrix', age = 'all')

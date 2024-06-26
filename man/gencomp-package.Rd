@@ -21,9 +21,10 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Kaio O. G. Dias \email{kaio.o.dias@ufv.br} (\href{https://orcid.org/0000-0002-9171-1021}{ORCID}) [copyright holder]
+  \item Kaio Olimpio G. Dias \email{kaio.o.dias@ufv.br} (\href{https://orcid.org/0000-0002-9171-1021}{ORCID}) [copyright holder]
   \item Filipe M. Ferreira \email{ferreira.fmanoel@gmail.com} (\href{https://orcid.org/0000-0002-7847-8333}{ORCID})
   \item Getúlio C. Ferreira \email{getuliocaifer@gmail.com} (\href{https://orcid.org/0000-0003-4982-8274}{ORCID})
+  \item Salvador A. Gezan \email{forestats.sg@gmail.com} (\href{https://orcid.org/0000-0002-5025-2658}{ORCID})
 }
 
 }

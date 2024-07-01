@@ -1,8 +1,11 @@
-input = prep.out$data
-control = attr(prep.out, 'control')
+input = comp_mat$data
+control = attr(comp_mat, 'control')
 
 input = input[order(input[,names(control)[7]], input[,names(control)[6]],
                     input[,names(control)[4]], input[,names(control)[5]]),]
+
+fixed = MAI~ age
+random = ~ block:age
 
 scm1 = asreml::asreml(fixed = fixed,
                      random = stats::as.formula(

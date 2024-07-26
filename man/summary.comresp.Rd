@@ -13,32 +13,13 @@
 }
 \value{
 The function returns a list with the variance components (\code{varcomp})
-and a dataframe informing which genotypes had the highest DGE, the highest and
-the lowest IGE, and the highest TGV. This dataframe also informs the number of
-aggressive, homeostatic and sensitive. If a multi-age model was fitted, the output
-list will have another dataframe with the same information for each age.
+and a data frame informing which genotypes had the highest DGE, the highest and
+the lowest IGE, and the highest TGV. This data frame also informs the number of
+aggressive, homoeostatic and sensitive. If a multi-age model was fitted, the output
+list will have another data frame with the same information for each age.
 }
 \description{
 A brief summary of the \code{comresp} object.
-}
-\examples{
-\donttest{
-library(gencomp)
- comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
- 
- model = asr(prep.out = comp_mat, 
-             fixed = MAI~ age, 
-             random = ~ block:age, 
-             cor = TRUE, maxit = 50,
-             lrtest = FALSE)
-             
- results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
- 
- summary(results)
-}
-
 }
 \seealso{
 \link{resp}

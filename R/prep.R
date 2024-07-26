@@ -1,30 +1,33 @@
-##' @title Preparations to fit a genetic-spatial competition model
+# Forest section ----------------------------------------------------------
+
+##' @title Preparations to fit a genetic-spatial competition models for forestry
 ##' 
 ##' @description
-##' This function builds the genetic competition matrix (\eqn{\mathbf{Z}_c}), prepare the 
-##' dataset to be used to fit the model and provide summaries of the trial. It also
-##' computes the competition intensity factor.
+##' This function builds the genetic competition matrix (\eqn{\mathbf{Z}_c}), and 
+##' prepares the dataset to be used for model fitting. It also computes the 
+##' competition intensity factor.
 ##' 
 ##' @param data A data frame containing the phenotypic data.
-##' @param gen,repl,row,col,ind,trait A string. The name of the columns that correspond
-##' to the genotype, replicate, row, column, individual and trait information,
+##' @param gen,row,col,ind,trait A string. The name of the columns that correspond
+##' to the genotype, row, column, individual (one plant per plot) and trait information,
 ##' respectively. `ind` can also distinguish the plots, if there are multiple plants per plot.
 ##' @param dist.row,dist.col An integer. The distance between rows and columns in the trial.
 ##' @param area A string. The name of the column that corresponds to the area information. 
 ##' Valid if the trial has non-contiguous blocks, for e.g., blocks 1 and 2 in area 1, and
 ##' blocks 3 and 4 in area 2. `NULL` (default) otherwise.
 ##' @param age A string. The name of the column that corresponds to the age information.
-##' Necessary for fitting a multi-age model using [gencomp::asr()]. `NULL` (default)
-##' otherwise.
+##' Necessary for fitting a multi-age model. `NULL` (default) otherwise.
 ##' @param method A string. The method for computing the competition intensity in \eqn{\mathbf{Z}_c}. 
 ##' It has three options: `"MU"` for the method proposed by Muir (2005), 
 ##' `"CC"` for the method proposed by Cappa and Cantet (2008), and `"SK"` for the 
 ##' method proposed by Costa e Silva and Kerr (2013) (default).
-##' See Details for more information on these methods.
+##' See Details for more information.
 ##' @param n.dec An integer. The number of decimal digits to be displayed in \eqn{\mathbf{Z}_c}. 
 ##' Defaults to 2.
 ##' @param verbose A logical value. If `TRUE`, a progress bar will be displayed in the 
 ##' console. Defaults to `FALSE`.
+##' @param effs a string vector with column names of other effects that will be 
+##' considered in model fitting step. Defaults to `NULL` (if there is no further effect).   
 ##' 
 ##' 
 ##' @return The function returns:
@@ -35,7 +38,6 @@
 ##' \item \code{neigh_check} : A data frame containing the phenotypic records of each
 ##' focal plant and its neighbours.
 ##' }
-##' If `age` is not `NULL`, the function provides the outputs described for each age.
 ##' 
 ##' @details
 ##' Three methods are available for estimating the competition intensity and building
@@ -107,15 +109,16 @@
 ##' @examples
 ##' \donttest{
 ##'  library(gencomp)
-##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
+##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+##'                     ind = 'tree', age = 'age', row = 'row', col = 'col',
+##'                     dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
+##'                     n.dec = 3, verbose = FALSE, effs = c("block"))
 ##' }
 
 
-prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col, 
-                     method = "SK", area = NULL, age = NULL, n.dec = 2, 
-                     verbose = FALSE){
+prepfor <- function(data, gen, row, col, ind, trait, effs = NULL, dist.row, dist.col, 
+                    method = "SK", area = NULL, age = NULL, n.dec = 2, 
+                    verbose = FALSE){
   
   # Messages and warnings
   stopifnot("The number of individuals must be the product of no. rows * no. columns" = length(unique(data[,ind])) == 
@@ -128,7 +131,7 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
   
   x = data.frame(
     trat = as.factor(data[, gen]),
-    repl = as.factor(data[, repl]),
+    # repl = as.factor(data[, repl]),
     ind = as.factor(data[, ind]), 
     row = as.numeric(data[, row]),
     col = as.numeric(data[, col]),
@@ -138,12 +141,12 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
   control = data.frame(
     trait = length(x$trait), 
     ngen = nlevels(x$trat),
-    nrepl = nlevels(x$repl),
+    # nrepl = nlevels(x$repl),
     nrow = length(unique(x$row)),
     ncol = length(unique(x$col))
   )
   
-  colnames(control) = c(trait, gen, repl, row, col)
+  colnames(control) = c(trait, gen, row, col)
   
   if(is.null(age)){
     control$age = 0
@@ -188,13 +191,11 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
       
       ## Diagonal --------------
       gen.diag = x$trat[x$row %in% (x$row[i] + c(-1, +1)) & x$col %in% (x$col[i] + c(-1, +1))]
-      repl.diag = x$repl[x$row %in% (x$row[i] + c(-1, +1)) & x$col %in% (x$col[i] + c(-1, +1))]
       ind.diag = x$ind[x$row %in% (x$row[i] + c(-1, +1)) & x$col %in% (x$col[i] + c(-1, +1))]
       area.diag = x$area[x$row %in% (x$row[i] + c(-1, +1)) & x$col %in% (x$col[i] + c(-1, +1))]
       trt_d = NULL
       for (k in 1:length(gen.diag)) {
         if (is.na(x[which(x$trat %in% gen.diag[k] & 
-                          x$repl %in% repl.diag[k] & 
                           x$ind %in% ind.diag[k]), "trait"]) | 
             x[i,'area'] != area.diag[k]){
           n_dd = n_dd + 1
@@ -202,20 +203,17 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
         }else{
           n_d = n_d + 1
           trt_d[k] = x[which(x$trat %in% gen.diag[k] & 
-                               x$repl %in% repl.diag[k] & 
                                x$ind %in% ind.diag[k]), "trait"]
         }
       }
       
       ## Column ---------------
       gen.col = x$trat[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
-      repl.col = x$repl[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
       ind.col = x$ind[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
       area.col = x$area[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
       trt_c = NULL
       for (k in 1:length(gen.col)) {
         if (is.na(x[which(x$trat %in% gen.col[k] & 
-                          x$repl %in% repl.col[k] & 
                           x$ind %in% ind.col[k]), "trait"]) | 
             x[i,'area'] != area.col[k]){
           n_cd = n_cd + 1
@@ -223,20 +221,17 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
         }else{
           n_c = n_c + 1
           trt_c[k] = x[which(x$trat %in% gen.col[k] & 
-                               x$repl %in% repl.col[k] & 
                                x$ind %in% ind.col[k]), "trait"]
         }
       }
       
       ## Row ------------------
       gen.row = x$trat[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
-      repl.row = x$repl[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
       ind.row = x$ind[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
       area.row = x$area[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
       trt_r = NULL
       for (k in 1:length(gen.row)) {
         if (is.na(x[which(x$trat %in% gen.row[k] & 
-                          x$repl %in% repl.row[k] & 
                           x$ind %in% ind.row[k]), "trait"]) | 
             x[i,'area'] != area.row[k]){
           n_rd = n_rd + 1
@@ -244,7 +239,6 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
         }else{
           n_r = n_r + 1
           trt_r[k] = x[which(x$trat %in% gen.row[k] & 
-                               x$repl %in% repl.row[k] & 
                                x$ind %in% ind.row[k]), "trait"]
         }
       }
@@ -366,8 +360,11 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
       input = input[order(input[, area], input[, row], input[, col]),]
     }
     
+    if(!is.null(effs) & length(effs) > 1){
+      input[,effs] = lapply(input[,effs], factor)
+    }else if(!is.null(effs)) input[,effs] = as.factor(input[,effs])
+    
     if(!is.factor(input[, gen])) input[, gen]= as.factor(input[, gen])
-    if(!is.factor(input[, repl])) input[, repl] = as.factor(input[, repl])
     if(!is.factor(input[, row])) input[, row] = as.factor(input[, row])
     if(!is.factor(input[, col])) input[, col] = as.factor(input[, col])
     if(!is.null(area)){
@@ -377,7 +374,7 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     Z = list(Z = z, CIF = cif, neigh_check = w, data = input)
     
     attr(Z, 'control') = control    
-    class(Z) = "comprep"
+    class(Z) = "comprepfor"
 
     return(Z)
     
@@ -411,13 +408,11 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
         
         ## Diagonal --------------
         gen.diag = q$trat[q$row %in% (q$row[i] + c(-1, +1)) & q$col %in% (q$col[i] + c(-1, +1))]
-        repl.diag = q$repl[q$row %in% (q$row[i] + c(-1, +1)) & q$col %in% (q$col[i] + c(-1, +1))]
         ind.diag = q$ind[q$row %in% (q$row[i] + c(-1, +1)) & q$col %in% (q$col[i] + c(-1, +1))]
         area.diag = q$area[q$row %in% (q$row[i] + c(-1, +1)) & q$col %in% (q$col[i] + c(-1, +1))]
         trt_d = NULL
         for (k in 1:length(gen.diag)) {
           if (is.na(q[which(q$trat %in% gen.diag[k] & 
-                            q$repl %in% repl.diag[k] & 
                             q$ind %in% ind.diag[k]), "trait"]) | 
               q[i,'area'] != area.diag[k]){
             n_dd = n_dd + 1
@@ -425,20 +420,17 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
           }else{
             n_d = n_d + 1
             trt_d[k] = q[which(q$trat %in% gen.diag[k] & 
-                                 q$repl %in% repl.diag[k] & 
                                  q$ind %in% ind.diag[k]), "trait"]
           }
         }
         
         ## Column ---------------
         gen.col = q$trat[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
-        repl.col = q$repl[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
         ind.col = q$ind[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
         area.col = q$area[q$col == q$col[i] & q$row %in% (q$row[i] + c(-1,+1))]
         trt_c = NULL
         for (k in 1:length(gen.col)) {
           if (is.na(q[which(q$trat %in% gen.col[k] & 
-                            q$repl %in% repl.col[k] & 
                             q$ind %in% ind.col[k]), "trait"]) | 
               q[i,'area'] != area.col[k]){
             n_cd = n_cd + 1
@@ -446,20 +438,17 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
           }else{
             n_c = n_c + 1
             trt_c[k] = q[which(q$trat %in% gen.col[k] & 
-                                 q$repl %in% repl.col[k] & 
                                  q$ind %in% ind.col[k]), "trait"]
           }
         }
         
         ## Row ------------------
         gen.row = q$trat[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
-        repl.row = q$repl[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
         ind.row = q$ind[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
         area.row = q$area[q$row == q$row[i] & q$col %in% (q$col[i] + c(-1, +1))]
         trt_r = NULL
         for (k in 1:length(gen.row)) {
           if (is.na(q[which(q$trat %in% gen.row[k] & 
-                            q$repl %in% repl.row[k] & 
                             q$ind %in% ind.row[k]), "trait"]) | 
               q[i,'area'] != area.row[k]){
             n_rd = n_rd + 1
@@ -467,7 +456,6 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
           }else{
             n_r = n_r + 1
             trt_r[k] = q[which(q$trat %in% gen.row[k] & 
-                                 q$repl %in% repl.row[k] & 
                                  q$ind %in% ind.row[k]), "trait"]
           }
         }
@@ -584,9 +572,12 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
       
       input = data.frame(cbind(z, dat))
       
+      if(!is.null(effs) & length(effs) > 1){
+        input[,effs] = lapply(input[,effs], factor)
+      }else if(!is.null(effs)) input[,effs] = as.factor(input[,effs])
+      
       if(!is.factor(input[, age])) input[, age]= as.factor(input[, age])
       if(!is.factor(input[, gen])) input[, gen]= as.factor(input[, gen])
-      if(!is.factor(input[, repl])) input[, repl] = as.factor(input[, repl])
       if(!is.factor(input[, row])) input[, row] = as.factor(input[, row])
       if(!is.factor(input[, col])) input[, col] = as.factor(input[, col])
       if(!is.null(area)){
@@ -601,19 +592,19 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
     Z$data = do.call(rbind, lapply(Z, function(x) x$data))
 
     attr(Z, 'control') = control
-    class(Z) = 'comprep'
+    class(Z) = 'comprepfor'
     
     return(Z)
   }
 }
 
 
-#' Print an object of class `comprep`
+#' Print an object of class `comprepfor`
 #'
-#' Print a `comprep` object in the R console. 
+#' Print a `comprepfor` object in the R console. 
 #'
 #'
-#' @param object An object of class `comprep`
+#' @param x An object of class `comprepfor`
 #' @param category A string indicating which object to print. Options are `"all"` for
 #' printing all objects, `"data"` for printing the data that will be used in the model, 
 #' `"matrix"` for printing the competition matrix, `"check"` for printing the `neigh_check`
@@ -623,41 +614,29 @@ prep<- function(data, gen, repl, row, col, ind, trait, dist.row, dist.col,
 #' `"all"`, which also serves when data has a single age.
 #' @param ... Currently not used.
 #' 
-#' @method print comprep
+#' @method print comprepfor
 #' 
-#' @seealso [gencomp::prep]
+#' @seealso [gencomp::prepfor]
 #' 
 #' 
 #' @importFrom data.table data.table 
-#' 
+#' @rdname print.comprepfor
 #' @export
 #' 
-#' @examples
-#'\donttest{
-#' library(gencomp)
-##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
-#'                 
-#' print(comp_mat, category = 'data', age = '6y')
-#' print(comp_mat, category = 'matrix', age = 'all')
-#' print(comp_mat, category = 'check', age = '3y')
-#' print(comp_mat, category = 'CIF', age = 'all')
-#' # Note that the ages are labeled as "3y" and "6y" in the example dataset 
-#' }
 #'
 
-
-print.comprep = function(object, category = 'matrix', age = 'all', ...){
+print.comprepfor = function(x, ..., category = 'matrix', age = 'all'){
   
-  stopifnot("The object must be of class 'comprep'" = class(object) == 'comprep')
+  object = x
+  
+  stopifnot("The object must be of class 'comprepfor'" = class(object) == 'comprepfor')
   stopifnot("'category' should be of size 1" = length(category) == 1)
   stopifnot("'age' should be of size 1" = length(age) == 1)
   stopifnot("'age' does not exist" = age %in% c('all',gsub('Age_','',names(object)[grep("Age_*.", names(object))])))
   
   control = attr(object, 'control')
   
-  if(control[,6] == 0) age = 'all'
+  if(control[,5] == 0) age = 'all'
   
   # Data set
   
@@ -665,13 +644,13 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
     
     if(age == 'all'){
       
-      cat("\n","===> Data (competition matrix + user-provided data set)", "\n")
+      message("===> Data (competition matrix + user-provided data set)")
       print(data.table::data.table(object$data))
       
     }else{
       
-      cat("\n","===> Data (competition matrix + user-provided data set), Age:", age, '\n')
-      print(data.table::data.table(droplevels(object$data[which(object$data[,colnames(control)[6]] == age),])))
+      message("===> Data (competition matrix + user-provided data set), Age: ", age)
+      print(data.table::data.table(droplevels(object$data[which(object$data[,colnames(control)[5]] == age),])))
       
     }
   }
@@ -682,9 +661,9 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
     
     if(age == 'all'){
       
-      cat("\n","===> Competition matrix", '\n')
+      message("===> Competition matrix")
       
-      if(control[,6] == 0){
+      if(control[,5] == 0){
         
         print(object$Z)
         
@@ -692,7 +671,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
         
         for(i in gsub('Age_','',names(object)[grep("Age_*.", names(object))])){
           
-          cat("\n","==> Age:", i, '\n')
+          message("==> Age:", i)
           
           print(object[[grep(i, names(object))]][['Z']])
           
@@ -701,7 +680,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
       
     }else{
       
-      cat("\n","===> Competition matrix, Age:", age, '\n')
+      message("===> Competition matrix, Age: ", age)
       print(object[[grep(age, names(object))]][['Z']])
       
     }
@@ -713,9 +692,9 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
     
     if(age == 'all'){
       
-      cat("\n","===> Neighbourhood check", "\n")
+      message("===> Neighbourhood check")
       
-      if(control[,6] == 0){
+      if(control[,5] == 0){
         
         print(data.table::data.table(object$neigh_check))
         
@@ -723,7 +702,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
         
         for(i in gsub('Age_','',names(object)[grep("Age_*.", names(object))])){
           
-          cat("\n","==> Age:", i, '\n')
+          message("==> Age: ", i)
           
           print(data.table(object[[grep(i, names(object))]][['neigh_check']]))
           
@@ -732,7 +711,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
       
     }else{
       
-      cat("\n","===> Neighbourhood check, Age:", age, '\n')
+      message("===> Neighbourhood check, Age: ", age)
       print(data.table(object[[grep(age, names(object))]][['neigh_check']]))
       
     }
@@ -744,9 +723,9 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
     
     if(age == 'all'){
       
-      cat("\n","===> Competition intensity factor", "\n")
+      message("===> Competition intensity factor")
       
-      if(control[,6] == 0){
+      if(control[,5] == 0){
         
         print(object$CIF)
         
@@ -754,7 +733,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
         
         for(i in gsub('Age_','',names(object)[grep("Age_*.", names(object))])){
           
-          cat("\n","==> Age:", i, '\n')
+          message("==> Age: ", i)
           
           print(object[[grep(i, names(object))]][['CIF']])
           
@@ -763,7 +742,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
       
     }else{
       
-      cat("\n","===> Competition intensity factor, Age:", age, '\n')
+      message("===> Competition intensity factor, Age: ", age)
       print(object[[grep(age, names(object))]][['CIF']])
       
     }
@@ -779,7 +758,7 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
 #' boxplots depicting the performance of each selection candidate
 #'
 #'
-#' @param object An object of class `comprep`
+#' @param x An object of class `comprepfor`
 #' @param category A string indicating which plot to build. Options are `"heatmap"` for
 #' plotting the field grid (default), or `"boxplot"` for plotting the boxplots of phenotypic 
 #' performance.
@@ -788,35 +767,34 @@ print.comprep = function(object, category = 'matrix', age = 'all', ...){
 #' to `"all"`, which also serves when data has a single age
 #' @param ... Currently not used.
 #' 
-#' @method plot comprep
+#' @method plot comprepfor
 #' 
-#' @details
-#' All plots are built using the [ggplot2] library, so they are all 
-#' customizable using "+ ggfun()"
 #' 
-#' @seealso  [ggplot2], [gencomp::prep]
+#' @seealso  [ggplot2], [gencomp::prepfor]
 #' 
 #' @importFrom ggplot2 ggplot
 #' @importFrom rlang .data
-#' 
+#' @rdname plot.comprepfor
 #' @export
 #' 
 #' @examples
 #'\donttest{
 #' library(gencomp)
-##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
-#'                 
+##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+##'                     ind = 'tree', age = 'age', row = 'row', col = 'col',
+##'                     dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
+##'                     n.dec = 3, verbose = FALSE, effs = c("block"))
+##'                                      
 #' plot(comp_mat, category = 'heatmap', age = "all")
 #' plot(comp_mat, category = 'boxplot', age = "3y")
 #' # Note that the ages are labelled as "3y" and "6y" in the example dataset 
 #' }
 #'
 
-plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
+plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
  
-  stopifnot("The object must be of class 'comprep'" = class(object) == 'comprep')
+  object = x
+  stopifnot("The object must be of class 'comprepfor'" = class(object) == 'comprepfor')
   stopifnot("'category' should be of size 1" = length(category) == 1)
   stopifnot("Please, choose between the available categories ('heatmap' or 'boxplot')" = category %in% c('heatmap', 'boxplot'))
   stopifnot("'age' should be of size 1" = length(age) == 1)
@@ -826,18 +804,18 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
   
   if(category == 'heatmap'){
     
-    if(control[,6] > 0){
+    if(control[,5] > 0){
       
       if(age == 'all'){
         
-        if(control[,7] > 0){
+        if(control[,6] > 0){
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,6,1)]]
           
-          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
-          names(facet.label.col) = unique(dat[,names(control)[7]])
-          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
-          names(facet.label.row) = unique(dat[,names(control)[6]])
+          facet.label.col = paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.col) = unique(dat[,names(control)[6]])
+          facet.label.row =  paste(names(control)[5], unique(dat[,names(control)[5]]))
+          names(facet.label.row) = unique(dat[,names(control)[5]])
           
           colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
           
@@ -858,10 +836,10 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
           
         } else {
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,1)]]
           
-          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
-          names(facet.label.row) = unique(dat[,names(control)[6]])
+          facet.label.row =  paste(names(control)[5], unique(dat[,names(control)[5]]))
+          names(facet.label.row) = unique(dat[,names(control)[5]])
           
           colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
           
@@ -881,14 +859,14 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
         }
       } else {
         
-        if(control[,7] > 0){
+        if(control[,6] > 0){
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,6,1)]]
           
-          dat = dat[which(dat[names(control)[6]] == age),]
+          dat = dat[which(dat[names(control)[5]] == age),]
           
-          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
-          names(facet.label.col) = unique(dat[,names(control)[7]])
+          facet.label.col = paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.col) = unique(dat[,names(control)[6]])
 
           colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
           
@@ -909,9 +887,9 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
           
         } else {
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,1)]]
           
-          dat = dat[which(dat[names(control)[6]] == age),]
+          dat = dat[which(dat[names(control)[5]] == age),]
           
           colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
           
@@ -921,7 +899,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
             geom_tile(color = 'black') + 
             scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
             labs(x = "Row", y = 'Column', fill = 'Y',
-                 title = paste(names(control)[6],'-',age)) + 
+                 title = paste(names(control)[5],'-',age)) + 
             theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
                   panel.background = element_blank(), 
                   panel.grid = element_line(colour = 'lightgrey'))
@@ -932,12 +910,12 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
       
       
     } else {
-      if(control[,7] > 0){
+      if(control[,6] > 0){
         
-        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,7,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,3,4,6,1)]]
         
-        facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
-        names(facet.label.col) = unique(dat[,names(control)[7]])
+        facet.label.col = paste(names(control)[6], unique(dat[,names(control)[6]]))
+        names(facet.label.col) = unique(dat[,names(control)[6]])
         
         colnames(dat) = c('gen', 'row', 'col', 'area', 'y')
         
@@ -957,7 +935,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
         
       } else {
         
-        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,3,4,1)]]
 
         colnames(dat) = c('gen', 'row', 'col', 'y')
         
@@ -975,18 +953,18 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
     }
   }else if(category == 'boxplot'){
 
-    if(control[,6] > 0){
+    if(control[,5] > 0){
       
       if(age == 'all'){
         
-        if(control[,7] > 0){
+        if(control[,6] > 0){
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,6,1)]]
           
-          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
-          names(facet.label.col) = unique(dat[,names(control)[7]])
-          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
-          names(facet.label.row) = unique(dat[,names(control)[6]])
+          facet.label.col = paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.col) = unique(dat[,names(control)[6]])
+          facet.label.row =  paste(names(control)[5], unique(dat[,names(control)[5]]))
+          names(facet.label.row) = unique(dat[,names(control)[5]])
           
           colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
           
@@ -1004,10 +982,10 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
           
         } else {
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,1)]]
           
-          facet.label.row =  paste(names(control)[6], unique(dat[,names(control)[6]]))
-          names(facet.label.row) = unique(dat[,names(control)[6]])
+          facet.label.row =  paste(names(control)[5], unique(dat[,names(control)[5]]))
+          names(facet.label.row) = unique(dat[,names(control)[5]])
           
           colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
           
@@ -1023,14 +1001,14 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
           
         }
       } else {
-        if(control[,7] > 0){
+        if(control[,6] > 0){
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,7,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,5,4,5,6,1)]]
           
-          dat = dat[which(dat[names(control)[6]] == age),]
+          dat = dat[which(dat[names(control)[5]] == age),]
           
-          facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
-          names(facet.label.col) = unique(dat[,names(control)[7]])
+          facet.label.col = paste(names(control)[6], unique(dat[,names(control)[6]]))
+          names(facet.label.col) = unique(dat[,names(control)[6]])
 
           colnames(dat) = c('gen', 'row', 'col', 'age', 'area', 'y')
           
@@ -1042,15 +1020,15 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
               facet_grid(cols = vars(.data$area), 
                          labeller = labeller(.cols = facet.label.col)) + 
               labs(x = names(control)[2], y = 'Y', 
-                   title = paste(names(control)[6],'-',age))
+                   title = paste(names(control)[5],'-',age))
           })
           
           
         } else {
           
-          dat = as.data.frame(object$data)[,names(control)[c(2,4,5,6,1)]]
+          dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,1)]]
           
-          dat = dat[which(dat[names(control)[6]] == age),]
+          dat = dat[which(dat[names(control)[5]] == age),]
           
           colnames(dat) = c('gen', 'row', 'col', 'age', 'y')
           
@@ -1060,19 +1038,19 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
               theme_bw() + 
               theme(axis.text.x = element_text(angle = 90)) + 
               labs(x = names(control)[2], y = 'Y', 
-                   title = paste(names(control)[6],'-',age))
+                   title = paste(names(control)[5],'-',age))
           })
           
         }
         
       }
     } else {
-      if(control[,7] > 0){
+      if(control[,6] > 0){
         
-        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,7,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,3,4,6,1)]]
         
-        facet.label.col = paste(names(control)[7], unique(dat[,names(control)[7]]))
-        names(facet.label.col) = unique(dat[,names(control)[7]])
+        facet.label.col = paste(names(control)[6], unique(dat[,names(control)[6]]))
+        names(facet.label.col) = unique(dat[,names(control)[6]])
         
         colnames(dat) = c('gen', 'row', 'col', 'area', 'y')
         
@@ -1089,7 +1067,7 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
         
       } else {
         
-        dat = as.data.frame(object$data)[,names(control)[c(2,4,5,1)]]
+        dat = as.data.frame(object$data)[,names(control)[c(2,3,4,1)]]
         
         colnames(dat) = c('gen', 'row', 'col', 'y')
         
@@ -1109,32 +1087,311 @@ plot.comprep = function(object, category = 'heatmap', age = 'all', ...){
 }
 
 
-#' Summary of the `comprep` object
+#' Summary of the `comprepfor` object
 #'
 #' A brief summary of the dataset used.
 #'
-#' @param object An object of class `comprep`
+#' @param object An object of class `comprepfor`
 #' @param ... Currently not used.
+#' @rdname summary.comprepfor
 #' 
-#' @method summary comprep
+#' @method summary comprepfor
 #' 
-#' @seealso [gencomp::prep]
+#' @seealso [gencomp::prepfor]
 #' 
 #' @export
 #' 
-#' @examples
-#'\donttest{
-#' library(gencomp)
-##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
-#'                 
-#' summary(comp_mat)
-#' }
 #'
 
-summary.comprep = function(object, ...){
+summary.comprepfor = function(object, ...){
+  print(attr(object, 'control'))
   
+}
+
+# Crop section ------------------------------------------------------------
+
+##' @title Preparations to fit a genetic competition model for agronomic data
+##' 
+##' @description
+##' This function builds the genetic competition matrix, represented by a within-row 
+##' or within-column incidence matrix (Stringer et al., 2011). It also 
+##' prepares the dataset to be used for model fitting.
+##' 
+##' @param data A data frame containing the phenotypic data.
+##' @param gen,row,col,plt,trait A string. The name of the columns that correspond
+##' to the genotype, row, column, plot and trait information, respectively.
+##' @param direction A string. The direction considered for building the competition matrix. 
+##' Can be `row` or `column`.
+##' @param verbose A logical value. If `TRUE`, a progress bar will be displayed in the 
+##' console. Defaults to `FALSE`.
+##' @param effs a string vector with column names of other effects that will be 
+##' considered in model fitting step. Defaults to `NULL` (if there is no further effect).   
+##' 
+##' @return The function returns:
+##' \itemize{
+##' \item \code{Z} : The competition incidence matrix (\eqn{\mathbf{Z}_c}).
+##' \item \code{data} : A data frame composed of the built \eqn{\mathbf{Z}_c} merged
+##' with the dataset provided by the user.
+##' \item \code{neigh_check} : A data frame containing the phenotypic records of each
+##' focal plant and its neighbours.
+##' }
+##' 
+##' @references 
+##' Stringer, J.K., Cullis, B.R., Thompson, R., 2008. Joint modeling of spatial 
+##' variability and within-row interplot competition to increase the efficiency of plant improvement. 
+##' Journal of Agricultural, Biological, and Environmental Statistics 16(2), 269-281. \doi{10.1007/s13253-010-0051-5}
+##' 
+##' @export
+##' 
+##' 
+
+prepcrop = function(data, gen, row, col, plt, trait, effs = NULL, direction = "row", verbose = FALSE){
+  
+  # Messages and warnings
+  stopifnot("The number of 'plt' must be the product of no. rows * no. columns" = length(unique(data[,plt])) == 
+              length(unique(data[,row])) * length(unique(data[,col])))
+  stopifnot("Please, choose the direction ('row' or 'column')" = direction %in% c('row', 'column'))
+  
+  x = data.frame(
+    trat = as.factor(data[, gen]),
+    plt = as.factor(data[, plt]), 
+    row = as.numeric(data[, row]),
+    col = as.numeric(data[, col]),
+    trait = as.numeric(data[, trait])
+  )
+  
+  x = x[order(x$row, x$col),]
+  
+  control = data.frame(
+    trait = length(x$trait), 
+    ngen = nlevels(x$trat),
+    nrow = length(unique(x$row)),
+    ncol = length(unique(x$col)),
+    direction = direction
+  )
+  colnames(control)[1:4] = c(trait, gen, row, col)
+  
+  Z = list()
+  z <- matrix(0, nrow(x), nlevels(x$trat), dimnames = list(1:nrow(x), levels(x$trat))) 
+  w = list()
+  
+  for (i in 1:nrow(x)) {
+    if(direction == "row"){
+      gen.row = x$trat[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
+      plt.row = x$plt[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
+      trt_r = NULL
+      for (k in 1:length(gen.row)) {
+        if (!is.na(x[which(x$trat %in% gen.row[k] & x$plt %in% plt.row[k]), "trait"])){
+          z[i,gen.row] = 1
+          trt_r[k] = x[which(x$trat %in% gen.row[k] & x$plt %in% plt.row[k]), "trait"]
+        }
+      }
+      
+      w[[i]] = data.frame(
+        gen = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trat'],
+        row = x$row[i],
+        col = x$col[i],
+        y_focal = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trait'],
+        y_row = suppressWarnings({mean(trt_r, na.rm = T)})
+      )
+      
+    }else if(direction == "column"){
+      gen.col = x$trat[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
+      plt.col = x$plt[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
+      trt_c = NULL
+      for (k in 1:length(gen.col)) {
+        if (!is.na(x[which(x$trat %in% gen.col[k] & x$plt %in% plt.col[k]), "trait"]) ){
+          z[i, gen.col] = 1
+          trt_c[k] = x[which(x$trat %in% gen.col[k] & x$plt %in% plt.col[k]), "trait"]
+        }
+      }
+      
+      w[[i]] = data.frame(
+        gen = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trat'],
+        row = x$row[i],
+        col = x$col[i],
+        y_focal = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trait'],
+        y_col = suppressWarnings({mean(trt_c, na.rm = T)})
+      )
+      
+    }
+    
+    if(verbose){
+      cat('\r Running through the grid -->',
+          sprintf(
+            '%s%s|% 3s%%',
+            strrep('=', round(i/nrow(z) * (options()$width - nchar('||100%')))),
+            strrep(' ', options()$width -
+                     round(i/nrow(z) * (options()$width - nchar('||100%'))) -
+                     nchar('||100%')),
+            round(i/nrow(z)*100)
+          ), fill = FALSE
+      )
+    }
+    
+  }
+  
+  w = do.call(rbind, w)
+  
+  input = data.frame(cbind(z, data))
+  
+  if(!is.null(effs) & length(effs) > 1){
+    input[,effs] = lapply(input[,effs], factor)
+  }else if(!is.null(effs)) input[,effs] = as.factor(input[,effs])
+  
+  if(!is.factor(input[, gen])) input[, gen] = as.factor(input[, gen])
+  if(!is.factor(input[, row])) input[, row] = as.factor(input[, row])
+  if(!is.factor(input[, col])) input[, col] = as.factor(input[, col])
+  
+  input = input[order(input[,row], input[,col]),]
+  
+  Z = list(Z = z, neigh_check = w, data = input)
+  
+  attr(Z, 'control') = control    
+  class(Z) = "comprepcrop"
+  
+  return(Z)
+}
+
+
+#' Print an object of class `comprepcrop`
+#'
+#' Print a `comprepcrop` object in the R console. 
+#'
+#'
+#' @param x An object of class `comprepcrop`
+#' @param category A string indicating which object to print. Options are `"all"` for
+#' printing all objects, `"data"` for printing the data that will be used in the model, 
+#' `"matrix"` for printing the competition matrix, and `"check"` for printing the `neigh_check`
+#' dataframe. 
+#' @param ... Currently not used.
+#' 
+#' @method print comprepcrop
+#' 
+#' @seealso [gencomp::prepcrop]
+#' 
+#' 
+#' @importFrom data.table data.table 
+#' @rdname print.comprepcrop
+#' @export
+#' 
+#'
+
+print.comprepcrop = function(x, ..., category = 'matrix'){
+  
+  object = x
+  
+  stopifnot("The object must be of class 'comprepcrop'" = class(object) == 'comprepcrop')
+  stopifnot("'category' should be of size 1" = length(category) == 1)
+
+  control = attr(object, 'control')
+  
+  # Data set
+  
+  if(category == 'all' | category == 'data'){
+    message("===> Data (competition matrix + user-provided data set)")
+    print(data.table::data.table(object$data))
+  }
+  
+  # Competition matrix
+  
+  if(category == 'all' | category == 'matrix'){
+    message("===> Competition matrix")
+    print(object$Z)
+  }
+  
+  # Neighbourhood check
+  
+  if(category == 'all' | category == 'check'){
+    message("===> Neighbourhood check")
+    print(data.table::data.table(object$neigh_check))
+  }
+}
+
+
+#' Plots for data overview
+#'
+#' The function generates two types of plots: i) a heatmap representing the grid. 
+#' The cells are filled according to the phenotype value of each plot; and ii) 
+#' boxplots depicting the performance of each selection candidate
+#'
+#'
+#' @param x An object of class `comprepcrop`
+#' @param category A string indicating which plot to build. Options are `"heatmap"` for
+#' plotting the field grid (default), or `"boxplot"` for plotting the boxplots of phenotypic 
+#' performance.
+#' @param ... Currently not used.
+#' 
+#' @method plot comprepcrop
+#' 
+#' 
+#' @seealso  [ggplot2], [gencomp::prepcrop]
+#' 
+#' @importFrom ggplot2 ggplot
+#' @importFrom rlang .data
+#' @rdname plot.comprepcrop
+#' @export
+#'
+
+plot.comprepcrop = function(x, ..., category = 'heatmap'){
+  
+  object = x
+  stopifnot("The object must be of class 'comprepcrop'" = class(object) == 'comprepcrop')
+  stopifnot("'category' should be of size 1" = length(category) == 1)
+  stopifnot("Please, choose between the available categories ('heatmap' or 'boxplot')" = category %in% c('heatmap', 'boxplot'))
+
+  control = attr(object, 'control')
+  
+  if(category == 'heatmap'){
+    
+    dat = as.data.frame(object$data)[,names(control)[c(2,3,4,1)]]
+    
+    colnames(dat) = c('gen', 'row', 'col', 'y')
+    
+    ggplot(data = dat, 
+           aes(x = as.numeric(.data$row), y = as.numeric(.data$col), 
+               fill = .data$y)) + 
+      geom_tile(color = 'black') + 
+      scale_fill_viridis_c(option = 'turbo', na.value = 'white') + 
+      labs(x = "Row", y = 'Column', fill = 'Y') + 
+      theme(plot.title = element_text(hjust = .5), legend.position = 'right', 
+            panel.background = element_blank(), 
+            panel.grid = element_line(colour = 'lightgrey'))
+    
+  }else if(category == 'boxplot'){
+    
+    dat = as.data.frame(object$data)[,names(control)[c(2,3,4,1)]]
+    
+    colnames(dat) = c('gen', 'row', 'col', 'y')
+    
+    suppressWarnings({
+      ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
+        geom_boxplot() + 
+        theme_bw() + 
+        theme(axis.text.x = element_text(angle = 90)) + 
+        labs(x = names(control)[2], y = 'Y')
+    })
+  }
+}
+
+
+#' Summary of the `comprepcrop` object
+#'
+#' A brief summary of the dataset used.
+#'
+#' @param object An object of class `comprepcrop`
+#' @param ... Currently not used.
+#' @rdname summary.comprepcrop
+#' 
+#' @method summary comprepcrop
+#' 
+#' @seealso [gencomp::prepcrop]
+#' 
+#' @export
+#' 
+#'
+
+summary.comprepcrop = function(object, ...){
   print(attr(object, 'control'))
   
 }

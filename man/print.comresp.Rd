@@ -4,23 +4,23 @@
 \alias{print.comresp}
 \title{Print an object of class \code{comresp}}
 \usage{
-\method{print}{comresp}(object, category = "blup.main", age = "all", ...)
+\method{print}{comresp}(x, ..., category = "blup.main", age = "all")
 }
 \arguments{
-\item{object}{An object of class \code{comresp}.}
+\item{x}{An object of class \code{comresp}.}
+
+\item{...}{Currently not used.}
 
 \item{category}{A string indicating which object to print. Options are \code{"all"}
 for printing all objects, \code{"summar"} for printing the variance components and the
-likelihood ratio test (if \code{lrt = TRUE} in \link{asr}), \code{"blup.main"} (Default) for printing
-the DGE, IGE and TGV (the main effects if a multi-age model was fitted), and
-\code{"blup.within"} for printing the DGE, IGE and TGV within ages (if a multi-age model
-was fitted).}
+likelihood ratio test (if \code{lrt = TRUE} in \link{asr} or \link{asr_ma}),
+\code{"blup.main"} (Default) for printing the DGE, IGE and TGV (the main effects
+if a multi-age model was fitted), and \code{"blup.within"} for printing the DGE,
+IGE and TGV within ages (if a multi-age model was fitted).}
 
 \item{age}{If \code{category = 'blup.within'}, a string indicating if this object should be printed per age.
 Options are \code{"all"} for printing all ages, or the name of a specific age. Defaults
 to \code{"all"}.}
-
-\item{...}{Currently not used.}
 }
 \description{
 Print a \code{comresp} object in the R console.
@@ -28,15 +28,17 @@ Print a \code{comresp} object in the R console.
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
- 
- model = asr(prep.out = comp_mat, 
-             fixed = MAI~ age, 
-             random = ~ block:age, 
-             cor = TRUE, maxit = 50,
-             lrtest = FALSE)
+ comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+                   ind = 'tree', age = 'age', row = 'row', col = 'col',
+                   dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
+                   n.dec = 3, verbose = FALSE, effs = c("block"))
+ model = asr_ma(prep.out = comp_mat,
+                fixed = MAI~ age, 
+                random = ~ block:age, 
+                lrtest = TRUE, 
+                spatial = TRUE, 
+                cor = TRUE, 
+                maxit = 20)
              
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  

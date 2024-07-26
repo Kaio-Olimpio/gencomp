@@ -7,13 +7,14 @@
 resp(prep.out, model, weight.tgv = FALSE, sd.class = 1)
 }
 \arguments{
-\item{prep.out}{A \code{comprep} object.}
+\item{prep.out}{A \code{comprepfor} or \code{comprepcrop} object.}
 
-\item{model}{An \code{asreml} object, preferably obtained using the \code{\link[=asr]{asr()}} function.}
+\item{model}{An \code{compmod} object, obtained from \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}} functions.}
 
-\item{weight.tgv}{A logical value. If \code{TRUE}, the function will use the direct and
-indirect genetic effects' reliability as a weight when estimating the total genotypic
-value. Defaults to \code{FALSE}. See Details for more information on these methods.}
+\item{weight.tgv}{A logical value or a numeric vector of size two. If \code{TRUE},
+the function will use the direct and indirect genetic effects' reliability as a weight when
+estimating the total genotypic value. If a vector is provided, the values within the vector
+are used as weights. Defaults to \code{FALSE}, so no weight is used. See Details for more information on these methods.}
 
 \item{sd.class}{A numeric value defining the weight to establish competition classes.
 Defaults to 1. See Details for more information.}
@@ -27,68 +28,94 @@ if \code{lrtest = TRUE} in \code{\link[=asr]{asr()}}.
 (object$vparameters). Variance component ratios are included if param = "gamma",
 and a measure of precision (standard error) is included along with boundary
 constraints at termination and the percentage change in the final iteration.
-\item \code{heritabilities} : a matrix containing the direct genetic effects heritability and
-the total heritability (see details). Available if \code{cor = TRUE} in \code{\link[=asr]{asr()}}
-\item \code{blups} : A list with a dataframe containing the direct (DGE) and indirect genetic effects (IGE), their standard errors,
-the competition class of each genotype and the total genotypic value (TGV). If \code{age = TRUE} in
-\code{\link[=prep]{prep()}}, \code{blup} will contain a further dataframe the within-ages DGE and IGE. If
+\item \code{heritability} : a matrix (or a data frame, if a model with heterogeneous
+residual variances is fitted) containing the direct genetic effects heritability and
+the total heritability (see details). Available if \code{cor = TRUE} in \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}}.
+\item \code{blups} : A list with a data frame containing the direct (DGE) and indirect genetic effects (IGE), their standard errors,
+the competition class of each genotype and the total genotypic value (TGV). If a multi-age model was fitted,
+\code{blup} will have a further data frame with the within-ages DGE and IGE. If
 other random effects were declared in the model, \code{blup} will contain a last data frame
-with their BLUPs.
+with the corresponding BLUPs.
 }
 }
 \description{
 This function provides responses extracted from the genetic-spatial
-competition model fitted using \code{\link[=asr]{asr()}}.
+competition model fitted using \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}}.
 }
 \details{
-The genetic-spatial competition model provides the direct (DGE) and indirect
-genetic effects (IGE) of each genotype. The DGE represents the "pure" performance
-of the genotype, while the IGE is the related to the average effect of the genotype on
-the genotypic value of its neighbours. The higher the IGE, the more aggressive is the genotype.
-Here, we use the classification proposed by Ferreira et al. (2023) to define competition classes:
+The genetic competition model provides the direct (DGE) and indirect genetic
+effects (IGE) of each genotype. The DGE represents the "pure" performance of
+the genotype, while the IGE reflects the average effect of the same genotype
+on the genotypic value of its neighbours.
+
+\itemize{\item Competition classes}
+
+A higher IGE indicates a more
+aggressive genotype. In this study, we employ the classification proposed by
+Ferreira et al. (2023) to define competition classes.
 
 \deqn{\begin{cases} c_i > \overline{c} + sd(c) \times \alpha \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) \times \alpha > c_i > \overline{c} - sd(c) \times \alpha \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \times \alpha \rightarrow \text{Sensitive} \end{cases}}
 
 where \eqn{c_i} is the IGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} genotype, \eqn{\overline{c}} is
 the mean IGE, \eqn{sd(c)} is the standard deviation of the IGE and
-\eqn{\alpha} is a weight (defaults to 1). This classification is
-detailed in the plot \code{IGE.density}.
+\eqn{\alpha} is a weight (defaults to 1).
 
-The total genotypic value (TGV) is given by:
+\itemize{\item Total genotypic value}
+
+The total genotypic value (TGV) of a candidate refers to its genetic merit summed to its
+competition capacity. When the competition effects are weighted by the distance between
+individuals - which applies to the methods adapted for forest data in \code{gencomp}, the
+TGV is given by:
 
 \deqn{TGV_i =  d_i + CIF \times c_i}
 
 where \eqn{d_i} is the DGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} genotype, and \eqn{CIF} is
 the overall competition intensity factor, previously computed in the function
-\code{\link[=prep]{prep()}}. If \code{weight.tgv = TRUE}, the DGE and IGE will be
-multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and \eqn{r_{c_i}^2}) (Ferreira et al., 2024):
+\code{\link[=prepfor]{prepfor()}}.
 
 \deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
 
-When \code{cor = TRUE} in \link{asr}, \code{resp} estimates the DGE heritability and the total
-heritability, given by, respectively (Bijma et al., 2007):
+When there is no weighting based on distances (the case of agronomic data),
+the full contribution of IGE to the heritable variance is considered (Bijma, 2014).
+In this case, the TGV is given by:
+
+\deqn{TGV_i =  d_i + c_i}
+
+In both cases, when \code{weight.tgv = TRUE}, the DGE and IGE will be
+multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and
+\eqn{r_{c_i}^2}) (Ferreira et al., 2024)
+
+\itemize{\item{Heritability}}
+
+When \code{cor = TRUE} in \link{asr} or \link{asr_ma}, \code{resp} estimates the
+DGE heritability and the total heritability, given by,
+respectively (Bijma et al., 2007):
 
 \deqn{H^2 =  \frac{\sigma^2_g}{\sigma^2_p}}
 
 \deqn{H^2_t = \frac{\sigma^2_t}{\sigma^2_p}}
 
 where \eqn{\sigma^2_g} is the DGE variance, \eqn{\sigma^2_p} is the phenotypic variance,
-and \eqn{\sigma^2_t} is the total heritable variance, given as \eqn{\sigma^2_t = \sigma^2_g + 2 \times CIF \times \sigma_{gc} + CIF^2 \times \sigma^2_c},
-with \eqn{CIF} being the mean competition intensity factor, \eqn{\sigma_{gc}} being the
-covariance between DGE and IGE, and \eqn{\sigma^2_c} being the IGE variance.
+and \eqn{\sigma^2_t} is the total heritable variance, given by
+\eqn{\sigma^2_t = \sigma^2_g + 2 \times CIF \times \sigma_{gc} + CIF^2 \times \sigma^2_c}
+for forestry data, and \eqn{\sigma^2_t = \sigma^2_g + 2 \times \sigma_{gc} + \sigma^2_c}
+for agronomic data. In these equations, \eqn{\sigma_{gc}} is the
+covariance between DGE and IGE estimated in the model, and \eqn{\sigma^2_c} is the IGE variance.
 }
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
- 
- model = asr(prep.out = comp_mat, 
-             fixed = MAI~ age, 
-             random = ~ block:age, 
-             cor = TRUE, maxit = 50,
-             lrtest = FALSE)
+ comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+                   ind = 'tree', age = 'age', row = 'row', col = 'col',
+                   dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
+                   n.dec = 3, verbose = FALSE, effs = c("block"))
+ model = asr_ma(prep.out = comp_mat,
+                fixed = MAI~ age, 
+                random = ~ block:age, 
+                lrtest = TRUE, 
+                spatial = TRUE, 
+                cor = TRUE, 
+                maxit = 20)
              
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  
@@ -105,11 +132,14 @@ Bijma, P., Muir, W.M., Van Arendonk, J.A.M., 2007. Multilevel Selection 1:
 Quantitative genetics of inheritance and response to selection. Genetics 175,
 277–288. \doi{10.1534/genetics.106.062711}
 
-Ferreira, F.M., Chaves, S.F., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
-Sousa, J.E., Resende, M.D., Leite, F.P., Gezan, S.A., Viana, J.M.,
-Fernandes, S.B., Dias, K.O., 2023. A novel strategy to predict clonal composites
+Bijma, P. 2014. The quantitative genetics of indirect genetic effects: a
+selective review of modelling issues. Heredity 112(1), 61-69. \doi{10.1038/hdy.2013.15}
+
+Ferreira, F.M., Chaves, S.F.S., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
+Sousa, J.E., Resende, M.D.V, Leite, F.P., Gezan, S.A., Viana, J.M.,
+Fernandes, S.B., Dias, K.O.G., 2023. A novel strategy to predict clonal composites
 by jointly modeling spatial variation and genetic competition. Forest Ecology
-and Management 548, 121393. \doi{https://doi.org/10.1016/j.foreco.2023.121393}
+and Management 548, 121393. \doi{10.1016/j.foreco.2023.121393}
 
 Ferreira, F.M., Chaves, S.F.S., Santos, O.P., Nunes, A.C.P., Tambarussi, E.V.,
 Pereira, G.S., Santos, G.A., Bhering, L.L., Dias, K.O.G., 2024. Competition
@@ -117,5 +147,5 @@ effects can mislead selection in eucalypt breeding trials. Forest Ecology and
 Management 561, 121892. \doi{10.1016/j.foreco.2024.121892}
 }
 \seealso{
-\link{prep}, \link{asr}
+\link{prepfor}, \link{prepcrop}, \link{asr}, \link{asr_ma}
 }

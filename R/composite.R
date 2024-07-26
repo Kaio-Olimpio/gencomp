@@ -2,10 +2,11 @@
 ##'
 ##' @description
 ##' This function simulates clonal composites using outputs of a genetic-spatial
-##' competition model fitted using [gencomp::asr()]
+##' competition model fitted using [gencomp::asr()] or [gencomp::asr_ma()]. Currently, 
+##' only forestry data is accepted. 
 ##' 
-##' @param prep.out A `comprep` object.
-##' @param model An `asreml` object, preferably obtained using the [gencomp::asr()] function.
+##' @param prep.out A `comprepfor` object.
+##' @param model A `compmod` object obtained using [gencomp::asr()] or [gencomp::asr_ma()].
 ##' @param resp.out A `comresp` object.
 ##' @param d.row.col A vector of size two. The first element contain the distance between
 ##' rows, and second the distance between columns of the simulated grid.
@@ -35,13 +36,13 @@
 ##' \deqn{\hat{y}_{ij} = \hat{\mu} + \hat{d}_i + \sum^n_{i \neq j}{\frac{1}{dist_{ij}} \times \hat{c}_j}}
 ##' 
 ##' @references 
-##' Ferreira, F.M., Chaves, S.F., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
-##' Sousa, J.E., Resende, M.D., Leite, F.P., Gezan, S.A., Viana, J.M., 
-##' Fernandes, S.B., Dias, K.O., 2023. A novel strategy to predict clonal composites 
+##' Ferreira, F.M., Chaves, S.F.S., Bhering, L.L., Alves, R.S., Takahashi, E.K.,
+##' Sousa, J.E., Resende, M.D.V., Leite, F.P., Gezan, S.A., Viana, J.M., 
+##' Fernandes, S.B., Dias, K.O.G., 2023. A novel strategy to predict clonal composites 
 ##' by jointly modeling spatial variation and genetic competition. Forest Ecology 
 ##' and Management 548, 121393. \doi{https://doi.org/10.1016/j.foreco.2023.121393}
 ##'
-##' @seealso  [gencomp::prep], [gencomp::asr], [gencomp::resp]
+##' @seealso  [gencomp::prepfor], [gencomp::asr], [gencomp::asr_ma], [gencomp::resp]
 ##' 
 ##' @importFrom stats quantile model.matrix model.matrix.lm
 ##' 
@@ -50,17 +51,19 @@
 ##' @examples
 ##' \donttest{
 ##' library(gencomp)
-##'  comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-##'                  ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-##'                  dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
-##'  
-##'  model = asr(prep.out = comp_mat, 
-##'              fixed = MAI~ age, 
-##'              random = ~ block:age, 
-##'              cor = TRUE, maxit = 50,
-##'              lrtest = FALSE)
+##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+##'                    ind = 'tree', age = 'age', row = 'row', col = 'col',
+##'                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
+##'                    n.dec = 3, verbose = FALSE, effs = c("block"))
+##'  model = asr_ma(prep.out = comp_mat,
+##'                 fixed = MAI~ age, 
+##'                 random = ~ block:age, 
+##'                 lrtest = TRUE, 
+##'                 spatial = TRUE, 
+##'                 cor = TRUE, 
+##'                 maxit = 20)
 ##'              
-#'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
+##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
 ##'  
 ##'  cc = composite(prep.out = comp_mat, model = model, resp.out = results,
 ##'                 d.row.col = c(3,3), d.weight = TRUE, nsim = 10, verbose = TRUE, 
@@ -72,10 +75,7 @@
 composite = function(prep.out, model, resp.out, d.row.col, d.weight = TRUE, 
                      selected, nsim = 10, verbose = TRUE) {
   
-  ## Objects from previous functions
-  prep.out = prep.out
-  resp.out = resp.out
-  model = model
+  stopifnot("This function is only available for 'comprepfor' objects" = 'comprepfor' %in% class(prep.out))
   
   # Distances
   drow = d.row.col[1]

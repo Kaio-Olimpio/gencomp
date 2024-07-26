@@ -4,23 +4,23 @@
 \alias{plot.comresp}
 \title{Plots for the \code{comresp} object}
 \usage{
-\method{plot}{comresp}(object, category = "DGE.IGE", level = "main", age = "all", ...)
+\method{plot}{comresp}(x, ..., category = "DGE.IGE", level = "main", age = "all")
 }
 \arguments{
-\item{object}{An object of class \code{comresp}.}
+\item{x}{An object of class \code{comresp}.}
+
+\item{...}{Currently not used.}
 
 \item{category}{A string indicating which plot to build. See options in the Details section.}
 
-\item{level}{A string indicating the information level to be used for building
+\item{level}{Available if a multi-age model was fitted. A string indicating the information level to be used for building
 the plots. Options are \code{"main"} for focusing on the main effects, or \code{"within"} to
 focus on the within-age effects effects (main + interaction effects). Defaults
 to \code{"main"}, which also serves when data has a single age.}
 
-\item{age}{If \code{level = 'within'}, a string indicating if plots should be built per age.
+\item{age}{Available if a multi-age model was fitted. If \code{level = 'within'}, a string indicating if plots should be built per age.
 Options are \code{"all"} for plotting all ages, or the name of a specific age. Defaults
 to \code{"all"}, which serves when data has a single age.}
-
-\item{...}{Currently not used.}
 }
 \description{
 Build plots using the outputs stored in the \code{comresp} object.
@@ -37,7 +37,8 @@ are in descending order according to the DGE. The dots' colour depicts the DGE's
 reliability of each genotype.
 \item \code{TGV}: lollipop plots with the TGV of each genotype, in increasing order.
 \item \code{nneigh}: a bar plot depicting the number of different genotypes as neighbours
-(total and per competition class) of each selection candidate.
+(total and per competition class) of each selection candidate. Available only for
+objects of class \verb{comresp, comprepfor}.
 \item \code{grid.res}: a heatmap representing the grid. The cells are filled according
 to the residual value of each plot.
 \item \code{grid.dge}: a heatmap representing the grid. The cells are filled according
@@ -51,15 +52,17 @@ to the competition class of each genotype.
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prep(data = euca, gen = 'clone', repl = 'block', area = 'area',
-                 ind = 'tree', age = 'age', row = 'row', col = 'col', dist.col = 3, 
-                 dist.row = 2, trait = 'MAI', method = 'SK', n.dec = 3, verbose = TRUE)
- 
- model = asr(prep.out = comp_mat, 
-             fixed = MAI~ age, 
-             random = ~ block:age, 
-             cor = TRUE, maxit = 50,
-             lrtest = FALSE)
+ comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+                   ind = 'tree', age = 'age', row = 'row', col = 'col',
+                   dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
+                   n.dec = 3, verbose = FALSE, effs = c("block"))
+ model = asr_ma(prep.out = comp_mat,
+                fixed = MAI~ age, 
+                random = ~ block:age, 
+                lrtest = TRUE, 
+                spatial = TRUE, 
+                cor = TRUE, 
+                maxit = 20)
              
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  

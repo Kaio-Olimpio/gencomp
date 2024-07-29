@@ -54,11 +54,11 @@ A higher IGE indicates a more
 aggressive genotype. In this study, we employ the classification proposed by
 Ferreira et al. (2023) to define competition classes.
 
-\deqn{\begin{cases} c_i > \overline{c} + sd(c) \times \alpha \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) \times \alpha > c_i > \overline{c} - sd(c) \times \alpha \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \times \alpha \rightarrow \text{Sensitive} \end{cases}}
+\deqn{\begin{cases} c_i > \overline{c} + sd(c) \times \tau \rightarrow \text{Aggressive} \\ \overline{c} + sd(c) \times \tau > c_i > \overline{c} - sd(c) \times \tau \rightarrow \text{Homeostatic} \\ c_i < \overline{c} - sd(c) \times \tau \rightarrow \text{Sensitive} \end{cases}}
 
 where \eqn{c_i} is the IGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} genotype, \eqn{\overline{c}} is
 the mean IGE, \eqn{sd(c)} is the standard deviation of the IGE and
-\eqn{\alpha} is a weight (defaults to 1).
+\eqn{\tau} is a weight (defaults to 1).
 
 \itemize{\item Total genotypic value}
 
@@ -69,17 +69,18 @@ TGV is given by:
 
 \deqn{TGV_i =  d_i + CIF \times c_i}
 
-where \eqn{d_i} is the DGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} genotype, and \eqn{CIF} is
+where \eqn{d_i} is the DGE of the i\if{html}{\out{<sup>}}th\if{html}{\out{</sup>}} genotype, and \eqn{\phi} is
 the overall competition intensity factor, previously computed in the function
 \code{\link[=prepfor]{prepfor()}}.
 
-\deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {CIF \times c_i}}
+\deqn{wTGV_i = r_{d_i}^2 \times d_i + r_{c_i}^2 \times {\phi \times c_i}}
 
 When there is no weighting based on distances (the case of agronomic data),
 the full contribution of IGE to the heritable variance is considered (Bijma, 2014).
 In this case, the TGV is given by:
 
 \deqn{TGV_i =  d_i + c_i}
+id est, \eqn{\phi=1}.
 
 In both cases, when \code{weight.tgv = TRUE}, the DGE and IGE will be
 multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and
@@ -97,7 +98,7 @@ respectively (Bijma et al., 2007):
 
 where \eqn{\sigma^2_g} is the DGE variance, \eqn{\sigma^2_p} is the phenotypic variance,
 and \eqn{\sigma^2_t} is the total heritable variance, given by
-\eqn{\sigma^2_t = \sigma^2_g + 2 \times CIF \times \sigma_{gc} + CIF^2 \times \sigma^2_c}
+\eqn{\sigma^2_t = \sigma^2_g + 2 \times \phi \times \sigma_{gc} + \phi^2 \times \sigma^2_c}
 for forestry data, and \eqn{\sigma^2_t = \sigma^2_g + 2 \times \sigma_{gc} + \sigma^2_c}
 for agronomic data. In these equations, \eqn{\sigma_{gc}} is the
 covariance between DGE and IGE estimated in the model, and \eqn{\sigma^2_c} is the IGE variance.

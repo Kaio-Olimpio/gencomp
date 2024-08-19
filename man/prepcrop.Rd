@@ -9,8 +9,8 @@ prepcrop(
   gen,
   row,
   col,
-  plt,
   trait,
+  plt = NULL,
   effs = NULL,
   direction = "row",
   verbose = FALSE
@@ -19,8 +19,12 @@ prepcrop(
 \arguments{
 \item{data}{A data frame containing the phenotypic data.}
 
-\item{gen, row, col, plt, trait}{A string. The name of the columns that correspond
-to the genotype, row, column, plot and trait information, respectively.}
+\item{gen, row, col, trait}{A string. The name of the columns that correspond
+to the genotype, row, column, and trait information, respectively.}
+
+\item{plt}{A string or NULL. The name of the column that contain the plot information.
+Useful to properly indicate the direction of data collection. If \code{NULL} (default), the function
+will automatically generate a column after ordering the data set by \code{row} and \code{col}}
 
 \item{effs}{a string vector with column names of other effects that will be
 considered in model fitting step. Defaults to \code{NULL} (if there is no further effect).}

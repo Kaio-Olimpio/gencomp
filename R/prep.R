@@ -169,8 +169,10 @@ prepfor <- function(data, gen, row, col, ind, trait, effs = NULL, dist.row, dist
   {
     if(is.null(area)){
       x = x[order(x$row, x$col),]
+      # data = data[order(data[,row], data[,col]),]
     }else{
       x = x[order(x$area, x$row, x$col),]
+      # data = data[order(data[,area], data[,row], data[,col]),]
     }
     
     Z = list()
@@ -972,7 +974,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
             ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
               geom_boxplot() + 
               theme_bw() + 
-              theme(axis.text.x = element_text(angle = 90)) + 
+              theme(axis.text.x = element_text(angle = 90,hjust=1,vjust=0.5)) + 
               facet_grid(rows = vars(.data$age), cols = vars(.data$area), 
                          labeller = labeller(.cols = facet.label.col,
                                              .rows = facet.label.row)) + 
@@ -993,7 +995,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
             ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
               geom_boxplot() + 
               theme_bw() + 
-              theme(axis.text.x = element_text(angle = 90)) + 
+              theme(axis.text.x = element_text(angle = 90,hjust=1,vjust=0.5)) + 
               facet_grid(rows = vars(.data$age), 
                          labeller = labeller(.rows = facet.label.row)) + 
               labs(x = names(control)[2], y = 'Y')
@@ -1016,7 +1018,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
             ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
               geom_boxplot() + 
               theme_bw() + 
-              theme(axis.text.x = element_text(angle = 90)) + 
+              theme(axis.text.x = element_text(angle = 90,hjust=1,vjust=0.5)) + 
               facet_grid(cols = vars(.data$area), 
                          labeller = labeller(.cols = facet.label.col)) + 
               labs(x = names(control)[2], y = 'Y', 
@@ -1036,7 +1038,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
             ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
               geom_boxplot() + 
               theme_bw() + 
-              theme(axis.text.x = element_text(angle = 90)) + 
+              theme(axis.text.x = element_text(angle = 90,hjust=1,vjust=0.5)) + 
               labs(x = names(control)[2], y = 'Y', 
                    title = paste(names(control)[5],'-',age))
           })
@@ -1058,7 +1060,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
           ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
             geom_boxplot() + 
             theme_bw() + 
-            theme(axis.text.x = element_text(angle = 90)) + 
+            theme(axis.text.x = element_text(angle = 90,hjust=1,vjust=0.5)) + 
             facet_grid(cols = vars(.data$area), 
                        labeller = labeller(.cols = facet.label.col)) + 
             labs(x = names(control)[2], y = 'Y')
@@ -1075,7 +1077,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
           ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
             geom_boxplot() + 
             theme_bw() + 
-            theme(axis.text.x = element_text(angle = 90)) + 
+            theme(axis.text.x = element_text(angle = 90,hjust=1,vjust=0.5)) + 
             labs(x = names(control)[2], y = 'Y')
         })
         
@@ -1118,8 +1120,11 @@ summary.comprepfor = function(object, ...){
 ##' prepares the dataset to be used for model fitting.
 ##' 
 ##' @param data A data frame containing the phenotypic data.
-##' @param gen,row,col,plt,trait A string. The name of the columns that correspond
-##' to the genotype, row, column, plot and trait information, respectively.
+##' @param gen,row,col,trait A string. The name of the columns that correspond
+##' to the genotype, row, column, and trait information, respectively.
+##' @param plt A string or NULL. The name of the column that contain the plot information. 
+##' Useful to properly indicate the direction of data collection. If `NULL` (default), the function
+##' will automatically generate a column after ordering the data set by `row` and `col`
 ##' @param direction A string. The direction considered for building the competition matrix. 
 ##' Can be `row` or `column`.
 ##' @param verbose A logical value. If `TRUE`, a progress bar will be displayed in the 
@@ -1141,26 +1146,61 @@ summary.comprepfor = function(object, ...){
 ##' variability and within-row interplot competition to increase the efficiency of plant improvement. 
 ##' Journal of Agricultural, Biological, and Environmental Statistics 16(2), 269-281. \doi{10.1007/s13253-010-0051-5}
 ##' 
+##' 
 ##' @export
 ##' 
-##' 
+#' @examples
+#'\donttest{
+#' library(gencomp)
+#' library(agridat)
+#' data(connolly.potato)
+#' dat <- connolly.potato
+#' comps = prepcrop(data = dat, gen = "gen", row = "row", col = "col",
+#'                  plt = NULL, effs = c("rep", 'matur'), trait = "yield",
+#'                  direction = "row", verbose = TRUE)
+#'                                      
+#' plot(comps, category = 'heatmap')
+#' plot(comps, category = 'boxplot')
+#' 
+#' }
+#'  
 
-prepcrop = function(data, gen, row, col, plt, trait, effs = NULL, direction = "row", verbose = FALSE){
+prepcrop = function(data, gen, row, col, trait, plt = NULL, effs = NULL, direction = "row", verbose = FALSE){
   
   # Messages and warnings
-  stopifnot("The number of 'plt' must be the product of no. rows * no. columns" = length(unique(data[,plt])) == 
-              length(unique(data[,row])) * length(unique(data[,col])))
+  if(!is.null(plt)){
+    stopifnot("The number of observations must be the product of no. rows * no. columns" = length(unique(data[,plt])) == 
+                length(unique(data[,row])) * length(unique(data[,col])))
+  } else {
+    stopifnot("The number of observations must be the product of no. rows * no. columns" = nrow(data) == 
+                length(unique(data[,row])) * length(unique(data[,col])))
+  }
   stopifnot("Please, choose the direction ('row' or 'column')" = direction %in% c('row', 'column'))
   
-  x = data.frame(
-    trat = as.factor(data[, gen]),
-    plt = as.factor(data[, plt]), 
-    row = as.numeric(data[, row]),
-    col = as.numeric(data[, col]),
-    trait = as.numeric(data[, trait])
-  )
+  if(is.null(plt)){
+    x = data.frame(
+      trat = as.factor(data[, gen]),
+      row = as.numeric(data[, row]),
+      col = as.numeric(data[, col]),
+      trait = as.numeric(data[, trait])
+    )
+    x = x[order(x$row, x$col),]
+    x$plt = as.factor(1:nrow(x))
+  }else{
+    x = data.frame(
+      trat = as.factor(data[, gen]),
+      plt = as.factor(data[, plt]), 
+      row = as.numeric(data[, row]),
+      col = as.numeric(data[, col]),
+      trait = as.numeric(data[, trait])
+    )
+    
+    x = x[order(x$row, x$col),]
+  }
   
-  x = x[order(x$row, x$col),]
+  data = data[order(data[,row], data[,col]),]
+  
+  if(any(data[,row] != x[,row])) break
   
   control = data.frame(
     trait = length(x$trait), 
@@ -1368,7 +1408,7 @@ plot.comprepcrop = function(x, ..., category = 'heatmap'){
       ggplot(data = dat, aes(x = .data$gen, y = .data$y)) + 
         geom_boxplot() + 
         theme_bw() + 
-        theme(axis.text.x = element_text(angle = 90)) + 
+        theme(axis.text.x = element_text(angle = 90,hjust=1,vjust=0.5)) + 
         labs(x = names(control)[2], y = 'Y')
     })
   }

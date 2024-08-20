@@ -68,19 +68,12 @@
 ##' @examples
 ##' \donttest{
 ##'  library(gencomp)
-##'  dat = euca[which(euca$age == "6y"),]
-##'  comp_mat = prepfor(data = dat, gen = 'clone', area = 'area',
-##'                     ind = 'tree', age = NULL, row = 'row', col = 'col', 
-##'                     dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
-##'                     n.dec = 3, verbose = FALSE, effs = c("block"))
-##'  
-##'  model = asr(prep.out = comp_mat, 
-##'              fixed = MAI ~ 1, 
-##'              random = ~ block,
-##'              cor = TRUE,
-##'              spatial = TRUE,
-##'              lrtest = FALSE,
-##'              maxit = 20)
+#'   comps = prepcrop(data = potato, gen = "gen", row = "row", col = "col",
+#'                    plt = NULL, effs = c("rep", 'matur'), trait = "yield",
+#'                    direction = "row", verbose = TRUE)
+#'  
+#'   mod = asr(prep.out = comps, fixed = yield ~ matur + rep,
+#'             random = ~1, spatial = FALSE, cor = TRUE, lrtest = TRUE)
 ##'  }
 
 asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest = FALSE,...) {
@@ -533,7 +526,7 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
 ##' \donttest{
 ##'  library(gencomp)
 ##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
-##'                    ind = 'tree', age = 'age', row = 'row', col = 'col',
+##'                    plt = 'tree', age = 'age', row = 'row', col = 'col',
 ##'                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
 ##'                    n.dec = 3, verbose = FALSE, effs = c("block"))
 ##'  model = asr_ma(prep.out = comp_mat,

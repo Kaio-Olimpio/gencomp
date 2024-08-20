@@ -9,8 +9,8 @@ prepfor(
   gen,
   row,
   col,
-  ind,
   trait,
+  plt = NULL,
   effs = NULL,
   dist.row,
   dist.col,
@@ -24,9 +24,13 @@ prepfor(
 \arguments{
 \item{data}{A data frame containing the phenotypic data.}
 
-\item{gen, row, col, ind, trait}{A string. The name of the columns that correspond
-to the genotype, row, column, individual (one plant per plot) and trait information,
-respectively. \code{ind} can also distinguish the plots, if there are multiple plants per plot.}
+\item{gen, row, col, trait}{A string. The name of the columns that correspond
+to the genotype, row, column, and trait information,
+respectively.}
+
+\item{plt}{A string or NULL. The name of the column that contain the plot information.
+Useful to properly indicate the direction of data collection. If \code{NULL} (default), the function
+will automatically generate a column after ordering the data set by \code{row} and \code{col}}
 
 \item{effs}{a string vector with column names of other effects that will be
 considered in model fitting step. Defaults to \code{NULL} (if there is no further effect).}
@@ -124,7 +128,7 @@ mean number of neighbours in each direction:
 \donttest{
  library(gencomp)
  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
-                    ind = 'tree', age = 'age', row = 'row', col = 'col',
+                    plt = 'tree', age = 'age', row = 'row', col = 'col',
                     dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
                     n.dec = 3, verbose = FALSE, effs = c("block"))
 }

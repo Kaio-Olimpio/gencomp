@@ -52,7 +52,7 @@
 ##' \donttest{
 ##' library(gencomp)
 ##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
-##'                    ind = 'tree', age = 'age', row = 'row', col = 'col',
+##'                    plt = 'tree', age = 'age', row = 'row', col = 'col',
 ##'                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
 ##'                    n.dec = 3, verbose = FALSE, effs = c("block"))
 ##'  model = asr_ma(prep.out = comp_mat,

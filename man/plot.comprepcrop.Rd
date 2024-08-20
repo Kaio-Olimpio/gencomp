@@ -20,6 +20,19 @@ The function generates two types of plots: i) a heatmap representing the grid.
 The cells are filled according to the phenotype value of each plot; and ii)
 boxplots depicting the performance of each selection candidate
 }
+\examples{
+\donttest{
+library(gencomp)
+comps = prepcrop(data = potato, gen = "gen", row = "row", col = "col",
+                 plt = NULL, effs = c("rep", 'matur'), trait = "yield",
+                 direction = "row", verbose = TRUE)
+                                     
+plot(comps, category = 'heatmap')
+plot(comps, category = 'boxplot')
+
+}
+
+}
 \seealso{
 \link{ggplot2}, \link{prepcrop}
 }

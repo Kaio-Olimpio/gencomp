@@ -371,19 +371,12 @@ The likelihood ratio test is performed using a model without the correlation bet
 \examples{
 \donttest{
  library(gencomp)
- dat = euca[which(euca$age == "6y"),]
- comp_mat = prepfor(data = dat, gen = 'clone', area = 'area',
-                    ind = 'tree', age = NULL, row = 'row', col = 'col', 
-                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
-                    n.dec = 3, verbose = FALSE, effs = c("block"))
+  comps = prepcrop(data = potato, gen = "gen", row = "row", col = "col",
+                   plt = NULL, effs = c("rep", 'matur'), trait = "yield",
+                   direction = "row", verbose = TRUE)
  
- model = asr(prep.out = comp_mat, 
-             fixed = MAI ~ 1, 
-             random = ~ block,
-             cor = TRUE,
-             spatial = TRUE,
-             lrtest = FALSE,
-             maxit = 20)
+  mod = asr(prep.out = comps, fixed = yield ~ matur + rep,
+            random = ~1, spatial = FALSE, cor = TRUE, lrtest = TRUE)
  }
 }
 \seealso{

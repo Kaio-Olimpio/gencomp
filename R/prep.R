@@ -8,9 +8,12 @@
 ##' competition intensity factor.
 ##' 
 ##' @param data A data frame containing the phenotypic data.
-##' @param gen,row,col,ind,trait A string. The name of the columns that correspond
-##' to the genotype, row, column, individual (one plant per plot) and trait information,
-##' respectively. `ind` can also distinguish the plots, if there are multiple plants per plot.
+##' @param gen,row,col,trait A string. The name of the columns that correspond
+##' to the genotype, row, column, and trait information,
+##' respectively.
+##' @param plt A string or NULL. The name of the column that contain the plot information. 
+##' Useful to properly indicate the direction of data collection. If `NULL` (default), the function
+##' will automatically generate a column after ordering the data set by `row` and `col`
 ##' @param dist.row,dist.col An integer. The distance between rows and columns in the trial.
 ##' @param area A string. The name of the column that corresponds to the area information. 
 ##' Valid if the trial has non-contiguous blocks, for e.g., blocks 1 and 2 in area 1, and
@@ -110,71 +113,72 @@
 ##' \donttest{
 ##'  library(gencomp)
 ##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
-##'                     ind = 'tree', age = 'age', row = 'row', col = 'col',
+##'                     plt = 'tree', age = 'age', row = 'row', col = 'col',
 ##'                     dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
 ##'                     n.dec = 3, verbose = FALSE, effs = c("block"))
 ##' }
 
 
-prepfor <- function(data, gen, row, col, ind, trait, effs = NULL, dist.row, dist.col, 
+prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.row, dist.col, 
                     method = "SK", area = NULL, age = NULL, n.dec = 2, 
                     verbose = FALSE){
   
   # Messages and warnings
-  stopifnot("The number of individuals must be the product of no. rows * no. columns" = length(unique(data[,ind])) == 
-              length(unique(data[,row])) * length(unique(data[,col])))
+  if(!is.null(plt)){
+    stopifnot("The number of observations must be the product of no. rows * no. columns" = length(unique(data[,plt])) == 
+                length(unique(data[,row])) * length(unique(data[,col])))
+  } else if(!is.null(age)) {
+    stopifnot("The number of observations must be the product of no. rows * no. columns" = nrow(data)/length(unique(data[,age])) == 
+                length(unique(data[,row])) * length(unique(data[,col])))
+  } else{
+    stopifnot("The number of observations must be the product of no. rows * no. columns" = nrow(data) == 
+                length(unique(data[,row])) * length(unique(data[,col])))
+  }
   stopifnot("Please, choose between the available methods ('MU', 'CC' or 'SK')" = method %in% c('MU', 'CC', 'SK'))
   
   # Entry -------------------------------------------------------------------
   p = dist.col/dist.row
   dist.diag = sqrt(dist.row^2 + dist.col^2)
   
-  x = data.frame(
-    trat = as.factor(data[, gen]),
-    # repl = as.factor(data[, repl]),
-    ind = as.factor(data[, ind]), 
-    row = as.numeric(data[, row]),
-    col = as.numeric(data[, col]),
-    trait = as.numeric(data[, trait])
-  )
+  if(is.null(plt)){
+    x = data.frame(
+      trat = as.factor(data[, gen]),
+      row = as.numeric(data[, row]),
+      col = as.numeric(data[, col]),
+      trait = as.numeric(data[, trait])
+    )
+    if(is.null(area)) x$area = 1 else x$area = as.factor(data[,area])
+    if(is.null(age)) x$age = 1 else x$age = as.factor(data[,age])
+    x = x[order(x$age, x$area, x$row, x$col),]
+    x$ind = paste(x$trat, x$row, x$col, x$age, x$area, sep = "&")
+  }else{
+    x = data.frame(
+      trat = as.factor(data[, gen]),
+      ind = as.factor(data[, plt]), 
+      row = as.numeric(data[, row]),
+      col = as.numeric(data[, col]),
+      trait = as.numeric(data[, trait])
+    )
+    if(is.null(area)) x$area = 1 else x$area = as.factor(data[,area])
+    if(is.null(age)) x$age = 1 else x$age = as.factor(data[,age])
+    x = x[order(x$age, x$area, x$row, x$col),]
+  }
   
   control = data.frame(
     trait = length(x$trait), 
     ngen = nlevels(x$trat),
-    # nrepl = nlevels(x$repl),
     nrow = length(unique(x$row)),
     ncol = length(unique(x$col))
   )
   
   colnames(control) = c(trait, gen, row, col)
   
-  if(is.null(age)){
-    control$age = 0
-  }else{
-    control[, age] = length(unique(data[, age]))
-  }
+  if(is.null(age)) control$age = 0 else control[, age] = length(unique(data[, age]))
+  if(is.null(area)) control$area = 0 else control[, area] = length(unique(data[, area]))
   
-  if(is.null(area)){
-    control$area = 0
-  }else{
-    control[, area] = length(unique(data[, area]))
-  }
   
-  if(!is.null(area)){ # If the trial was laid out in different areas (talhões)
-    x$area = as.factor(data[, area])  
-  } else {
-    x$area = 1
-  }
   if(is.null(age)) # A single age ----------------------
   {
-    if(is.null(area)){
-      x = x[order(x$row, x$col),]
-      # data = data[order(data[,row], data[,col]),]
-    }else{
-      x = x[order(x$area, x$row, x$col),]
-      # data = data[order(data[,area], data[,row], data[,col]),]
-    }
-    
     Z = list()
     z <- matrix(0, nrow(x), nlevels(x$trat), dimnames = list(1:nrow(x), levels(x$trat))) 
     fd = NULL
@@ -382,15 +386,8 @@ prepfor <- function(data, gen, row, col, ind, trait, effs = NULL, dist.row, dist
     
   } else # Several ages -----------------------
   { 
-    x$age = as.factor(data[, age])  
     x = split(x, x$age)
-    x = lapply(x, function(q){
-      if(is.null(area)){
-        q[order(q$row, q$col),]
-      }else{
-        q[order(q$area, q$row, q$col),]
-      }
-    })
+    x = lapply(x, function(q) q[order(q$area, q$row, q$col),])
     
     Z = lapply(x, function(q){
       z <- matrix(0, nrow(q), nlevels(q$trat), dimnames = list(1:nrow(q), levels(q$trat))) 
@@ -783,7 +780,7 @@ print.comprepfor = function(x, ..., category = 'matrix', age = 'all'){
 #'\donttest{
 #' library(gencomp)
 ##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
-##'                     ind = 'tree', age = 'age', row = 'row', col = 'col',
+##'                     plt = 'tree', age = 'age', row = 'row', col = 'col',
 ##'                     dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
 ##'                     n.dec = 3, verbose = FALSE, effs = c("block"))
 ##'                                      
@@ -1152,16 +1149,9 @@ summary.comprepfor = function(object, ...){
 #' @examples
 #'\donttest{
 #' library(gencomp)
-#' library(agridat)
-#' data(connolly.potato)
-#' dat <- connolly.potato
-#' comps = prepcrop(data = dat, gen = "gen", row = "row", col = "col",
+#' comps = prepcrop(data = potato, gen = "gen", row = "row", col = "col",
 #'                  plt = NULL, effs = c("rep", 'matur'), trait = "yield",
 #'                  direction = "row", verbose = TRUE)
-#'                                      
-#' plot(comps, category = 'heatmap')
-#' plot(comps, category = 'boxplot')
-#' 
 #' }
 #'  
 
@@ -1200,7 +1190,7 @@ prepcrop = function(data, gen, row, col, trait, plt = NULL, effs = NULL, directi
   
   data = data[order(data[,row], data[,col]),]
   
-  if(any(data[,row] != x[,row])) break
+  # if(any(data[,row] != x[,row])) stop
   
   control = data.frame(
     trait = length(x$trait), 
@@ -1371,6 +1361,18 @@ print.comprepcrop = function(x, ..., category = 'matrix'){
 #' @importFrom rlang .data
 #' @rdname plot.comprepcrop
 #' @export
+#' 
+#' @examples
+#'\donttest{
+#' library(gencomp)
+#' comps = prepcrop(data = potato, gen = "gen", row = "row", col = "col",
+#'                  plt = NULL, effs = c("rep", 'matur'), trait = "yield",
+#'                  direction = "row", verbose = TRUE)
+#'                                      
+#' plot(comps, category = 'heatmap')
+#' plot(comps, category = 'boxplot')
+#' 
+#' }
 #'
 
 plot.comprepcrop = function(x, ..., category = 'heatmap'){
@@ -1429,7 +1431,7 @@ plot.comprepcrop = function(x, ..., category = 'heatmap'){
 #' 
 #' @export
 #' 
-#'
+#' 
 
 summary.comprepcrop = function(object, ...){
   print(attr(object, 'control'))

@@ -50,6 +50,15 @@ This function builds the genetic competition matrix, represented by a within-row
 or within-column incidence matrix (Stringer et al., 2011). It also
 prepares the dataset to be used for model fitting.
 }
+\examples{
+\donttest{
+library(gencomp)
+comps = prepcrop(data = potato, gen = "gen", row = "row", col = "col",
+                 plt = NULL, effs = c("rep", 'matur'), trait = "yield",
+                 direction = "row", verbose = TRUE)
+}
+ 
+}
 \references{
 Stringer, J.K., Cullis, B.R., Thompson, R., 2008. Joint modeling of spatial
 variability and within-row interplot competition to increase the efficiency of plant improvement.

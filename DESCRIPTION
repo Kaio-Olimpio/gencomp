@@ -34,8 +34,6 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    quarto,
     kableExtra
 VignetteBuilder: 
-    quarto,
     knitr

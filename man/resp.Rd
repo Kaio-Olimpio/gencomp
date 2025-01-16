@@ -106,26 +106,20 @@ covariance between DGE and IGE estimated in the model, and \eqn{\sigma^2_c} is t
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
-                   plt = 'tree', age = 'age', row = 'row', col = 'col',
+ dat = euca[which(euca$age == "6y"),]
+ comp_mat = prepfor(data = dat, gen = 'clone', area = 'area',
+                   plt = 'tree', age = NULL, row = 'row', col = 'col',
                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
                    n.dec = 3, verbose = FALSE, effs = c("block"))
- model = asr_ma(prep.out = comp_mat,
-                fixed = MAI~ age, 
-                random = ~ block:age, 
-                lrtest = TRUE, 
-                spatial = TRUE, 
-                cor = TRUE, 
-                maxit = 20)
+ model = asr(prep.out = comp_mat,
+              fixed = MAI~ 1, 
+              random = ~ block, 
+              lrtest = TRUE, 
+              spatial = TRUE, 
+              cor = TRUE, 
+              maxit = 20)
              
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
- 
- results$varcomp  # Variance components
- results$blups$main  # BLUPs (DGE, IGE and TGV, main effects)
- results$blups$within  # BLUPs (DGE, IGE and TGV, within-age effects)
- 
- # To export these results to the working directory, use:
- # write.csv(results$blups$main, file = "working/directory/filename.csv")
  }
 }
 \references{

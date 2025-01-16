@@ -41,11 +41,12 @@ machinery. Thus, you must have `ASReml-R` installed prior to installing
 
 ## Usage
 
-Currently, `gencomp` can be applied in three situations (click on the
-link for a detailed vignette):
+Currently, `gencomp` can be applied in three situations:
 
 - Single-trial tree breeding data
+  (`vignette(topic = "tree_competition", package = "gencomp")`)
 - Single-trial crop breeding data
+  (`vignette(topic = "crop_competition", package = "gencomp")`)
 - Multi-ages (repeated measures) tree breeding data
 
 ## Citation

@@ -1,27 +1,20 @@
 ---
 title: "Genetic competition in tree breeding trials"
-output: rmarkdown::html_vignette
 author: "Saulo F. S. Chaves"
 date: "`r Sys.Date()`"
 bibliography: bibliography.bib
-format: 
-  html:
+output: 
+  rmarkdown::html_vignette:
+    fig_width: 7
+    fig_height: 5
+    df_print: kable
     toc: true
-    toc-title: "Summary"
-    number-sections: true
-    number-depth: 4
-    anchor-sections: true
-    smooth-scroll: true
-    code-overflow: wrap
-    code-block-border-left: true
-    code-block-bg: true
-    lang: en
-    fig-format: retina
-    fig-cap-location: bottom
-    html-math-method: mathjax
+    toc_depth: 3
+    number_sections: true
+    anchor_sections: true
 vignette: >
   %\VignetteIndexEntry{Genetic competition in tree breeding trials}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -37,6 +30,13 @@ knitr::opts_chunk$set(
   text-align: justify !important
 }
 ```
+
+<!-- avoid border around images -->
+<style>
+    img {
+        border: 0;
+    }
+</style>
 
 # Introduction {.justify}
 
@@ -139,7 +139,7 @@ comp_mat = prepfor(
 )
 ```
 
-`data` is the working dataset. `gen`, `row`, `col`, and `trait` are the column names in the dataset that contain the information of genotypes, row, column, and trait, respectively. `dist_row` and `dist_col` are the distances between rows and columns, respectively. `method` refers to the method to be used to compute the competition intensity: it should be `"MU"`, `"CC"` or `"SK"` (as detailed above). `area` and `age` are `NULL` by default, but if you have non-contiguous blocks (as we have in our example) and multi-age (repeated measures) data (see `vignette("multi_age_competition"`), you can add the name of the columns that contain this information in the data frame. `n.dec` is the number of decimal digits to show in $\mathbf{Z}_c$. The `plt` argument is optional (defaulting to `NULL`) and allows users to specify the name of the column containing plot information. This helps ensure that the functions follow the same order as the data collection in the field. If `plt` is not provided, the functions will automatically generate a column to differentiate the plots, ordering the dataset by row and column. The `effs` argument accepts a string vector with the names of columns representing other effects to be considered in the model fitting step. For instance, the effect of block (`block`) effect. Finally, `verbose` controls whether a progress bar is printed in the console or not. 
+`data` is the working dataset. `gen`, `row`, `col`, and `trait` are the column names in the dataset that contain the information of genotypes, row, column, and trait, respectively. `dist_row` and `dist_col` are the distances between rows and columns, respectively. `method` refers to the method to be used to compute the competition intensity: it should be `"MU"`, `"CC"` or `"SK"` (as detailed above). `area` and `age` are `NULL` by default, but if you have non-contiguous blocks (as we have in our example) and multi-age (repeated measures) data (see `vignette("multi_age_competition"`), you can add the name of the columns that contain this information in the data frame. `n.dec` is the number of decimal digits to show in $\mathbf{Z}_c$. The `plt` argument is optional (defaulting to `NULL`) and allows users to specify the name of the column containing plot information. This helps ensure that the functions follow the same order as the data collection in the field. If `plt` is not provided, the function will automatically generate a column to differentiate the plots, ordering the dataset by row and column. The `effs` argument accepts a string vector with the names of columns representing other effects to be considered in the model fitting step. For instance, the effect of block (`block`). Finally, `verbose` controls whether a progress bar is printed in the console or not. 
 
 The `prepfor` function generates a list of class `comprepfor`. This list has four elements:
 
@@ -185,24 +185,18 @@ comp_mat$Z[1:5, 1:5] |>
 comp_mat$CIF
 ```
 
-`comprepfor` objects are also compatible with the S3 method `plot`, which can be used to generate a heatmap illustrating the field trial (@fig-heatmap1), and box-plots with each candidate's performance (@fig-boxplot1). 
+`comprepfor` objects are also compatible with the S3 method `plot`, which can be used to generate a heatmap illustrating the field trial, and box-plots with each candidate's performance. 
 
-```{r}
-#| fig-cap: "Heatmap representing the grid, in which the cells are filled according to the phenotype value of each plot (blank cells are missing values)"
-#| label: fig-heatmap1
-
+```{r, fig.cap = "Heatmap representing the grid, in which the cells are filled according to the phenotype value of each plot (blank cells are missing values)"}
 plot(comp_mat, category = "heatmap")
 ```
 
 
-```{r warning=FALSE, message=FALSE}
-#| fig-cap: "Boxplots depicting the phenotypic performance (y-axis) of each selection candidate (x-axis). The candidates' names were removed for better visualization"
-#| label: fig-boxplot1
-
+```{r warning=FALSE, message=FALSE, fig.cap = "Boxplots depicting the phenotypic performance (y-axis) of each selection candidate (x-axis). The candidates' names were removed for better visualization"}
 plot(comp_mat, category = "boxplot") + theme(axis.text.x = element_blank())
 ```
 
-The `summary(comprepfor)` function returns the number of phenotypic records, number of selection candidates, number of replicates, number of rows and columns, and the number of ages (if applicable) and areas (if applicable).
+The `summary(comprepfor)` function returns the number of phenotypic records, number of selection candidates, number of rows and columns, and the number of ages (if applicable) and areas (if applicable).
 
 ```{r}
 summary(comp_mat)
@@ -219,7 +213,7 @@ $$
 $$
  
 where $\mathbf{y}$ is the vector of phenotypic records, $\boldsymbol{\beta}$ is the vector of fixed effects, $\mathbf{g}$ is the vector of direct genetic effects (DGE), $\mathbf{c}$ is the vector of indirect genetic effects (IGE), $\mathbf{p}$ is the vector of other random effects, and $\boldsymbol{\varepsilon}$ is the vector of spatially correlated errors. $\mathbf{X}$ is the incidence matrix of the fixed effects, $\mathbf{Z}_g$ is the DGE incidence matrix, $\mathbf{Z}_c$ is the IGE incidence matrix (built using `prepfor`), and $\mathbf{Z}_p$ is the design matrix of other random effects. The dimensions of $\mathbf{Z}_c$ are the same as $\mathbf{Z}_g$. The spatially correlated errors are distributed as 
- $\boldsymbol{\varepsilon} \sim \mathcal{N}\{\mathbf{0}, \sigma^2_\xi[\mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)]\}$, where $\sigma^2_\varepsilon$ is the spatially correlated residual variance, $\mathbf{AR1}(\rho_C)$ and $\mathbf{AR1}(\rho_R)$ are the first-order autoregressive correlation matrices in the column and row directions, and $\otimes$ is the Kronecker product. If `area` is not `NULL` (like in the example), heterogeneous residual variances and particular autocorrelations are obtained per area. If `cor = TRUE` (default), the function will fit a model in which $\mathbf{g}$ and $\mathbf{c}$ are correlated outcomes of the genotypic effects decomposition. They both follow a Gaussian distribution, with mean centred in zero, and covariance given by:
+ $\boldsymbol{\varepsilon} \sim \mathcal{N}\{\mathbf{0}, \sigma^2_\xi[\mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)]\}$, where $\sigma^2_\varepsilon$ is the spatially correlated residual variance, $\mathbf{AR1}(\rho_C)$ and $\mathbf{AR1}(\rho_R)$ are the first-order autoregressive correlation matrices in the column and row directions, and $\otimes$ is the Kronecker product. If `area` is not `NULL` (like in the example), heterogeneous residual variances and particular autocorrelations are obtained per area. If `cor = TRUE` (default, see below), the function will fit a model in which $\mathbf{g}$ and $\mathbf{c}$ are correlated outcomes of the genotypic effects decomposition. They both follow a Gaussian distribution, with mean centred in zero, and covariance given by:
   
 $$
 \mathbf{\Sigma_g} = \begin{bmatrix}\sigma_{\text{g}}^2 & \sigma_{\text{gc}}\\\sigma_{\text{gc}} & \sigma_{\text{c}}^2\\\end{bmatrix}\otimes {{\mathbf I_V}}
@@ -345,77 +339,59 @@ $$
 $$
 with $\bar{c}$ being the mean IGE in the population, $\hat{c}_v$ the IGE of the $v^{th}$ genotype, $sd(c)$ the IGE's standard deviation, and $\tau$ a weight defining the thresholds to declare if a genotype is aggressive, homoeostatic or sensitive.
 
-This classification is illustrated using a density plot (@fig-dens1), a scatter plot (@fig-point1) and a heat map representing the field grid (@fig-heat2). These plots aid in the investigation of the relationship between DGE and IGE, how this dynamics are related to classification, and how aggressive, homoeostatic and sensitive are distributed in the field.
+This classification is illustrated using a density plot, a scatter plot and a heat map representing the field grid. These plots aid in the investigation of the relationship between DGE and IGE, how this dynamics are related to classification, and how aggressive, homoeostatic and sensitive are distributed in the field.
 
-```{r}
-#| fig-cap: "Density of IGE values. The area within the distribution is filled according to the competition class"
-#| label: fig-dens1
+```{r fig.cap = "Density of IGE values. The area within the distribution is filled according to the competition class"}
 plot(res, category = "class")
 ```
 
 
-```{r}
-#| fig-cap: "Relationship between IGE (x-axis) and DGE (y-axis). The dots are coloured according to the competition class."
-#| label: fig-point1
+```{r fig.cap = "Relationship between IGE (x-axis) and DGE (y-axis). The dots are coloured according to the competition class."}
 plot(res, category = "DGEvIGE")
 ```
 
-```{r}
-#| fig-cap: "Heatmap representations of the field trial, with cells filled according to the competition class of each genotype"
-#| label: fig-heat2
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the competition class of each genotype"}
 plot(res, category = "grid.class")
 ```
 
 ### Ranking
 
-Three possible rankings are possible: based on the DGE, the IGE (@fig-rank1), or the TGV (@fig-rank2). Note from @fig-rank1 that DGE and IGE have different reliabilities, with DGE's being usually higher. It is advisable to take this into consideration when making decisions.
+Three possible rankings are possible: based on the DGE, the IGE, or the TGV. Note that DGE and IGE have different reliabilities, with DGE's being usually higher. It is advisable to take this into consideration when making decisions.
 
-```{r}
-#| fig-cap: "Direct (DGE) and indirect (IGE) genotypic effects (\textit{y}-axis) of each candidate. The plots are in descending order according to the DGE. The colour of the dots reflects the reliability of both the DGE and IGE for each genotype"
-#| label: fig-rank1
+```{r fig.cap = "Direct (DGE) and indirect (IGE) genotypic effects (\textit{y}-axis) of each candidate. The plots are in descending order according to the DGE. The colour of the dots reflects the reliability of both the DGE and IGE for each genotype"}
 plot(res, category = "DGE.IGE") + 
   theme(axis.text.x = element_text(size = 4, vjust = .5, hjust = 1))
 ```
 
 
-```{r}
-#| fig-cap: "Total genotypic value (TGV) (y-axis) of each candidate (x-axis), in increasing order"
-#| label: fig-rank2
+```{r fig.cap = "Total genotypic value (TGV) (y-axis) of each candidate (x-axis), in increasing order"}
 plot(res, category = "TGV") + 
   theme(axis.text.x = element_text(size = 4, vjust = .5, hjust = 1))
 ```
 
-The distribution of high-performance and/or competitive candidates is illustrated by @fig-heat3 and @fig-heat4.
+The distribution of high-performance and/or competitive candidates is also illustrated.
 
-```{r}
-#| fig-cap: "Heatmap representations of the field trial, with cells filled according to the direct genotypic effect (DGE) of each genotype"
-#| label: fig-heat3
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the direct genotypic effect (DGE) of each genotype"}
 plot(res, category = "grid.dge")
 ```
 
-```{r}
-#| fig-cap: "Heatmap representations of the field trial, with cells filled according to the indirect genotypic effect (IGE) of each genotype"
-#| label: fig-heat4
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the indirect genotypic effect (IGE) of each genotype"}
 plot(res, category = "grid.ige")
 ```
 
 ### Number of different neighbours
 
-The number of different genotypes as neighbours of the candidates can be evaluated using @fig-bar1. In the example dataset, almost all clones neighboured each other, and most of them had homoeostatic neighbours.
+The number of different genotypes as neighbours of the candidates can be evaluated by the figure below. In the example dataset, almost all clones neighboured each other, and most of them had homoeostatic neighbours.
 
-```{r}
-#| fig-cap: "Number of different genotypes as neighbors (total and per competition class) of each selection candidate"
-#| label: fig-bar1
+```{r fig.cap = "Number of different genotypes as neighbors (total and per competition class) of each selection candidate"}
 plot(res, category = "nneigh")
 ```
 
 ### Error distribution
 
-The last plot available for objects of class `compresp` is a heatmap coloured according to the residual value of each plot (@fig-heat5). This is useful to observe possible trends in the field.
+The last plot available for objects of class `compresp` is a heatmap coloured according to the residual value of each plot. This is useful to observe possible trends in the field.
 
-```{r}
-#| fig-cap: "Heatmap representations of the field trial, with cells filled according to the residual value of each plot. Blank cells are missing values"
-#| label: fig-heat5
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the residual value of each plot. Blank cells are missing values"}
 plot(res, category = "grid.res")
 ```
 

@@ -1,6 +1,6 @@
 Package: gencomp
 Title: Fit Spatial-Genetic Competition Models
-Version: 0.0.0.1
+Version: 1.0.0.0
 Authors@R: 
     c(person("Saulo F. S.", "Chaves", role = c("aut", "cre"),
                      email = "saulo.chaves@ufv.br",
@@ -34,3 +34,4 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown
+VignetteBuilder: quarto, knitr

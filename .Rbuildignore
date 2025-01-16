@@ -15,3 +15,5 @@
 ^pkgdown$
 ^temp\.R$
 ^Manuscript$
+^repo_settings\.R$
+^vignettes/*_files$

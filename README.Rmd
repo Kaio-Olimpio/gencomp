@@ -9,6 +9,54 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Package `GenComp`
+# Exploring genetic and spatial competition with `gencomp`
 
-`GenComp` is in its infancy. Coming soon........
+Imagine a group of caged animals where everyone has it’s own set of abilities to acquire food. Among them, there is a notably competitive animal named Max. Max is driven by a strong desire to outshine his companions, particularly when it comes to securing a limited food resource within the cage. In this confined space, Max competitive nature tends to create a stressful environment, negatively affecting the access to food of his cage mates. (*Example extracted from [this blog](https://vsni.co.uk/blogs/competitive-genetics-exploring-the-impact-of-direct-and-indirect-genetic-effects-in-tree-breeding/)*)
+
+Just like Max, plants also compete. In this case, space, light, water and nutrients are the main limited resources. In a competition environment, breeders cannot be fully assured that a candidate had a poor performance *per se*, or it had overly competitive neighbours that suppressed its development. This is how competition affects the selection, and that is why it should not be overlooked in the breeding pipeline. 
+
+`gencomp` is an `R` package designed to aid plant breeders in dealing with genetic and spatial competition in field trials. The package has functions to: i) fit (spatial) genetic competition models, ii) define competition classes, iii) compute the total genotypic value and iv) calculate the total heritable variation. Specifically for tree breeding, `gencomp` can also predict the performance of commercial forest stands composed of clonal mixtures, based on clones' competition capacity.
+
+## Installation
+
+Install `gencomp` running the following code:
+
+```{r eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("Kaio-Olimpio/gencomp")
+```
+
+**IMPORTANT: `gencomp` fits linear mixed models using the `ASReml-R` machinery. Thus, you must have `ASReml-R` installed prior to installing `gencomp`.**
+
+## Usage
+
+Currently, `gencomp` can be applied in three situations (click on the link for a detailed vignette):
+
+- Single-trial tree breeding data
+- Single-trial crop breeding data
+- Multi-ages (repeated measures) tree breeding data
+
+## Citation
+
+If you used the package to analyse data for a publication, please cite:
+
+Chaves SFS, Ferreira FM, Ferreira GC, Gezan SA, Dias KOG (2025) Incorporating spatial and genetic competition into breeding pipelines with the `R` package `gencomp`. Heredity. https://doi.org/10.1038/s41437-024-00743-9
+
+## Recommended papers
+
+Bijma P (2014) The quantitative genetics of indirect genetic effects: a selective review of modelling issues. Heredity 112:61-69. https://doi.org/10.1038/hdy.2013.15
+
+Cappa EP, Cantet RJC (2008) Direct and competition additive effects in tree breeding: bayesian estimation from an individual tree mixed model. Silvae Genet 57:45–56. https://doi.org/10.1515/sg-2008-0008
+
+Costa e Silva J, Kerr RJ (2013) Accounting for competition in genetic analysis, with particular emphasis on forest genetic trials. Tree Genet Genomes 9:1–17. https://doi.org/10.1007/s11295-012-0521-8
+
+Ferreira FM, Chaves SFS, Bhering LL et al. (2023) A novel strategy to predict clonal composites by jointly modeling spatial variation and genetic competition. For Ecol Manag 548:121393. https://doi.org/10.1016/j.foreco.2023.121393
+
+Ferreira FM, Chaves SFS, Santos OP et al. (2024) Competition effects can mislead selection in eucalypt breeding trials. For Ecol Manag 561:121892. https://doi.org/10.1016/j.foreco.2024.121892
+
+Muir WM (2005) Incorporation of competitive effects in forest tree or animal breeding programs. Genetics 170:1247–1259. https://doi.org/10.1534/genetics.104.035956
+
+Stringer JK, Cullis BR, Thompson R (2011) Joint modeling of spatial variability and within-row interplot competition to increase the efficiency of plant improvement. J Agric Biol Environ Stat 16:269–281. https://doi.org/10.1007/s13253-010-0051-5
+
+Walsh B, Lynch M (2018) Evolution and selection of quantitative traits, vol. 1. Oxford University Press. (Chapter 22)
+

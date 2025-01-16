@@ -1,3 +1,31 @@
+# Update asreml model ---------------
+
+##' @title Update the asreml object
+##' 
+##' @description
+##' This function keeps updating the `asreml` object until full convergence
+##' 
+##' @param model An object of class `asreml`.
+##' @return An object of class `asreml` with all parameters converged.
+##' @seealso [gencomp::asr()], [gencomp::asr_ma()],  [asreml::asreml.options], [asreml::asreml.object], [asreml::family_dist]
+##' 
+##' @importFrom asreml update.asreml
+##' @keywords internal
+
+.up.mod = function(model) {
+  if (model$converge) {
+    repeat {
+      if (any(na.exclude(model$vparameters.pc) >= 1)) {
+        model = suppressWarnings(update(model))
+        message("gencomp: The model was updated and reached full convergence")
+      } else{
+        break
+      }
+    }
+  } else message("The model failed to converge")
+  return(model)
+}
+
 # Single-environment spatial competition model ----------------------------
 
 ##' @title Fit a genetic competition model
@@ -84,14 +112,16 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
   
   control = attr(prep.out, 'control')
   
-  prep.out <<- prep.out
+  # prep.out <<- prep.out
   control <<- control
+  fixed <<- fixed
+  random <<- random
   
   input = prep.out$data
   
   if(inherits(prep.out, "comprepfor") && control[,6] > 0) ### Multi-areas ------------
   {
-    input = input[order(input[,names(control)[6]],
+    input <<- input[order(input[,names(control)[6]],
                         input[,names(control)[3]], 
                         input[,names(control)[4]]),]
     
@@ -128,6 +158,7 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
                              data = input, ...)
       }
       
+      scm = .up.mod(scm)
       
       if(lrtest & scm$converge){
         message("====> Starting likelihood ratio tests")
@@ -220,6 +251,8 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
                                colnames(control)[6],')')
                              ),
                              data = input, ...)
+        
+        scm = .up.mod(scm)
       }
       if(lrtest & scm$converge){
         message("====> Starting likelihood ratio tests")
@@ -283,7 +316,7 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
 
   } else ### Single area -----------
   {
-    input = input[order(input[,names(control)[3]], 
+    input <<- input[order(input[,names(control)[3]], 
                         input[,names(control)[4]]),]
     
     if(spatial){
@@ -315,6 +348,8 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
                              ),
                              data = input, ...)
       }
+      
+      scm = .up.mod(scm)
       
       if(lrtest & scm$converge){
         message("====> Starting likelihood ratio tests")
@@ -397,6 +432,9 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
                              group = list(g1 = 1:control[,2]),
                              data = input, ...)
       }
+      
+      scm = .up.mod(scm)
+      
       if(lrtest & scm$converge){
         message("====> Starting likelihood ratio tests")
         
@@ -446,8 +484,7 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
     }
   }
   
-  remove(prep.out, envir = .GlobalEnv)
-  remove(control, envir = .GlobalEnv)
+  remove(control, fixed, random, envir = .GlobalEnv)
   class(scm) = c("compmod", class(scm))
   
   return(scm)
@@ -547,8 +584,10 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
   
   control = attr(prep.out, 'control')
   
-  prep.out <<- prep.out
+  # prep.out <<- prep.out
   control <<- control
+  fixed <<- fixed
+  random <<- random
   
   input = prep.out$data
   
@@ -556,7 +595,7 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
   {
     input[,"aux"] = factor(paste(paste(names(control)[6], input[,names(control)[6]], sep = '_'),
                                  paste(names(control)[5], input[,names(control)[5]], sep = '_'),sep = ':'))
-    input = input[order(input[,'aux'], input[,names(control)[3]], input[,names(control)[4]]),]
+    input <<- input[order(input[,'aux'], input[,names(control)[3]], input[,names(control)[4]]),]
     
     if(spatial){
         
@@ -599,6 +638,8 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
                                data = input, ...)
           
         }
+      
+      scm = .up.mod(scm)
         
       if(lrtest & scm$converge){
         message("====> Starting likelihood ratio tests")
@@ -738,6 +779,9 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
                                data = input, ...)
           
         }
+        
+        scm = .up.mod(scm)
+        
         if(lrtest & scm$converge){
           message("====> Starting likelihood ratio tests")
           
@@ -828,7 +872,7 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
       
   } else ### Single area -----------
   {
-      input = input[order(input[,names(control)[5]],
+      input <<- input[order(input[,names(control)[5]],
                           input[,names(control)[3]], 
                           input[,names(control)[4]]),]
       
@@ -876,6 +920,8 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
                                ),
                                data = input, ...)
         }
+        
+        scm = .up.mod(scm)
         
         if(lrtest & scm$converge){
           message("====> Starting likelihood ratio tests")
@@ -1038,6 +1084,8 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
                                data = input, ...)
         }
         
+        scm = .up.mod(scm)
+        
         if(lrtest & scm$converge){
           message("====> Starting likelihood ratio tests")
           
@@ -1153,8 +1201,7 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
       }
   }
   
-  remove(prep.out, envir = .GlobalEnv)
-  remove(control, envir = .GlobalEnv)
+  remove(control, fixed, random, envir = .GlobalEnv)
   
   class(scm) = c("compmod", class(scm))
   

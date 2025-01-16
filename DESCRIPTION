@@ -33,5 +33,9 @@ Imports:
     data.table
 Suggests: 
     knitr,
-    rmarkdown
-VignetteBuilder: quarto, knitr
+    rmarkdown,
+    quarto,
+    kableExtra
+VignetteBuilder: 
+    quarto,
+    knitr

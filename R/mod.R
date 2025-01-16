@@ -10,13 +10,14 @@
 ##' @seealso [gencomp::asr()], [gencomp::asr_ma()],  [asreml::asreml.options], [asreml::asreml.object], [asreml::family_dist]
 ##' 
 ##' @importFrom asreml update.asreml
+##' @importFrom stats na.exclude
 ##' @keywords internal
 
 .up.mod = function(model) {
   if (model$converge) {
     repeat {
-      if (any(na.exclude(model$vparameters.pc) >= 1)) {
-        model = suppressWarnings(update(model))
+      if (any(stats::na.exclude(model$vparameters.pc) >= 1)) {
+        model = suppressWarnings(asreml::update.asreml(model))
         message("gencomp: The model was updated and reached full convergence")
       } else{
         break

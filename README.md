@@ -71,12 +71,14 @@ Costa e Silva J, Kerr RJ (2013) Accounting for competition in genetic
 analysis, with particular emphasis on forest genetic trials. Tree Genet
 Genomes 9:1–17. <https://doi.org/10.1007/s11295-012-0521-8>
 
-Ferreira FM, Chaves SFS, Bhering LL et al. (2023) A novel strategy to
-predict clonal composites by jointly modeling spatial variation and
-genetic competition. For Ecol Manag 548:121393.
+Ferreira FM, Chaves SFS, Bhering LL, Alves RS, Takahashi EK, Sousa JE,
+Resende MDV, Leite FP, Gezan SA, Viana JMS, Fernandes SB, Dias KOG
+(2023) A novel strategy to predict clonal composites by jointly modeling
+spatial variation and genetic competition. For Ecol Manag 548:121393.
 <https://doi.org/10.1016/j.foreco.2023.121393>
 
-Ferreira FM, Chaves SFS, Santos OP et al. (2024) Competition effects can
+Ferreira FM, Chaves SFS, Santos OP, Nunes ACP, Tambarussi EV, Pereira
+GS, Santos GA, Bhering LL, Dias KOG (2024) Competition effects can
 mislead selection in eucalypt breeding trials. For Ecol Manag
 561:121892. <https://doi.org/10.1016/j.foreco.2024.121892>
 

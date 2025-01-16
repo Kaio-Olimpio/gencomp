@@ -32,7 +32,7 @@ Install `gencomp` running the following code:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Kaio-Olimpio/gencomp")
+devtools::install_github("Kaio-Olimpio/gencomp", build_vignettes = TRUE)
 ```
 
 **IMPORTANT: `gencomp` fits linear mixed models using the `ASReml-R`

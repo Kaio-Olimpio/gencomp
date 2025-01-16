@@ -8,7 +8,7 @@ companions, particularly when it comes to securing a limited food
 resource within the cage. In this confined space, Max's competitive nature
 tends to create a stressful environment, negatively affecting his cage mates' access
 to food. (*Example extracted from [this
-blog](https://vsni.co.uk/blogs/competitive-genetics-exploring-the-impact-of-direct-and-indirect-genetic-effects-in-tree-breeding/)*).
+blog](https://vsni.co.uk/blogs/competitive-genetics-exploring-the-impact-of-direct-and-indirect-genetic-effects-in-tree-breeding/)*)
 
 Just like Max, plants also compete. Space, light, water, and nutrients are the main limited resources in this case. In a competition
 environment, breeders cannot be fully assured that a candidate had a

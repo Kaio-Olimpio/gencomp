@@ -5,13 +5,12 @@ Imagine a group of caged animals where everyone has it’s own set of
 abilities to acquire food. Among them, there is a notably competitive
 animal named Max. Max is driven by a strong desire to outshine his
 companions, particularly when it comes to securing a limited food
-resource within the cage. In this confined space, Max competitive nature
-tends to create a stressful environment, negatively affecting the access
-to food of his cage mates. (*Example extracted from [this
-blog](https://vsni.co.uk/blogs/competitive-genetics-exploring-the-impact-of-direct-and-indirect-genetic-effects-in-tree-breeding/)*)
+resource within the cage. In this confined space, Max's competitive nature
+tends to create a stressful environment, negatively affecting his cage mates' access
+to food. (*Example extracted from [this
+blog](https://vsni.co.uk/blogs/competitive-genetics-exploring-the-impact-of-direct-and-indirect-genetic-effects-in-tree-breeding/)*).
 
-Just like Max, plants also compete. In this case, space, light, water
-and nutrients are the main limited resources. In a competition
+Just like Max, plants also compete. Space, light, water, and nutrients are the main limited resources in this case. In a competition
 environment, breeders cannot be fully assured that a candidate had a
 poor performance *per se*, or it had overly competitive neighbours that
 suppressed its development. This is how competition affects the
@@ -21,7 +20,7 @@ pipeline.
 `gencomp` is an `R` package designed to aid plant breeders in dealing
 with genetic and spatial competition in field trials. The package has
 functions to: i) fit (spatial) genetic competition models, ii) define
-competition classes, iii) compute the total genotypic value and iv)
+competition classes, iii) compute the total genotypic value, and iv)
 calculate the total heritable variation. Specifically for tree breeding,
 `gencomp` can also predict the performance of commercial forest stands
 composed of clonal mixtures, based on clones’ competition capacity.

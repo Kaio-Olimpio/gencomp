@@ -59,27 +59,23 @@
 	title = {Direct and competition additive effects in tree breeding: bayesian estimation from an individual tree mixed model},
 	volume = {57},
 	doi = {10.1515/sg-2008-0008},
-	abstract = {Abstract
-            
-              An individual tree model with additive direct and competition effects is introduced to account for competitive effects in forest genetics evaluation. The mixed linear model includes fixed effects as well as direct and competition breeding values plus permanent environmental effects. Competition effects, either additive or environmental, are identified in the phenotype of a competitor tree by means of ‘intensity of competition’ elements (IC), which are non-zero elements of the incidence matrix of the additive competition effects. The ICs are inverse function of the distance and the number of competing individuals, either row-column wise or diagonally. The ICs allow standardization of the variance of competition effects in the phenotypic variance of any individual tree, so that the model accounts for unequal number of neighbors. Expressions are obtained for the bias in estimating additive variance using the covariance between half-sibs, when ignoring competition effects for row-plot designs and for single-tree plot designs. A data set of loblolly pines on growth at breast height is used to estimate the additive variances of direct and competition effects, the covariance between both effects, and the variance of permanent environmental effects using a Bayesian method via Gibbs sampling and Restricted Maximum Likelihood procedures (REML) via the Expectation- Maximization (EM) algorithm. No problem of convergence was detected with the model and ICs used when compared to what has been reported in the animal breeding literature for such models. Posterior means (standard error) of the estimated parameters were σ̂
-              2
-              Ad
-              = 12.553 (1.447), σ̂
-              2
-              Ac
-              = 1.259 (0.259), σ̂
-              AdAc
-              = -3.126 (0.492), σ̂
-              2
-              p = 1.186 (0.289), and σ̂
-              2
-              e
-              = 5.819 (1.07). Leaving permanent environmental competition effects out of the model may bias the predictions of direct breeding values. Results suggest that selection for increasing direct growth while keeping a low level of competition is feasible.},
 	number = {2},
 	journal = {Silvae Genetica},
 	author = {Cappa, Eduardo P. and Cantet, R. J. C.},
 	year = {2008},
 	pages = {45--56},
+}
+
+@article{ferreira_competition_2024,
+	title = {Competition effects can mislead selection in eucalypt breeding trials},
+	volume = {561},
+	doi = {10.1016/j.foreco.2024.121892},
+	language = {en},
+	journal = {Forest Ecology and Management},
+	author = {Ferreira, Filipe Manoel and Chaves, Saulo Fabrício Silva and Santos, Osmarino Pires and Nunes, Andrei Caíque Pires and Tambarussi, Evandro Vagner and Pereira, Guilherme Silva and Santos, Gleison Augusto and Bhering, Leonardo Lopes and Dias, Kaio Olimpio Graças},
+	year = {2024},
+	pages = {121892},
+	file = {Ferreira - 2024 - Competition effects can mislead selection in eucal.pdf:C\:\\Users\\saulo\\Zotero\\storage\\QRW5WD6T\\Ferreira - 2024 - Competition effects can mislead selection in eucal.pdf:application/pdf},
 }
 
 @article{ferreira_novel_2023,
@@ -93,3 +89,20 @@
 	keywords = {Quantitative genetics, Linear mixed models, Competition, Associative effects, Eucalyptus breeding},
 	pages = {121393},
 }
+
+
+@article{chaves_incorporating_2025,
+	title = {Incorporating spatial and genetic competition into breeding pipelines with the {R} package gencomp},
+	issn = {1365-2540},
+	doi = {10.1038/s41437-024-00743-9},
+	abstract = {Genetic competition can obscure the true merit of selection candidates, potentially leading to altered genotype rankings and a divergence between expected and actual genetic gains. Despite a wealth of literature on genetic competition in plant and animal breeding, the separation of genetic values into direct genetic effects (DGE, related to a genotype’s merit) and indirect genetic effects (IGE, related to the effects of a genotype’s alleles on its neighbor's phenotype) in linear mixed models is often overlooked, likely due to the complexity involved. To address this, we introduce gencomp, a new R package designed to simplify the use of (spatial-) genetic competition models in crop and tree breeding routines. gencomp includes functions for constructing the genetic competition matrix, fitting (spatial-) genetic competition models via the variance-component approach, and extracting key results such as variance components, heritabilities, competition classes, and total genetic values. For tree breeding, gencomp also calculates the merit of different clonal mixtures using the estimated DGE and IGE of the selection candidates. In this paper, we first present the theoretical foundation of the methods implemented in the package. We then demonstrate the use of gencomp with two datasets: one simulated from a Eucalyptus spp. trial and a real potato dataset. We used both datasets to demonstrate the influence of genetic competition in variance component estimates, heritabilities and selection. Despite the dependency on ASReml-R, a paid resource, gencomp is a user-friendly tool that can popularize genetic competition models, contributing to more informed decision-making in plant breeding.},
+	language = {en},
+	urldate = {2025-01-16},
+	journal = {Heredity},
+	author = {Chaves, Saulo F. S. and Ferreira, Filipe M. and Ferreira, Getulio C. and Gezan, Salvador A. and Dias, Kaio Olimpio G.},
+	month = jan,
+	year = {2025},
+	keywords = {Plant breeding},
+	pages = {1--13},
+}
+

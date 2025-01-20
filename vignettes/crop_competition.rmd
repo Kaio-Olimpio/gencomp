@@ -129,7 +129,7 @@ comp_mat$Z[1:5, 1:5] |>
     kbl(format = 'html', row.names = FALSE, digits = 2) |> kable_styling()
 ```
   
-`comprepcrop` objects are also compatible with the S3 method `plot`, which can be used to generate a heatmap illustrating the field trial, and box-plots with each candidate's performance. 
+`comprepcrop` objects are compatible with the S3 method `plot`, which can be used to generate a heatmap illustrating the field trial, and box-plots with each candidate's performance. 
 
 ```{r heatmap1, fig.cap = "Heatmap representing the grid, in which the cells are filled according to the phenotype value of each plot (blank cells are missing values)"}
 plot(comp_mat, category = "heatmap")
@@ -147,8 +147,6 @@ The `summary(comprepfor)` function returns the number of phenotypic records, num
 summary(comp_mat)
 ```
 
-The name corresponding to each value is compatible with the name used in the dataset.
-
 # Fitting the model {.justify}
 
 A general spatial-genetic competition model can be represented by: 
@@ -158,7 +156,7 @@ $$
 $$
  
 where $\mathbf{y}$ is the vector of phenotypic records, $\boldsymbol{\beta}$ is the vector of fixed effects, $\mathbf{g}$ is the vector of direct genetic effects (DGE), $\mathbf{c}$ is the vector of indirect genetic effects (IGE), $\mathbf{p}$ is the vector of other random effects, and $\boldsymbol{\varepsilon}$ is the vector of spatially correlated errors. $\mathbf{X}$ is the incidence matrix of the fixed effects, $\mathbf{Z}_g$ is the DGE incidence matrix, $\mathbf{Z}_c$ is the IGE incidence matrix (built using `prepfor`), and $\mathbf{Z}_p$ is the design matrix of other random effects. The dimensions of $\mathbf{Z}_c$ are the same as $\mathbf{Z}_g$. The spatially correlated errors are distributed as 
- $\boldsymbol{\varepsilon} \sim \mathcal{N}\{\mathbf{0}, \sigma^2_\xi[\mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)]\}$, where $\sigma^2_\varepsilon$ is the spatially correlated residual variance, $\mathbf{AR1}(\rho_C)$ and $\mathbf{AR1}(\rho_R)$ are the first-order autoregressive correlation matrices in the column and row directions, and $\otimes$ is the Kronecker product. Note that spatial modelling is not possible in the example dataset, so $\boldsymbol{\varepsilon} \mathcal{N} \left( \mathbf{0}, \sigma^2_\varepsilon \mathbf{I} \right)$, i.e., a genetic competition model (without the spatial component) is being fitted. If `cor = TRUE` (default, see below), the function will fit a model in which $\mathbf{g}$ and $\mathbf{c}$ are correlated outcomes of the genotypic effects decomposition. They both follow a Gaussian distribution, with mean centred in zero, and covariance given by:
+ $\boldsymbol{\varepsilon} \sim \mathcal{N}\{\mathbf{0}, \sigma^2_\varepsilon[\mathbf{AR1}(\rho_C) \otimes \mathbf{AR1}(\rho_R)]\}$, where $\sigma^2_\varepsilon$ is the spatially correlated residual variance, $\mathbf{AR1}(\rho_C)$ and $\mathbf{AR1}(\rho_R)$ are the first-order autoregressive correlation matrices in the column and row directions, and $\otimes$ is the Kronecker product. Note that spatial modelling is not possible in the example dataset, so $\boldsymbol{\varepsilon} \mathcal{N} \left( \mathbf{0}, \sigma^2_\varepsilon \mathbf{I} \right)$, i.e., a genetic competition model (without the spatial component) is being fitted. If `cor = TRUE` (default, see below), the function will fit a model in which $\mathbf{g}$ and $\mathbf{c}$ are correlated outcomes of the genotypic effects decomposition. They both follow a Gaussian distribution, with mean centred in zero, and covariance given by:
   
 $$
 \mathbf{\Sigma_g} = \begin{bmatrix}\sigma_{\text{g}}^2 & \sigma_{\text{gc}}\\\sigma_{\text{gc}} & \sigma_{\text{c}}^2\\\end{bmatrix}\otimes {{\mathbf I_V}}
@@ -178,7 +176,7 @@ model = asr(
   cor = TRUE
 )
 ```
-`prep.out` is a `comprepcrop` object. `fixed` is a formula, declared just like is usually done for regular `asreml` models. `random` is also a formula, but this argument should just be altered if other random effects than the genotypic effects should be considered in the model. This is because all pre-programmed models already consider DGE and IGE, as previsouly described. `lrtest` defines if hypothesis tests using likelihood ratio tests should be done. `spatial` determines if a regular genetic competition model (`spatial = FALSE`) or a spatial-genetic competition model (`spatial = TRUE`) should be fitted. Finally, `cor` dictates if the function will fit a model considering the covariance between DGE and IGE (`cor = TRUE`) or not (`cor = FALSE`). `asr` can receive other arguments passed on to the `asreml` function (see `?asreml` for more information). The output of the `asr` function is an object of classes `asreml` and `compmod`. Since it holds the `asreml` class, it is suitable for using with S3 methods like `plot`, `summary`, `predict`, `update`, `resid` and others.
+`prep.out` is a `comprepcrop` object. `fixed` is a formula, declared just like is usually done for regular `asreml` models. `random` is also a formula, but this argument should just be altered if other random effects than the genotypic effects should be considered in the model. This is because all pre-programmed models already consider DGE and IGE, as previously described. `lrtest` defines if hypothesis tests using likelihood ratio tests should be done. `spatial` determines if a regular genetic competition model (`spatial = FALSE`) or a spatial-genetic competition model (`spatial = TRUE`) should be fitted. Finally, `cor` dictates if the function will fit a model considering the covariance between DGE and IGE (`cor = TRUE`) or not (`cor = FALSE`). `asr` can receive other arguments passed on to the `asreml` function (see `?asreml` for more information). The output of the `asr` function is an object of classes `asreml` and `compmod`. Since it holds the `asreml` class, it is suitable for using with S3 methods like `plot`, `summary`, `predict`, `update`, `resid` and others (see `help("asreml.object")`).
 
 # Extracting the results {.justify}
 

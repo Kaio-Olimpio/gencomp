@@ -18,7 +18,7 @@ Authors@R:
                      email = "forestats.sg@gmail.com",
                      comment = c(ORCID = "0000-0002-5025-2658")))
 Description: Fit spatial-genetic competition models for assessing the competition capacity of genotypes. Contained are functions used to build a competition matrix based on different criteria, fit the spatial-genetic competition model, and extract and visualize the results.
-URL: https://github.com/Kaio-Olimpio/gencomp
+URL: https://github.com/Kaio-Olimpio/gencomp, https://kaio-olimpio.github.io/gencomp/
 BugReports: https://github.com/Kaio-Olimpio/gencomp/issues
 License: GPL (>= 3)
 Encoding: UTF-8

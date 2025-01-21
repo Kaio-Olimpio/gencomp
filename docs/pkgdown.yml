@@ -1,0 +1,8 @@
+pandoc: '3.2'
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  crop_competition: crop_competition.html
+  multi_age: multi_age.html
+  tree_competition: tree_competition.html
+last_built: 2025-01-21T21:20Z

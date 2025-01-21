@@ -1,4 +1,16 @@
-url: https://kaio-olimpio.github.io/gencomp/
-template:
-  bootstrap: 5
-
+url: ~
+pkgdown:
+  template:
+    bootstrap: 5
+    bootswatch: sandstone
+    light-switch: true
+  navbar:
+    structure:
+      left:
+        - text: "Home"
+          href: index.html
+        - text: "Reference"
+          href: reference/index.html
+      right:
+        - text: "GitHub"
+          href: https://github.com/Kaio-Dias/gencomp

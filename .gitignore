@@ -12,7 +12,5 @@ comp_breedR.R
 real_data/Bouvet et al. 2015
 bouvet.R
 data_sim.R
-inst/doc
-docs
 Manuscript
 temp.R

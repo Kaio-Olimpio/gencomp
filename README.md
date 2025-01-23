@@ -1,5 +1,5 @@
 
-# Exploring genetic and spatial competition with `gencomp`
+# Exploring genetic and spatial competition with `gencomp` <img src="man/figures/logo.png" align="right" height="138" alt="" />
 
 Imagine a group of caged animals where everyone has it’s own set of
 abilities to acquire food. Among them, there is a notably competitive

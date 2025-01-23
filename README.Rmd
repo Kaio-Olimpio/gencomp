@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Exploring genetic and spatial competition with `gencomp` <img src="man/figures/logo.png" align="right" height="138" alt="" />
+# Exploring genetic and spatial competition with `gencomp` <img src="man/figures/logo.png" align="right" height="210" alt="" />
 
 Imagine a group of caged animals where everyone has it’s own set of abilities to acquire food. Among them, there is a notably competitive animal named Max. Max is driven by a strong desire to outshine his companions, particularly when it comes to securing a limited food resource within the cage. In this confined space, Max competitive nature tends to create a stressful environment, negatively affecting the access to food of his cage mates. (*Example extracted from [this blog](https://vsni.co.uk/blogs/competitive-genetics-exploring-the-impact-of-direct-and-indirect-genetic-effects-in-tree-breeding/)*)
 

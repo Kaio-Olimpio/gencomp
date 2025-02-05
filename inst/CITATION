@@ -6,5 +6,7 @@ bibentry(
   author   = as.person("Saulo F. S. Chaves [aut], Filipe M. Ferreira [aut], Getulio C. Ferreira [aut], Salvador A. Gezan [aut], Kaio Olimpio G. Dias [aut]"),
   journal  = "Heredity",
   year     = "2025",
+  volume   = "134",
+  pages    = "129--141",
   doi      = "10.1038/s41437-024-00743-9"
 )

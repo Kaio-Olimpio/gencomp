@@ -56,7 +56,7 @@ If you used the package to analyse data for a publication, please cite:
 
 Chaves SFS, Ferreira FM, Ferreira GC, Gezan SA, Dias KOG (2025)
 Incorporating spatial and genetic competition into breeding pipelines
-with the `R` package `gencomp`. Heredity.
+with the `R` package `gencomp`. *Heredity* **134**, 129-141.
 <https://doi.org/10.1038/s41437-024-00743-9>
 
 ## Recommended papers

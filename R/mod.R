@@ -120,7 +120,7 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE, lrtest 
   
   input = prep.out$data
   
-  if(inherits(prep.out, "comprepfor") && control[,6] > 0) ### Multi-areas ------------
+  if(inherits(prep.out, "comprepfor") && control[,6] > 1) ### Multi-areas ------------
   {
     input <<- input[order(input[,names(control)[6]],
                         input[,names(control)[3]], 
@@ -592,7 +592,7 @@ asr_ma = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
   
   input = prep.out$data
   
-  if(control[,6] > 0) ### Multi-areas ------------
+  if(control[,6] > 1) ### Multi-areas ------------
   {
     input[,"aux"] = factor(paste(paste(names(control)[6], input[,names(control)[6]], sep = '_'),
                                  paste(names(control)[5], input[,names(control)[5]], sep = '_'),sep = ':'))

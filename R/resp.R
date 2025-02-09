@@ -160,7 +160,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   varcomp = summary(model)$varcomp
   
   ## Dealing with the names --------------------
-  if(inherits(prep.out, "comprepfor") && control[,5] > 0){
+  if(inherits(prep.out, "comprepfor") && control[,5] > 1){
     # varcomp = varcomp[-grep('!R$', rownames(varcomp)),]
     rownames(varcomp)[
       rownames(varcomp) == rownames(varcomp[which(grepl('grp', rownames(varcomp)) &
@@ -175,7 +175,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
                                                           rownames(varcomp))),])
     ] = paste("IGE", names(control)[5], sep = ':')
     
-    if(control[,6] > 0){
+    if(control[,6] > 1){
       rownames(varcomp)[
         rownames(varcomp) %in% rownames(varcomp[which(grepl('!R', 
                                                             rownames(varcomp))),])
@@ -219,7 +219,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
       ] = paste0("R=", sub("!.*",'', rownames(varcomp[which(grepl("!R$", 
                                                                   rownames(varcomp))),])))
     }
-  }else if(inherits(prep.out, "comprepfor") && control[,6] > 0){
+  }else if(inherits(prep.out, "comprepfor") && control[,6] > 1){
     
     rownames(varcomp)[
       rownames(varcomp) %in% rownames(varcomp[which(grepl('!R', 
@@ -288,7 +288,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
       s2g = varcomp[grepl("DGE$", rownames(varcomp)),1]
       s2c = varcomp[grepl("IGE$", rownames(varcomp)),1]
       s2t = s2g + s2c
-      if(control[5]>0){
+      if(control[5]>1){
         s2ga = varcomp[grepl("DGE:age", rownames(varcomp)),1]
         s2ca = varcomp[grepl("IGE:age", rownames(varcomp)),1]
         s2t = s2t + s2ga + s2ca
@@ -305,7 +305,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
         s2t = s2t + sum(s2p)
       }
       
-      if(control[6]>0 | control[5]>0){
+      if(control[6]>1 | control[5]>1){
         s2e = varcomp[which(grepl("R=", rownames(varcomp)) & !grepl("autocor", rownames(varcomp))),1]
         s2t = s2t + s2e
       }else{
@@ -359,7 +359,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   if(inherits(prep.out, "comprepfor"))
     { ### Forest ------
     
-    if(control[,5] > 0){
+    if(control[,5] > 1){
       ## Main effects --------------
       DGE = blup[which(grepl(names(control)[2], rownames(blup)) & 
                          !grepl(names(control)[5], rownames(blup))), -3]
@@ -741,7 +741,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
   dat$resid = c(attr(object, 'residuals'))
   sd.class = attr(object, 'sd.class')
   
-  if("comprepfor" %in% class(object) && control[, 5] > 0){
+  if("comprepfor" %in% class(object) && control[, 5] > 1){
     stopifnot("'age' should be of size 1" = length(age) == 1)
     stopifnot("'age' does not exist" = age %in% c('all', levels(dat[,colnames(control)[5]])))
   }
@@ -860,7 +860,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
       
     }else if(category == 'grid.res'){
       
-      if("comprepfor" %in% class(object) && control[6] > 0){ # Multi-areas
+      if("comprepfor" %in% class(object) && control[6] > 1){ # Multi-areas
         
         temp = dat[,c(names(control)[c(2,3,4,6,1)],'resid')]
         
@@ -902,7 +902,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
       
     }else if(category == 'grid.dge'){
       
-      if("comprepfor" %in% class(object) && control[6] > 0){ # Multi-areas
+      if("comprepfor" %in% class(object) && control[6] > 1){ # Multi-areas
         
         temp = dat[,names(control)[c(2,3,4,6,1)]]
         colnames(temp) = c('gen', 'row', 'col', 'area', 'y')
@@ -945,7 +945,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
       }
       
     }else if(category == 'grid.ige'){
-      if("comprepfor" %in% class(object) && control[6] > 0){ # Multi-areas
+      if("comprepfor" %in% class(object) && control[6] > 1){ # Multi-areas
         
         temp = dat[,names(control)[c(2,3,4,6,1)]]
         colnames(temp) = c('gen', 'row', 'col', 'area', 'y')
@@ -988,7 +988,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
       }
       
     }else if(category == 'grid.class'){
-      if("comprepfor" %in% class(object) && control[6] > 0){ # Multi-areas
+      if("comprepfor" %in% class(object) && control[6] > 1){ # Multi-areas
         
         temp = dat[,names(control)[c(2,3,4,6,1)]]
         colnames(temp) = c('gen', 'row', 'col', 'area', 'y')
@@ -1202,7 +1202,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
           facet_wrap(.~.data$age, labeller = labeller(.cols = facet.label))
       }else if(category == 'grid.res'){
         
-        if(control[6] > 0){ # Multi-areas
+        if(control[6] > 1){ # Multi-areas
           
           temp2 = dat[,c(names(control)[c(2,3,4,5,6,1)],'resid')]
           
@@ -1253,7 +1253,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         
       }else if(category == 'grid.dge'){
         
-        if(control[6] > 0){ # Multi-area
+        if(control[6] > 1){ # Multi-area
           
           temp2 = dat[,names(control)[c(2,3,4,5,6,1)]]
           colnames(temp2) = c('gen', 'row', 'col', 'age', 'area', 'y')
@@ -1307,7 +1307,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         }
         
       }else if(category == 'grid.ige'){
-        if(control[6] > 0){ # Multi-area
+        if(control[6] > 1){ # Multi-area
           
           temp2 = dat[,names(control)[c(2,3,4,5,6,1)]]
           colnames(temp2) = c('gen', 'row', 'col', 'age', 'area', 'y')
@@ -1361,7 +1361,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         }
         
       }else if(category == 'grid.class'){
-        if(control[6] > 0){ # Multi-area
+        if(control[6] > 1){ # Multi-area
           
           temp2 = dat[,names(control)[c(2,3,4,5,6,1)]]
           colnames(temp2) = c('gen', 'row', 'col', 'age', 'area', 'y')
@@ -1548,7 +1548,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         
       }else if(category == 'grid.res'){
         
-        if(control[6] > 0){ # Multi-areas
+        if(control[6] > 1){ # Multi-areas
           
           temp = dat[which(dat[,names(control)[5]] == age),]
           temp2 = temp[,c(names(control)[c(2,3,4,6,1)],'resid')]
@@ -1592,7 +1592,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         
       }else if(category == 'grid.dge'){
         
-        if(control[6] > 0){ # Multi-area
+        if(control[6] > 1){ # Multi-area
           
           temp3 = dat[which(dat[,names(control)[5]] == age),]
           temp2 = temp3[,names(control)[c(2,3,4,6,1)]]
@@ -1637,7 +1637,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         }
         
       }else if(category == 'grid.ige'){
-        if(control[6] > 0){ # Multi-areas
+        if(control[6] > 1){ # Multi-areas
           
           temp3 = dat[which(dat[,names(control)[5]] == age),]
           temp2 = temp3[,names(control)[c(2,3,4,6,1)]]
@@ -1682,7 +1682,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         }
         
       }else if(category == 'grid.class'){
-        if(control[6] > 0){ # Multi-areas
+        if(control[6] > 1){ # Multi-areas
           
           temp3 = dat[which(dat[,names(control)[5]] == age),]
           temp2 = temp3[,names(control)[c(2,3,4,6,1)]]
@@ -1800,7 +1800,7 @@ print.comresp = function(x, ..., category = 'blup.main', age = 'all'){
   rownames(dat) = NULL
   dat$resid = c(attr(object, 'residuals'))
   
-  if("comprepfor" %in% class(object) && control[, 5] > 0){
+  if("comprepfor" %in% class(object) && control[, 5] > 1){
     stopifnot("'age' should be of size 1" = length(age) == 1)
     stopifnot("'age' does not exist" = age %in% c('all', levels(dat[,colnames(control)[5]])))
   }

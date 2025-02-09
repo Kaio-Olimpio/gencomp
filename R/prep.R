@@ -147,8 +147,8 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
       col = as.numeric(data[, col]),
       trait = as.numeric(data[, trait])
     )
-    if(is.null(area)) x$area = 1 else x$area = as.factor(data[,area])
-    if(is.null(age)) x$age = 1 else x$age = as.factor(data[,age])
+    if(is.null(area) | length(unique(data[,area])) <= 1) x$area = 1 else x$area = as.factor(data[,area])
+    if(is.null(age) | length(unique(data[,age])) <= 1) x$age = 1 else x$age = as.factor(data[,age])
     x = x[order(x$age, x$area, x$row, x$col),]
     x$ind = paste(x$trat, x$row, x$col, x$age, x$area, sep = "&")
   }else{
@@ -159,8 +159,8 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
       col = as.numeric(data[, col]),
       trait = as.numeric(data[, trait])
     )
-    if(is.null(area)) x$area = 1 else x$area = as.factor(data[,area])
-    if(is.null(age)) x$age = 1 else x$age = as.factor(data[,age])
+    if(is.null(area) | length(unique(data[,area])) <= 1) x$area = 1 else x$area = as.factor(data[,area])
+    if(is.null(age) | length(unique(data[,age])) <= 1) x$age = 1 else x$age = as.factor(data[,age])
     x = x[order(x$age, x$area, x$row, x$col),]
   }
   
@@ -173,11 +173,11 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
   
   colnames(control) = c(trait, gen, row, col)
   
-  if(is.null(age)) control$age = 0 else control[, age] = length(unique(data[, age]))
-  if(is.null(area)) control$area = 0 else control[, area] = length(unique(data[, area]))
+  if(is.null(age) | length(unique(data[,age])) <= 1) control$age = 0 else control[, age] = length(unique(data[, age]))
+  if(is.null(area) | length(unique(data[,area])) <= 1) control$area = 0 else control[, area] = length(unique(data[, area]))
   
   
-  if(is.null(age)) # A single age ----------------------
+  if(is.null(age) | length(unique(data[,age])) <= 1) # A single age ----------------------
   {
     Z = list()
     z <- matrix(0, nrow(x), nlevels(x$trat), dimnames = list(1:nrow(x), levels(x$trat))) 
@@ -352,7 +352,7 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
     
     ### Entry for the model function
     
-    if(is.null(area)){
+    if(is.null(area) | length(unique(data[,area])) <= 1){
       data = data[order(data[, row], data[, col]),]
     } else{
       data = data[order(data[, area], data[, row], data[, col]),]
@@ -360,7 +360,7 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
     
     input = data.frame(cbind(z, data))
     
-    if(is.null(area)){
+    if(is.null(area) | length(unique(data[,area])) <= 1){
       input = input[order(input[, row], input[, col]),]
     } else{
       input = input[order(input[, area], input[, row], input[, col]),]
@@ -374,7 +374,7 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
     if(!is.factor(input[, row])) input[, row] = as.factor(input[, row])
     if(!is.factor(input[, col])) input[, col] = as.factor(input[, col])
     if(!is.null(area)){
-      if(!is.factor(input[, area])) input[, area] = as.factor(input[, area])
+      if(!is.factor(input[, area]) | !length(unique(data[,area])) <= 1) input[, area] = as.factor(input[, area])
     }
     
     Z = list(Z = z, CIF = cif, neigh_check = w, data = input)
@@ -563,7 +563,7 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
       
       dat = data[data[, age] == q$age, ]
       
-      if(is.null(area)){
+      if(is.null(area) | length(unique(data[,area])) <= 1){
         dat = dat[order(dat[, row], dat[, col]),]
       } else{
         dat = dat[order(dat[, area], dat[, row], dat[, col]),]
@@ -579,7 +579,7 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
       if(!is.factor(input[, gen])) input[, gen]= as.factor(input[, gen])
       if(!is.factor(input[, row])) input[, row] = as.factor(input[, row])
       if(!is.factor(input[, col])) input[, col] = as.factor(input[, col])
-      if(!is.null(area)){
+      if(!is.null(area) | !length(unique(data[,area])) <= 1){
         if(!is.factor(input[, area])) input[, area] = as.factor(input[, area])
       }
       
@@ -635,7 +635,7 @@ print.comprepfor = function(x, ..., category = 'matrix', age = 'all'){
   
   control = attr(object, 'control')
   
-  if(control[,5] == 0) age = 'all'
+  if(control[,5] <= 1) age = 'all'
   
   # Data set
   
@@ -662,7 +662,7 @@ print.comprepfor = function(x, ..., category = 'matrix', age = 'all'){
       
       message("===> Competition matrix")
       
-      if(control[,5] == 0){
+      if(control[,5] <= 1){
         
         print(object$Z)
         
@@ -693,7 +693,7 @@ print.comprepfor = function(x, ..., category = 'matrix', age = 'all'){
       
       message("===> Neighbourhood check")
       
-      if(control[,5] == 0){
+      if(control[,5] <= 1){
         
         print(data.table::data.table(object$neigh_check))
         
@@ -724,7 +724,7 @@ print.comprepfor = function(x, ..., category = 'matrix', age = 'all'){
       
       message("===> Competition intensity factor")
       
-      if(control[,5] == 0){
+      if(control[,5] <= 1){
         
         print(object$CIF)
         
@@ -803,11 +803,11 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
   
   if(category == 'heatmap'){
     
-    if(control[,5] > 0){
+    if(control[,5] > 1){
       
       if(age == 'all'){
         
-        if(control[,6] > 0){
+        if(control[,6] > 1){
           
           dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,6,1)]]
           
@@ -858,7 +858,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
         }
       } else {
         
-        if(control[,6] > 0){
+        if(control[,6] > 1){
           
           dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,6,1)]]
           
@@ -909,7 +909,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
       
       
     } else {
-      if(control[,6] > 0){
+      if(control[,6] > 1){
         
         dat = as.data.frame(object$data)[,names(control)[c(2,3,4,6,1)]]
         
@@ -952,11 +952,11 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
     }
   }else if(category == 'boxplot'){
 
-    if(control[,5] > 0){
+    if(control[,5] > 1){
       
       if(age == 'all'){
         
-        if(control[,6] > 0){
+        if(control[,6] > 1){
           
           dat = as.data.frame(object$data)[,names(control)[c(2,3,4,5,6,1)]]
           
@@ -1000,7 +1000,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
           
         }
       } else {
-        if(control[,6] > 0){
+        if(control[,6] > 1){
           
           dat = as.data.frame(object$data)[,names(control)[c(2,5,4,5,6,1)]]
           
@@ -1044,7 +1044,7 @@ plot.comprepfor = function(x, ..., category = 'heatmap', age = 'all'){
         
       }
     } else {
-      if(control[,6] > 0){
+      if(control[,6] > 1){
         
         dat = as.data.frame(object$data)[,names(control)[c(2,3,4,6,1)]]
         

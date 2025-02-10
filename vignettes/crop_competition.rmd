@@ -1,6 +1,6 @@
 ---
 title: "Genetic competition in crop breeding trials"
-author: "Saulo F. S. Chaves"
+author: "Saulo Chaves, Filipe M. Ferreira and Kaio Olimpio G. Dias"
 date: "`r Sys.Date()`"
 bibliography: bibliography.bib
 output: 

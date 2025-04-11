@@ -18,10 +18,10 @@
     repeat {
       if (any(stats::na.exclude(model$vparameters.pc) >= 1)) {
         model = suppressWarnings(asreml::update.asreml(model))
-        message("gencomp: The model was updated and reached full convergence")
       } else{
         break
       }
+      message("gencomp: The model was updated and reached full convergence")
     }
   } else message("The model failed to converge")
   return(model)

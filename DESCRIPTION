@@ -2,14 +2,14 @@ Package: gencomp
 Title: Fit Spatial-Genetic Competition Models
 Version: 1.0.0.1
 Authors@R: 
-    c(person("Saulo F. S.", "Chaves", role = c("aut", "cre"),
+    c(person("Saulo", "Chaves", role = c("aut", "cre"),
                      email = "saulochaves@usp.br",
                      comment = c(ORCID = "0000-0002-0694-1798")),
               person("Kaio Olimpio G.", "Dias", role = c("aut", "cph"),
                      email = "kaio.o.dias@ufv.br",
                      comment = c(ORCID = "0000-0002-9171-1021")),
-              person("Filipe M.", "Ferreira", role = "aut",
-                     email = "ferreira.fmanoel@gmail.com",
+              person("Filipe", "Ferreira", role = "aut",
+                     email = "filipeferreira@usp.br",
                      comment = c(ORCID = "0000-0002-7847-8333")),
               person("Getúlio C.", "Ferreira", role = "aut",
                      email = "getuliocaifer@gmail.com",

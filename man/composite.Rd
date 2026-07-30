@@ -18,7 +18,7 @@ composite(
 \arguments{
 \item{prep.out}{A \code{comprepfor} object.}
 
-\item{model}{A \code{compmod} object obtained using \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}}.}
+\item{model}{A \code{compmod} object obtained using \code{\link[=asr]{asr()}}.}
 
 \item{resp.out}{A \code{comresp} object.}
 
@@ -45,7 +45,7 @@ averaging the predicted mean of all clones.
 }
 \description{
 This function simulates clonal composites using outputs of a genetic-spatial
-competition model fitted using \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}}. Currently,
+competition model fitted using \code{\link[=asr]{asr()}}. Currently,
 only forestry data is accepted.
 }
 \details{
@@ -62,17 +62,18 @@ IGE is divided by the distance between the focal tree and its neighbours:
 \examples{
 \donttest{
 library(gencomp)
- comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
                    plt = 'tree', age = 'age', row = 'row', col = 'col',
                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
                    n.dec = 3, verbose = FALSE, effs = c("block"))
- model = asr_ma(prep.out = comp_mat,
-                fixed = MAI~ age, 
-                random = ~ block:age, 
-                lrtest = TRUE, 
-                spatial = TRUE, 
-                cor = TRUE, 
-                maxit = 20)
+ model = asr(prep.out = comp_mat,
+             fixed = MAI ~ age, 
+             random = ~ block:age, 
+             lrtest = TRUE, 
+             spatial = TRUE, 
+             cor = TRUE, 
+             K = NULL,
+             maxit = 20)
              
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  
@@ -90,5 +91,5 @@ by jointly modeling spatial variation and genetic competition. Forest Ecology
 and Management 548, 121393. \doi{https://doi.org/10.1016/j.foreco.2023.121393}
 }
 \seealso{
-\link{prepfor}, \link{asr}, \link{asr_ma}, \link{resp}
+\link{prepfor}, \link{asr}, \link{resp}
 }

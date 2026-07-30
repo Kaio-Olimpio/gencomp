@@ -13,9 +13,9 @@
 An object of class \code{asreml} with all parameters converged.
 }
 \description{
-This function keeps updating the \code{asreml} object until full convergence
+Updates the \code{asreml} object until full convergence
 }
 \seealso{
-\code{\link[=asr]{asr()}}, \code{\link[=asr_ma]{asr_ma()}},  \link[asreml:asreml.options]{asreml::asreml.options}, \link[asreml:asreml.object]{asreml::asreml.object}, \link[asreml:family_dist]{asreml::family_dist}
+\code{\link[=asr]{asr()}}, \link[asreml:asreml.options]{asreml::asreml.options}, \link[asreml:asreml.object]{asreml::asreml.object}
 }
 \keyword{internal}

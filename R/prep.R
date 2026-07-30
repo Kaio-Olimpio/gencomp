@@ -1,9 +1,79 @@
+##' @title Check a pedigree (adapted from the `asreml` package)
+##' 
+##' @description
+##' Checks a pedigree for consistency, adds missing founders and sorts so that founders appear before individuals. 
+##' Adapted from `asreml` V. 4.2.0.481
+##' 
+##' @param pedigree A data frame where the first three columns correspond to the identifiers for the individual, male parent and female parent, respectively. Founders or unknown parents use 0 (zero) or NA in the parental columns.
+##' @param mv A character vector of missing value indicators; elements of pedigree that exactly match any of the members of mv are treated as missing. The values passed should be used in addition to "0" and "NA" (default = "0", "NA").
+##' @return The pedigree in a data frame, reordered and expanded if necessary.
+##' 
+##' @keywords internal
+
+.checkped = function (pedigree, mv = c("0", "NA")) {
+  
+  if (any(dup <- duplicated(as.character(pedigree[, 1])))) {
+    stop(cat("Duplicated individuals", "\n", as.character(pedigree[, 
+                                                                   1])[dup], "\n"))
+  }
+  which <- seq(1, nrow(pedigree))[as.character(pedigree[, 1]) == as.character(pedigree[, 2]) |
+                                    as.character(pedigree[, 1]) == as.character(pedigree[, 3])]
+  if (length(which <- which[!is.na(which)])) {
+    cat(paste(which, pedigree[, 1][which]), sep = "\n")
+    stop("Individuals appear as their own parent")
+  }
+  is.missing <- function(pcol, mv) {
+    isna <- is.na(pcol) | is.element(as.character(pcol), 
+                                     mv) | trimws(as.character(pcol)) == ""
+    return(isna)
+  }
+  lped <- nrow(pedigree)
+  charPed <- c(as.character(pedigree[, 1]),
+               as.character(pedigree[, 2]),
+               as.character(pedigree[, 3]))
+  lvls <- unique(charPed)
+  lvls <- lvls[!is.missing(lvls, mv)]
+  charPed <- NULL
+  nan <- length(lvls)
+  memumdad <- names(pedigree)[1:3]
+  pedigree <- matrix(c(
+    match(pedigree[, 1], lvls, nomatch = 0),
+    match(pedigree[, 2], lvls, nomatch = 0),
+    match(pedigree[, 3], lvls, nomatch = 0)
+  ), nrow = lped, byrow = FALSE)
+  xtras <- numeric(0)
+  if (lped < nan) {
+    xmum <- match(pedigree[, 2], pedigree[, 1])
+    xmum <- unique(pedigree[is.na(xmum), 2])
+    xmum <- xmum[!is.na(xmum) & xmum > 0]
+    xdad <- match(pedigree[, 3], pedigree[, 1])
+    xdad <- unique(pedigree[is.na(xdad), 3])
+    xdad <- xdad[!is.na(xdad) & xdad > 0]
+    xtras <- unique(c(xmum, xdad))
+    nxtra <- length(xtras)
+    if (nxtra != nan - lped) 
+      stop("programming error in chkPed")
+    xtra <- matrix(c(xtras, rep(0, 2 * nxtra)), nrow = nxtra, 
+                   ncol = 3, byrow = FALSE)
+    pedigree <- rbind(xtra, pedigree)
+  }
+  which <- pedigree > 0
+  pedigree[which] <- lvls[pedigree[which]]
+  pedigree <- data.frame(pedigree, stringsAsFactors = FALSE)
+  names(pedigree) <- memumdad
+  attr(pedigree, "rowNames") <- pedigree[, 1]
+  if (length(xtras)) 
+    attr(pedigree, "Insertions") <- lvls[xtras]
+  return(pedigree)
+}
+
+
 # Forest section ----------------------------------------------------------
 
 ##' @title Preparations to fit a genetic-spatial competition models for forestry
 ##' 
 ##' @description
-##' This function builds the genetic competition matrix (\eqn{\mathbf{Z}_c}), and 
+##' This function builds the genetic competition matrix \eqn{\left(\mathbf{Z}_c\right)}, and 
 ##' prepares the dataset to be used for model fitting. It also computes the 
 ##' competition intensity factor.
 ##' 
@@ -30,7 +100,7 @@
 ##' @param verbose A logical value. If `TRUE`, a progress bar will be displayed in the 
 ##' console. Defaults to `FALSE`.
 ##' @param effs a string vector with column names of other effects that will be 
-##' considered in model fitting step. Defaults to `NULL` (if there is no further effect).   
+##' considered in model fitting step. Defaults to `NULL` (if there is no further effect).
 ##' 
 ##' 
 ##' @return The function returns:
@@ -108,7 +178,6 @@
 ##' 
 ##' @export
 ##' 
-##' 
 ##' @examples
 ##' \donttest{
 ##'  library(gencomp)
@@ -120,10 +189,12 @@
 
 
 prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.row, dist.col, 
-                    method = "SK", area = NULL, age = NULL, n.dec = 2, 
+                    method = "SK", area = NULL, age = NULL, n.dec = 2,
                     verbose = FALSE){
   
   # Messages and warnings
+  # n_area = if(is.null(area)) 1 else length(unique(data[[area]]))
+  # n_age  = if(is.null(age))  1 else length(unique(data[[age]]))
   if(!is.null(plt)){
     stopifnot("The number of observations must be the product of no. rows * no. columns" = length(unique(data[,plt])) == 
                 length(unique(data[,row])) * length(unique(data[,col])))
@@ -135,7 +206,7 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
                 length(unique(data[,row])) * length(unique(data[,col])))
   }
   stopifnot("Please, choose between the available methods ('MU', 'CC' or 'SK')" = method %in% c('MU', 'CC', 'SK'))
-  
+
   # Entry -------------------------------------------------------------------
   p = dist.col/dist.row
   dist.diag = sqrt(dist.row^2 + dist.col^2)
@@ -180,7 +251,8 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
   if(is.null(age) | length(unique(data[,age])) <= 1) # A single age ----------------------
   {
     Z = list()
-    z <- matrix(0, nrow(x), nlevels(x$trat), dimnames = list(1:nrow(x), levels(x$trat))) 
+    z <- matrix(0, nrow(x), nlevels(x$trat), 
+                dimnames = list(1:nrow(x), levels(x$trat))) 
     fd = NULL
     fc = NULL
     fr = NULL
@@ -251,10 +323,12 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
       
       ### Neighbourhood check -------------
       w[[i]] = data.frame(
-        gen = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trat'],
+        gen = x[which(x$col == x$col[i] & x$row == x$row[i] & x$area == x$area[i]),
+                'trat'],
         row = x$row[i],
         col = x$col[i],
-        y_focal = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trait'],
+        y_focal = x[which(x$col == x$col[i] & x$row == x$row[i] & x$area == x$area[i]),
+                    'trait'],
         y_row = mean(trt_r, na.rm = T),
         n_row = n_r,
         y_col = mean(trt_c, na.rm = T),
@@ -266,68 +340,54 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
       
       ### Competition intensity methods -------------
       
-      if(method == "SK"){ # Costa e Silva and Kerr
+      if(method == "SK"){
         if(n_c == 0 & n_r == 0 & n_d == 0){
-          f_D = 0
-          z[i, gen.diag[which(area.diag == x[i,'area'])]] = f_D
-          z[i, gen.col[which(area.col == x[i,'area'])]] = f_C = round((f_D * sqrt(1 + p ^ 2)) / p, n.dec) #fc
-          z[i, gen.row[which(area.row == x[i,'area'])]] = f_R = round(f_D * sqrt(1 + p ^ 2), n.dec)#fr
-          
-          fd[i] = f_D
-          fc[i] = f_C
-          fr[i] = f_R
-          nc[i] = n_c
-          nr[i] = n_r
-          nd[i] = n_d
-        }else{
-          f_D = round(p / (sqrt((n_r * p ^ 4) + (n_r * p ^ 2)
-                                + (n_c * p ^ 2) + (n_d * p ^ 2) + n_c)), n.dec) 
-          z[i, gen.diag[which(area.diag == x[i,'area'])]] = f_D
-          z[i, gen.col[which(area.col == x[i,'area'])]] = f_C = round((f_D * sqrt(1 + p ^ 2)) / p, n.dec) #fc
-          z[i, gen.row[which(area.row == x[i,'area'])]] = f_R = round(f_D * sqrt(1 + p ^ 2), n.dec)#fr
-          
-          fd[i] = f_D
-          fc[i] = f_C
-          fr[i] = f_R
-          nc[i] = n_c
-          nr[i] = n_r
-          nd[i] = n_d
+          f_D = 0; f_C = 0; f_R = 0
+        } else {
+          f_D = round(p / (sqrt((n_r * p^4) + (n_r * p^2) + (n_c * p^2) + (n_d * p^2) + n_c)), n.dec)
+          f_C = round((f_D * sqrt(1 + p^2)) / p, n.dec)
+          f_R = round(f_D * sqrt(1 + p^2), n.dec)
         }
-      } else if(method == "CC"){  # Cappa and Cantet
+      } else if(method == "CC"){
         if(n_c == 0 & n_r == 0 & n_d == 0){
-          z[i, gen.diag[which(area.diag == x[i,'area'])]] = f_D =  0
-          z[i, gen.col[which(area.col == x[i,'area'])]] = f_C = 0  
-          z[i, gen.row[which(area.row == x[i,'area'])]] = f_R = 0
-          
-          fd[i] = f_D
-          fc[i] = f_C
-          fr[i] = f_R
-          nc[i] = n_c
-          nr[i] = n_r
-          nd[i] = n_d
-        }else{
-          z[i, gen.diag[which(area.diag == x[i,'area'])]] = f_D = round(1/sqrt(2*(n_r+n_c) + n_d), n.dec)
-          z[i, gen.col[which(area.col == x[i,'area'])]] = f_C = round(sqrt(2/(2*(n_r+n_c) + n_d)), n.dec)
-          z[i, gen.row[which(area.row == x[i,'area'])]] = f_R = round(sqrt(2/(2*(n_r+n_c) + n_d)), n.dec)
-          
-          fd[i] = f_D
-          fc[i] = f_C
-          fr[i] = f_R
-          nc[i] = n_c
-          nr[i] = n_r
-          nd[i] = n_d
+          f_D = 0; f_C = 0; f_R = 0
+        } else {
+          f_D = round(1 / sqrt(2*(n_r + n_c) + n_d), n.dec)
+          f_C = round(sqrt(2 / (2*(n_r + n_c) + n_d)), n.dec)
+          f_R = round(sqrt(2 / (2*(n_r + n_c) + n_d)), n.dec)
         }
-      }else if(method == "MU"){ # Muir
-        z[i, gen.diag[which(area.diag == x[i,'area'])]] = f_D = round((1/dist.diag), n.dec)
-        z[i, gen.col[which(area.col == x[i,'area'])]] = f_C = round((1/dist.col), n.dec)
-        z[i, gen.row[which(area.row == x[i,'area'])]] = f_R = round((1/dist.row), n.dec)
-        
-        fd[i] = f_D
-        fc[i] = f_C
-        fr[i] = f_R
-        nc[i] = n_c
-        nr[i] = n_r
-        nd[i] = n_d
+      } else if(method == "MU"){
+        f_D = round(1 / dist.diag, n.dec)
+        f_C = round(1 / dist.col, n.dec)
+        f_R = round(1 / dist.row, n.dec)
+      }
+      
+      fd[i] <- f_D; fc[i] <- f_C; fr[i] <- f_R
+      nc[i] <- n_c; nr[i] <- n_r; nd[i] <- n_d
+      
+      if(length(gen.diag) > 0){
+        for(k in seq_along(gen.diag)){
+          if(!is.na(trt_d[k])){
+            g <- as.character(gen.diag[k])
+            z[i, g] <- z[i, g] + f_D
+          }
+        }
+      }
+      if(length(gen.col) > 0){
+        for(k in seq_along(gen.col)){
+          if(!is.na(trt_c[k])){
+            g <- as.character(gen.col[k])
+            z[i, g] <- z[i, g] + f_C
+          }
+        }
+      }
+      if(length(gen.row) > 0){
+        for(k in seq_along(gen.row)){
+          if(!is.na(trt_r[k])){
+            g <- as.character(gen.row[k])
+            z[i, g] <- z[i, g] + f_R
+          }
+        }
       }
       
       ### Progress bar
@@ -346,19 +406,18 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
       
     }
     
-    cif = mean(fr, na.rm=T)*mean(nr) + mean(fc,na.rm=T)*mean(nc) + 
-      mean(fd,na.rm=T)*mean(nd)
+    cif = mean(fr, na.rm=TRUE)*mean(nr) + mean(fc,na.rm=TRUE)*mean(nc) + 
+      mean(fd,na.rm=TRUE)*mean(nd)
     w = do.call(rbind, w)
     
     ### Entry for the model function
-    
     if(is.null(area) | length(unique(data[,area])) <= 1){
       data = data[order(data[, row], data[, col]),]
     } else{
       data = data[order(data[, area], data[, row], data[, col]),]
     }
     
-    input = data.frame(cbind(z, data))
+    input = data.frame(z, data, check.names = FALSE)  
     
     if(is.null(area) | length(unique(data[,area])) <= 1){
       input = input[order(input[, row], input[, col]),]
@@ -476,68 +535,54 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
         
         ### Competition intensity methods -------------
         
-        if(method == "SK"){ # Costa e Silva and Kerr
+        if(method == "SK"){
           if(n_c == 0 & n_r == 0 & n_d == 0){
-            f_D = 0
-            z[i, gen.diag[which(area.diag == q[i,'area'])]] = f_D
-            z[i, gen.col[which(area.col == q[i,'area'])]] = f_C = round((f_D * sqrt(1 + p ^ 2)) / p, n.dec) #fc
-            z[i, gen.row[which(area.row == q[i,'area'])]] = f_R = round(f_D * sqrt(1 + p ^ 2), n.dec)#fr
-            
-            fd[i] = f_D
-            fc[i] = f_C
-            fr[i] = f_R
-            nc[i] = n_c
-            nr[i] = n_r
-            nd[i] = n_d
-          }else{
-            f_D = round(p / (sqrt((n_r * p ^ 4) + (n_r * p ^ 2)
-                                  + (n_c * p ^ 2) + (n_d * p ^ 2) + n_c)), n.dec) 
-            z[i, gen.diag[which(area.diag == q[i,'area'])]] = f_D
-            z[i, gen.col[which(area.col == q[i,'area'])]] = f_C = round((f_D * sqrt(1 + p ^ 2)) / p, n.dec) #fc
-            z[i, gen.row[which(area.row == q[i,'area'])]] = f_R = round(f_D * sqrt(1 + p ^ 2), n.dec)#fr
-            
-            fd[i] = f_D
-            fc[i] = f_C
-            fr[i] = f_R
-            nc[i] = n_c
-            nr[i] = n_r
-            nd[i] = n_d
+            f_D = 0; f_C = 0; f_R = 0
+          } else {
+            f_D = round(p / (sqrt((n_r * p^4) + (n_r * p^2) + (n_c * p^2) + (n_d * p^2) + n_c)), n.dec)
+            f_C = round((f_D * sqrt(1 + p^2)) / p, n.dec)
+            f_R = round(f_D * sqrt(1 + p^2), n.dec)
           }
-        } else if(method == "CC"){  # Cappa and Cantet
+        } else if(method == "CC"){
           if(n_c == 0 & n_r == 0 & n_d == 0){
-            z[i, gen.diag[which(area.diag == q[i,'area'])]] = f_D =  0
-            z[i, gen.col[which(area.col == q[i,'area'])]] = f_C = 0  
-            z[i, gen.row[which(area.row == q[i,'area'])]] = f_R = 0
-            
-            fd[i] = f_D
-            fc[i] = f_C
-            fr[i] = f_R
-            nc[i] = n_c
-            nr[i] = n_r
-            nd[i] = n_d
-          }else{
-            z[i, gen.diag[which(area.diag == q[i,'area'])]] = f_D = round(1/sqrt(2*(n_r+n_c) + n_d), n.dec)
-            z[i, gen.col[which(area.col == q[i,'area'])]] = f_C = round(sqrt(2/(2*(n_r+n_c) + n_d)), n.dec)
-            z[i, gen.row[which(area.row == q[i,'area'])]] = f_R = round(sqrt(2/(2*(n_r+n_c) + n_d)), n.dec)
-            
-            fd[i] = f_D
-            fc[i] = f_C
-            fr[i] = f_R
-            nc[i] = n_c
-            nr[i] = n_r
-            nd[i] = n_d
+            f_D = 0; f_C = 0; f_R = 0
+          } else {
+            f_D = round(1 / sqrt(2*(n_r + n_c) + n_d), n.dec)
+            f_C = round(sqrt(2 / (2*(n_r + n_c) + n_d)), n.dec)
+            f_R = round(sqrt(2 / (2*(n_r + n_c) + n_d)), n.dec)
           }
-        }else if(method == "MU"){ # Muir
-          z[i, gen.diag[which(area.diag == q[i,'area'])]] = f_D = round((1/dist.diag), n.dec)
-          z[i, gen.col[which(area.col == q[i,'area'])]] = f_C = round((1/dist.col), n.dec)
-          z[i, gen.row[which(area.row == q[i,'area'])]] = f_R = round((1/dist.row), n.dec)
-          
-          fd[i] = f_D
-          fc[i] = f_C
-          fr[i] = f_R
-          nc[i] = n_c
-          nr[i] = n_r
-          nd[i] = n_d
+        } else if(method == "MU"){
+          f_D = round(1 / dist.diag, n.dec)
+          f_C = round(1 / dist.col, n.dec)
+          f_R = round(1 / dist.row, n.dec)
+        }
+        
+        fd[i] <- f_D; fc[i] <- f_C; fr[i] <- f_R
+        nc[i] <- n_c; nr[i] <- n_r; nd[i] <- n_d
+        
+        if(length(gen.diag) > 0){
+          for(k in seq_along(gen.diag)){
+            if(!is.na(trt_d[k])){
+              g <- as.character(gen.diag[k])
+              z[i, g] <- z[i, g] + f_D
+            }
+          }
+        }
+        if(length(gen.col) > 0){
+          for(k in seq_along(gen.col)){
+            if(!is.na(trt_c[k])){
+              g <- as.character(gen.col[k])
+              z[i, g] <- z[i, g] + f_C
+            }
+          }
+        }
+        if(length(gen.row) > 0){
+          for(k in seq_along(gen.row)){
+            if(!is.na(trt_r[k])){
+              g <- as.character(gen.row[k])
+              z[i, g] <- z[i, g] + f_R
+            }
+          }
         }
         
         ### Progress bar
@@ -569,7 +614,7 @@ prepfor <- function(data, gen, row, col, trait, plt = NULL, effs = NULL, dist.ro
         dat = dat[order(dat[, area], dat[, row], dat[, col]),]
       }
       
-      input = data.frame(cbind(z, dat))
+      input = data.frame(z, dat, check.names = FALSE) 
       
       if(!is.null(effs) & length(effs) > 1){
         input[,effs] = lapply(input[,effs], factor)
@@ -1143,7 +1188,6 @@ summary.comprepfor = function(object, ...){
 ##' variability and within-row interplot competition to increase the efficiency of plant improvement. 
 ##' Journal of Agricultural, Biological, and Environmental Statistics 16(2), 269-281. \doi{10.1007/s13253-010-0051-5}
 ##' 
-##' 
 ##' @export
 ##' 
 #' @examples
@@ -1157,40 +1201,37 @@ summary.comprepfor = function(object, ...){
 
 prepcrop = function(data, gen, row, col, trait, plt = NULL, effs = NULL, direction = "row", verbose = FALSE){
   
-  # Messages and warnings
+
+  stopifnot("Please, choose the direction ('row' or 'column')" = direction %in% c('row', 'column'))
   if(!is.null(plt)){
-    stopifnot("The number of observations must be the product of no. rows * no. columns" = length(unique(data[,plt])) == 
-                length(unique(data[,row])) * length(unique(data[,col])))
+    stopifnot("The number of observations must be the product of no. rows * no. columns" = length(unique(data[[plt]])) == 
+                length(unique(data[[row]])) * length(unique(data[[col]])))
   } else {
     stopifnot("The number of observations must be the product of no. rows * no. columns" = nrow(data) == 
-                length(unique(data[,row])) * length(unique(data[,col])))
+                length(unique(data[[row]])) * length(unique(data[[col]])))
   }
-  stopifnot("Please, choose the direction ('row' or 'column')" = direction %in% c('row', 'column'))
-  
+
   if(is.null(plt)){
     x = data.frame(
-      trat = as.factor(data[, gen]),
-      row = as.numeric(data[, row]),
-      col = as.numeric(data[, col]),
-      trait = as.numeric(data[, trait])
+      trat = as.factor(data[[gen]]),
+      row = as.numeric(data[[row]]),
+      col = as.numeric(data[[col]]),
+      trait = as.numeric(data[[trait]])
     )
     x = x[order(x$row, x$col),]
     x$plt = as.factor(1:nrow(x))
-  }else{
+  } else {
     x = data.frame(
-      trat = as.factor(data[, gen]),
-      plt = as.factor(data[, plt]), 
-      row = as.numeric(data[, row]),
-      col = as.numeric(data[, col]),
-      trait = as.numeric(data[, trait])
+      trat = as.factor(data[[gen]]),
+      plt = as.factor(data[[plt]]), 
+      row = as.numeric(data[[row]]),
+      col = as.numeric(data[[col]]),
+      trait = as.numeric(data[[trait]])
     )
-    
     x = x[order(x$row, x$col),]
   }
   
-  data = data[order(data[,row], data[,col]),]
-  
-  # if(any(data[,row] != x[,row])) stop
+  data = data[order(data[[row]], data[[col]]),]
   
   control = data.frame(
     trait = length(x$trait), 
@@ -1201,49 +1242,57 @@ prepcrop = function(data, gen, row, col, trait, plt = NULL, effs = NULL, directi
   )
   colnames(control)[1:4] = c(trait, gen, row, col)
   
-  Z = list()
   z <- matrix(0, nrow(x), nlevels(x$trat), dimnames = list(1:nrow(x), levels(x$trat))) 
-  w = list()
+  w = vector("list", nrow(x))
   
   for (i in 1:nrow(x)) {
     if(direction == "row"){
-      gen.row = x$trat[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
-      plt.row = x$plt[x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1))]
-      trt_r = NULL
-      for (k in 1:length(gen.row)) {
-        if (!is.na(x[which(x$trat %in% gen.row[k] & x$plt %in% plt.row[k]), "trait"])){
-          z[i,gen.row] = 1
-          trt_r[k] = x[which(x$trat %in% gen.row[k] & x$plt %in% plt.row[k]), "trait"]
+      
+      idx_neigh = which(x$row == x$row[i] & x$col %in% (x$col[i] + c(-1, +1)))
+      trt_r = c()
+      
+      if(length(idx_neigh) > 0){
+        for (k in seq_along(idx_neigh)) {
+          idx_k = idx_neigh[k]
+          if (!is.na(x$trait[idx_k])){
+            g = as.character(x$trat[idx_k])
+            z[i, g] = z[i, g] + 1  
+            trt_r = c(trt_r, x$trait[idx_k])
+          }
         }
       }
       
       w[[i]] = data.frame(
-        gen = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trat'],
+        gen = x$trat[i],
         row = x$row[i],
         col = x$col[i],
-        y_focal = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trait'],
-        y_row = suppressWarnings({mean(trt_r, na.rm = T)})
+        y_focal = x$trait[i],
+        y_row = suppressWarnings({ ifelse(length(trt_r) > 0, mean(trt_r, na.rm = TRUE), NA) })
       )
       
-    }else if(direction == "column"){
-      gen.col = x$trat[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
-      plt.col = x$plt[x$col == x$col[i] & x$row %in% (x$row[i] + c(-1,+1))]
-      trt_c = NULL
-      for (k in 1:length(gen.col)) {
-        if (!is.na(x[which(x$trat %in% gen.col[k] & x$plt %in% plt.col[k]), "trait"]) ){
-          z[i, gen.col] = 1
-          trt_c[k] = x[which(x$trat %in% gen.col[k] & x$plt %in% plt.col[k]), "trait"]
+    } else if(direction == "column"){
+      
+      idx_neigh = which(x$col == x$col[i] & x$row %in% (x$row[i] + c(-1, +1)))
+      trt_c = c()
+      
+      if(length(idx_neigh) > 0){
+        for (k in seq_along(idx_neigh)) {
+          idx_k = idx_neigh[k]
+          if (!is.na(x$trait[idx_k])){
+            g = as.character(x$trat[idx_k])
+            z[i, g] = z[i, g] + 1  
+            trt_c = c(trt_c, x$trait[idx_k])
+          }
         }
       }
       
       w[[i]] = data.frame(
-        gen = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trat'],
+        gen = x$trat[i],
         row = x$row[i],
         col = x$col[i],
-        y_focal = x[which(x$col == x$col[i] & x$row == x$row[[i]]),'trait'],
-        y_col = suppressWarnings({mean(trt_c, na.rm = T)})
+        y_focal = x$trait[i],
+        y_col = suppressWarnings({ ifelse(length(trt_c) > 0, mean(trt_c, na.rm = TRUE), NA) })
       )
-      
     }
     
     if(verbose){
@@ -1258,26 +1307,27 @@ prepcrop = function(data, gen, row, col, trait, plt = NULL, effs = NULL, directi
           ), fill = FALSE
       )
     }
-    
   }
   
   w = do.call(rbind, w)
   
-  input = data.frame(cbind(z, data))
+  input = data.frame(z, data, check.names = FALSE) 
   
-  if(!is.null(effs) & length(effs) > 1){
-    input[,effs] = lapply(input[,effs], factor)
-  }else if(!is.null(effs)) input[,effs] = as.factor(input[,effs])
+  if(!is.null(effs) && length(effs) >= 1){
+    for(e in effs){
+      input[[e]] = as.factor(input[[e]])
+    }
+  }
   
-  if(!is.factor(input[, gen])) input[, gen] = as.factor(input[, gen])
-  if(!is.factor(input[, row])) input[, row] = as.factor(input[, row])
-  if(!is.factor(input[, col])) input[, col] = as.factor(input[, col])
+  if(!is.factor(input[[gen]])) input[[gen]] = as.factor(input[[gen]])
+  if(!is.factor(input[[row]])) input[[row]] = as.factor(input[[row]])
+  if(!is.factor(input[[col]])) input[[col]] = as.factor(input[[col]])
   
-  input = input[order(input[,row], input[,col]),]
+  input = input[order(input[[row]], input[[col]]),]
   
   Z = list(Z = z, neigh_check = w, data = input)
   
-  attr(Z, 'control') = control    
+  attr(Z, 'control') = control 
   class(Z) = "comprepcrop"
   
   return(Z)

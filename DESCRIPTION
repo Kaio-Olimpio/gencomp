@@ -1,6 +1,6 @@
 Package: gencomp
 Title: Fit Spatial-Genetic Competition Models
-Version: 1.0.0.1
+Version: 1.1
 Authors@R: 
     c(person("Saulo", "Chaves", role = c("aut", "cre"),
                      email = "saulochaves@usp.br",
@@ -11,9 +11,6 @@ Authors@R:
               person("Filipe", "Ferreira", role = "aut",
                      email = "filipeferreira@usp.br",
                      comment = c(ORCID = "0000-0002-7847-8333")),
-              person("Getúlio C.", "Ferreira", role = "aut",
-                     email = "getuliocaifer@gmail.com",
-                     comment = c(ORCID = "0000-0003-4982-8274")),
               person("Salvador A.", "Gezan", role = "aut",
                      email = "forestats.sg@gmail.com",
                      comment = c(ORCID = "0000-0002-5025-2658")))
@@ -24,7 +21,6 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 Imports: 
     asreml,
     ggplot2,
@@ -37,3 +33,4 @@ Suggests:
     kableExtra
 VignetteBuilder: 
     knitr
+Config/roxygen2/version: 8.0.0

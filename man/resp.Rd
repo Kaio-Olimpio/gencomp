@@ -9,7 +9,7 @@ resp(prep.out, model, weight.tgv = FALSE, sd.class = 1)
 \arguments{
 \item{prep.out}{A \code{comprepfor} or \code{comprepcrop} object.}
 
-\item{model}{An \code{compmod} object, obtained from \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}} functions.}
+\item{model}{An \code{compmod} object, obtained from \code{\link[=asr]{asr()}}.}
 
 \item{weight.tgv}{A logical value or a numeric vector of size two. If \code{TRUE},
 the function will use the direct and indirect genetic effects' reliability as a weight when
@@ -30,7 +30,7 @@ and a measure of precision (standard error) is included along with boundary
 constraints at termination and the percentage change in the final iteration.
 \item \code{heritability} : a matrix (or a data frame, if a model with heterogeneous
 residual variances is fitted) containing the direct genetic effects heritability and
-the total heritability (see details). Available if \code{cor = TRUE} in \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}}.
+the total heritability (see details). Available if \code{cor = TRUE} in \code{\link[=asr]{asr()}}.
 \item \code{blups} : A list with a data frame containing the direct (DGE) and indirect genetic effects (IGE), their standard errors,
 the competition class of each genotype and the total genotypic value (TGV). If a multi-age model was fitted,
 \code{blup} will have a further data frame with the within-ages DGE and IGE. If
@@ -40,7 +40,7 @@ with the corresponding BLUPs.
 }
 \description{
 This function provides responses extracted from the genetic-spatial
-competition model fitted using \code{\link[=asr]{asr()}} or \code{\link[=asr_ma]{asr_ma()}}.
+competition model fitted using \code{\link[=asr]{asr()}}.
 }
 \details{
 The genetic competition model provides the direct (DGE) and indirect genetic
@@ -62,7 +62,7 @@ the mean IGE, \eqn{sd(c)} is the standard deviation of the IGE and
 
 \itemize{\item Total genotypic value}
 
-The total genotypic value (TGV) of a candidate refers to its genetic merit summed to its
+The total genotypic (or genetic) value (TGV) of a candidate refers to its genetic merit summed to its
 competition capacity. When the competition effects are weighted by the distance between
 individuals - which applies to the methods adapted for forest data in \code{gencomp}, the
 TGV is given by:
@@ -80,7 +80,7 @@ the full contribution of IGE to the heritable variance is considered (Bijma, 201
 In this case, the TGV is given by:
 
 \deqn{TGV_i =  d_i + c_i}
-id est, \eqn{\phi=1}.
+i.e., \eqn{\phi=1}.
 
 In both cases, when \code{weight.tgv = TRUE}, the DGE and IGE will be
 multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and
@@ -88,9 +88,8 @@ multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and
 
 \itemize{\item{Heritability}}
 
-When \code{cor = TRUE} in \link{asr} or \link{asr_ma}, \code{resp} estimates the
-DGE heritability and the total heritability, given by,
-respectively (Bijma et al., 2007):
+When \code{cor = TRUE} in \link{asr}, \code{resp} estimates the DGE broad- or narrow-sense
+heritability and the total heritability, given by, respectively (Bijma et al., 2007):
 
 \deqn{H^2 =  \frac{\sigma^2_g}{\sigma^2_p}}
 
@@ -106,20 +105,37 @@ covariance between DGE and IGE estimated in the model, and \eqn{\sigma^2_c} is t
 \examples{
 \donttest{
  library(gencomp)
- dat = euca[which(euca$age == "6y"),]
- comp_mat = prepfor(data = dat, gen = 'clone', area = 'area',
-                   plt = 'tree', age = NULL, row = 'row', col = 'col',
-                   dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
-                   n.dec = 3, verbose = FALSE, effs = c("block"))
- model = asr(prep.out = comp_mat,
-              fixed = MAI~ 1, 
-              random = ~ block, 
-              lrtest = TRUE, 
-              spatial = TRUE, 
-              cor = TRUE, 
-              maxit = 20)
-             
- results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
+ comp = prepfor(
+   data = cpt,
+   gen = "id",
+   row = "row",
+   col = "col",
+   trait = "pheno",
+   effs = "block",
+   dist.row = 2,
+   dist.col = 3,
+   verbose = TRUE,
+   n.dec = 4
+ )
+ 
+ ped = unique(as.data.frame(cbind(
+  do.call(rbind, strsplit(as.character(cpt[, 1]), split = "x")), 
+                         as.character(cpt[, 2])
+ )))
+ ped = ped[,c(3,1,2)]
+ ainv = asreml::ainverse(ped)
+ 
+ mod = asr(
+  prep.out = comp,
+  fixed = pheno ~ block,
+  random = ~ 1,
+  spatial = TRUE,
+  cor = TRUE,
+  lrtest = TRUE,
+  K = ainv
+ )
+ 
+ results = resp(prep.out = comp, model = mod, weight.tgv = FALSE, sd.class = 1)
  }
 }
 \references{
@@ -142,5 +158,5 @@ effects can mislead selection in eucalypt breeding trials. Forest Ecology and
 Management 561, 121892. \doi{10.1016/j.foreco.2024.121892}
 }
 \seealso{
-\link{prepfor}, \link{prepcrop}, \link{asr}, \link{asr_ma}
+\link{prepfor}, \link{prepcrop}, \link{asr}
 }

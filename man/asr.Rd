@@ -11,6 +11,7 @@ asr(
   spatial = TRUE,
   cor = TRUE,
   lrtest = FALSE,
+  K = NULL,
   ...
 )
 }
@@ -42,6 +43,14 @@ between direct and indirect genetic effects.}
 
 \item{lrtest}{A logical value. If \code{TRUE}, performs a likelihood ratio test to verify
 the significance of the direct and indirect genetic effects. Defaults to \code{FALSE}.}
+
+\item{K}{A sparse inverse variance matrix held in three-column coordinate form in row-major order.
+For backwards compatibility, a three-column data frame is also accepted.
+In either case, the source must have a \code{rowNames} attribute.
+This object must have class \code{ginv} from a call to \code{\link[asreml:ainverse]{asreml::ainverse()}},
+or have attribute \code{INVERSE} set to \code{TRUE}. If the attribute \code{INVERSE} is not set then FALSE is assumed.
+We recommend using the \code{ASRgenomics} package to set the genomic relationship matrix (see \code{\link[ASRgenomics:G.matrix]{ASRgenomics::G.matrix()}} and
+\code{\link[ASRgenomics:G.inverse]{ASRgenomics::G.inverse()}}). If there is no relationship information, \code{K = NULL} (default)}
 
 \item{...}{
   Arguments passed on to \code{\link[asreml:asreml]{asreml::asreml}}
@@ -357,28 +366,59 @@ where \eqn{\sigma^2_\varepsilon} is the spatially correlated residual variance,
 \eqn{\mathbf{AR1}(\rho_C)} and \eqn{\mathbf{AR1}(\rho_R)} are the first-order autoregressive
 correlation matrices in the column and row directions, and \eqn{\otimes} is the
 Kronecker product. If \code{cor = TRUE}, the function will fit a model in which
-\eqn{\mathbf{g}} and \eqn{\mathbf{c}} are correlated outcomes of the genotypic effects'
+\eqn{\mathbf{g}} and \eqn{\mathbf{c}} are correlated outcomes of the genetic effects'
 decomposition. They both follow a Gaussian distribution, with mean centred in zero, and
 covariance given by:
 
-\deqn{\mathbf{\Sigma_g} = \begin{bmatrix}\sigma_{\text{g}}^2 & \sigma_{\text{gc}}\\\sigma_{\text{gc}} & \sigma_{\text{c}}^2\\\end{bmatrix}\otimes {{\mathbf I_V}}}
+\deqn{\mathbf{\Sigma_g} = \begin{bmatrix}\sigma_{\text{g}}^2 & \sigma_{\text{gc}}\\\sigma_{\text{gc}} & \sigma_{\text{c}}^2\\\end{bmatrix}\otimes {{\mathbf K}}}
 
 where \eqn{\sigma_{\text{g}}^2} is the DGE variance, \eqn{\sigma_{\text{c}}^2} is the IGE variance,
-and \eqn{\sigma_{\text{gc}}} is the covariance between DGE and IGE.
+\eqn{\sigma_{\text{gc}}} is the covariance between DGE and IGE, and \eqn{K} is a \eqn{V \times V} relationship matrix.
 
-The likelihood ratio test is performed using a model without the correlation between DGE and IGE.
+If \code{prep.out} is a \code{comprepfor} object, and the argument \code{age} is different than \code{NULL} in
+the \link{prepfor} function, a multi-age genetic competition model is fitted. In this case,
+the vectors \eqn{\mathbf{g}} and \eqn{\mathbf{c}} follow a compound symmetry structure, with
+a explicit variance for the main effects, and another for the genotype-by-environment interaction.
+The residual variance is assumed to be heterogeneous (one variance per age).
+If \code{spatial = TRUE}, the errors will be adjusted using a first-order autoregressive
+structure, with autocorrelation coefficients particularized per age. If \code{cor = TRUE}, the function will fit a model in which
+the main effects of \eqn{\mathbf{g}} and \eqn{\mathbf{c}} are correlated outcomes of
+the main genetic effects decomposition.
+
+The likelihood ratio test is performed comparing models excluding the covariance component.
 }
 \examples{
 \donttest{
  library(gencomp)
+ 
+ # Genetic competition model using a crop breeding example
   comps = prepcrop(data = potato, gen = "gen", row = "row", col = "col",
                    plt = NULL, effs = c("rep", 'matur'), trait = "yield",
                    direction = "row", verbose = TRUE)
  
-  mod = asr(prep.out = comps, fixed = yield ~ matur + rep,
-            random = ~1, spatial = FALSE, cor = TRUE, lrtest = TRUE)
+  mod = asr(prep.out = comps, 
+            fixed = yield ~ matur + rep,
+            random = ~1, 
+            spatial = FALSE, 
+            cor = TRUE, 
+            lrtest = TRUE, 
+            K = NULL)
+  
+  # Genetic competition model using a forest tree breeding example
+  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+                   plt = 'tree', age = 'age', row = 'row', col = 'col',
+                   dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
+                   n.dec = 3, verbose = FALSE, effs = c("block"))
+ model = asr(prep.out = comp_mat,
+             fixed = MAI ~ age, 
+             random = ~ block:age, 
+             lrtest = TRUE, 
+             spatial = TRUE, 
+             cor = TRUE, 
+             K = NULL,
+             maxit = 20)
  }
 }
 \seealso{
-\link{prepfor}, \link{prepcrop}, \link[asreml:asreml.options]{asreml::asreml.options}, \link[asreml:asreml.object]{asreml::asreml.object}, \link[asreml:family_dist]{asreml::family_dist}
+\link{prepfor}, \link{prepcrop}, \link[asreml:asreml.options]{asreml::asreml.options}, \link[asreml:asreml.object]{asreml::asreml.object}, \link[asreml:ainverse]{asreml::ainverse}
 }

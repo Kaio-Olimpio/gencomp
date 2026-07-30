@@ -67,7 +67,7 @@ focal plant and its neighbours.
 }
 }
 \description{
-This function builds the genetic competition matrix (\eqn{\mathbf{Z}_c}), and
+This function builds the genetic competition matrix \eqn{\left(\mathbf{Z}_c\right)}, and
 prepares the dataset to be used for model fitting. It also computes the
 competition intensity factor.
 }

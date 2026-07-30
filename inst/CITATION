@@ -3,7 +3,7 @@ citHeader("Your citation motivates us to keep improving the package. Thank you f
 bibentry(
   bibtype  = "Article",
   title    = "Incorporating spatial and genetic competition into breeding pipelines with the {R} package gencomp",
-  author   = as.person("Saulo F. S. Chaves [aut], Filipe M. Ferreira [aut], Getulio C. Ferreira [aut], Salvador A. Gezan [aut], Kaio Olimpio G. Dias [aut]"),
+  author   = as.person("Saulo Chaves [aut], Filipe M. Ferreira [aut], Getulio C. Ferreira [aut], Salvador A. Gezan [aut], Kaio Olimpio G. Dias [aut]"),
   journal  = "Heredity",
   year     = "2025",
   volume   = "134",

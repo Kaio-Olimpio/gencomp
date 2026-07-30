@@ -20,13 +20,13 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Saulo F. S. Chaves \email{saulochaves@usp.br} (\href{https://orcid.org/0000-0002-0694-1798}{ORCID})
+\strong{Maintainer}: Saulo Chaves \email{saulochaves@usp.br} (\href{https://orcid.org/0000-0002-0694-1798}{ORCID})
 
 Authors:
 \itemize{
+  \item Saulo Chaves \email{saulochaves@usp.br} (\href{https://orcid.org/0000-0002-0694-1798}{ORCID})
   \item Kaio Olimpio G. Dias \email{kaio.o.dias@ufv.br} (\href{https://orcid.org/0000-0002-9171-1021}{ORCID}) [copyright holder]
-  \item Filipe M. Ferreira \email{ferreira.fmanoel@gmail.com} (\href{https://orcid.org/0000-0002-7847-8333}{ORCID})
-  \item Getúlio C. Ferreira \email{getuliocaifer@gmail.com} (\href{https://orcid.org/0000-0003-4982-8274}{ORCID})
+  \item Filipe Ferreira \email{filipeferreira@usp.br} (\href{https://orcid.org/0000-0002-7847-8333}{ORCID})
   \item Salvador A. Gezan \email{forestats.sg@gmail.com} (\href{https://orcid.org/0000-0002-5025-2658}{ORCID})
 }
 

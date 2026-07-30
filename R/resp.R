@@ -2,10 +2,10 @@
 ##' 
 ##' @description
 ##' This function provides responses extracted from the genetic-spatial 
-##' competition model fitted using [gencomp::asr()] or [gencomp::asr_ma()]. 
+##' competition model fitted using [gencomp::asr()]. 
 ##' 
 ##' @param prep.out A `comprepfor` or `comprepcrop` object.
-##' @param model An `compmod` object, obtained from [gencomp::asr()] or [gencomp::asr_ma()] functions.
+##' @param model An `compmod` object, obtained from [gencomp::asr()].
 ##' @param weight.tgv A logical value or a numeric vector of size two. If `TRUE`, 
 ##' the function will use the direct and indirect genetic effects' reliability as a weight when 
 ##' estimating the total genotypic value. If a vector is provided, the values within the vector 
@@ -23,7 +23,7 @@
 ##' constraints at termination and the percentage change in the final iteration.
 ##' \item \code{heritability} : a matrix (or a data frame, if a model with heterogeneous 
 ##' residual variances is fitted) containing the direct genetic effects heritability and 
-##' the total heritability (see details). Available if `cor = TRUE` in [gencomp::asr()] or [gencomp::asr_ma()]. 
+##' the total heritability (see details). Available if `cor = TRUE` in [gencomp::asr()]. 
 ##' \item \code{blups} : A list with a data frame containing the direct (DGE) and indirect genetic effects (IGE), their standard errors, 
 ##' the competition class of each genotype and the total genotypic value (TGV). If a multi-age model was fitted, 
 ##' `blup` will have a further data frame with the within-ages DGE and IGE. If 
@@ -51,7 +51,7 @@
 ##' 
 ##' \itemize{\item Total genotypic value}
 ##' 
-##' The total genotypic value (TGV) of a candidate refers to its genetic merit summed to its 
+##' The total genotypic (or genetic) value (TGV) of a candidate refers to its genetic merit summed to its 
 ##' competition capacity. When the competition effects are weighted by the distance between 
 ##' individuals - which applies to the methods adapted for forest data in `gencomp`, the 
 ##' TGV is given by:
@@ -69,7 +69,7 @@
 ##' In this case, the TGV is given by:
 ##' 
 ##' \deqn{TGV_i =  d_i + c_i}
-##' id est, \eqn{\phi=1}.
+##' i.e., \eqn{\phi=1}.
 ##' 
 ##' In both cases, when `weight.tgv = TRUE`, the DGE and IGE will be 
 ##' multiplied by their respective reliabilities (\eqn{r_{d_i}^2} and 
@@ -77,9 +77,8 @@
 ##' 
 ##' \itemize{\item{Heritability}}
 ##' 
-##' When `cor = TRUE` in [gencomp::asr] or [gencomp::asr_ma], `resp` estimates the 
-##' DGE heritability and the total heritability, given by, 
-##' respectively (Bijma et al., 2007):
+##' When `cor = TRUE` in [gencomp::asr], `resp` estimates the DGE broad- or narrow-sense 
+##' heritability and the total heritability, given by, respectively (Bijma et al., 2007):
 ##' 
 ##' \deqn{H^2 =  \frac{\sigma^2_g}{\sigma^2_p}}
 ##' 
@@ -92,7 +91,7 @@
 ##' for agronomic data. In these equations, \eqn{\sigma_{gc}} is the 
 ##' covariance between DGE and IGE estimated in the model, and \eqn{\sigma^2_c} is the IGE variance. 
 ##'
-##' @seealso  [gencomp::prepfor], [gencomp::prepcrop], [gencomp::asr], [gencomp::asr_ma]
+##' @seealso  [gencomp::prepfor], [gencomp::prepcrop], [gencomp::asr]
 ##' 
 ##' @references 
 ##' 
@@ -123,20 +122,37 @@
 ##' @examples
 ##' \donttest{
 ##'  library(gencomp)
-##'  dat = euca[which(euca$age == "6y"),]
-##'  comp_mat = prepfor(data = dat, gen = 'clone', area = 'area',
-##'                    plt = 'tree', age = NULL, row = 'row', col = 'col',
-##'                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
-##'                    n.dec = 3, verbose = FALSE, effs = c("block"))
-##'  model = asr(prep.out = comp_mat,
-##'               fixed = MAI~ 1, 
-##'               random = ~ block, 
-##'               lrtest = TRUE, 
-##'               spatial = TRUE, 
-##'               cor = TRUE, 
-##'               maxit = 20)
-##'              
-##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
+##'  comp = prepfor(
+##'    data = cpt,
+##'    gen = "id",
+##'    row = "row",
+##'    col = "col",
+##'    trait = "pheno",
+##'    effs = "block",
+##'    dist.row = 2,
+##'    dist.col = 3,
+##'    verbose = TRUE,
+##'    n.dec = 4
+##'  )
+##'  
+##'  ped = unique(as.data.frame(cbind(
+##'   do.call(rbind, strsplit(as.character(cpt[, 1]), split = "x")), 
+##'                          as.character(cpt[, 2])
+##'  )))
+##'  ped = ped[,c(3,1,2)]
+##'  ainv = asreml::ainverse(ped)
+##'  
+##'  mod = asr(
+##'   prep.out = comp,
+##'   fixed = pheno ~ block,
+##'   random = ~ 1,
+##'   spatial = TRUE,
+##'   cor = TRUE,
+##'   lrtest = TRUE,
+##'   K = ainv
+##'  )
+##'  
+##'  results = resp(prep.out = comp, model = mod, weight.tgv = FALSE, sd.class = 1)
 ##'  }
 
 resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
@@ -145,8 +161,16 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   
   ## Messages and warnings
   stopifnot("The model did not converge!" = model$converge)
-  stopifnot("Please, use an object obtained from 'asr' or 'asr.ma' functions" = "compmod" %in% class(model))
+  stopifnot("Please, use an object obtained from 'asr'" = "compmod" %in% class(model))
   stopifnot("'prep.out' must be an object of class 'comprepfor' or 'comprepcrop'" = class(prep.out) %in% c("comprepfor", "comprepcrop"))
+  
+  extr_names = function(text, pattern) {
+    loc = regexpr(pattern, text)
+    res = regmatches(text, loc)
+    out = rep(NA_character_, length(text))
+    out[loc != -1] <- res
+    return(out)
+  }
   
   prep.out <<- prep.out
   control = attr(prep.out, 'control')
@@ -318,12 +342,12 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
       
       if(length(h2g)>1){
         output$heritability = data.frame(
-          H2direct = h2g,
-          H2total = h2t,
+          direct = h2g,
+          total = h2t,
           row.names = sub("R=","",rownames(varcomp[which(grepl("R=", rownames(varcomp)) & !grepl("autocor", rownames(varcomp))),]))
         )
       }else{
-        output$heritability = matrix(c(h2g, h2t), dimnames = list(c('H2direct', 'H2total'),
+        output$heritability = matrix(c(h2g, h2t), dimnames = list(c('direct', 'total'),
                                                                     "Heritability"))
       }
     }else if(inherits(prep.out, "comprepcrop")){
@@ -347,7 +371,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
       h2g = s2g/s2t
       h2t = (s2g + (2 * Cov) + (s2c))/s2t
       
-      output$heritability = matrix(c(h2g, h2t), dimnames = list(c('H2direct', 'H2total'),
+      output$heritability = matrix(c(h2g, h2t), dimnames = list(c('direct', 'total'),
                                                                   "Heritability"))
     }
   }
@@ -363,8 +387,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
       ## Main effects --------------
       DGE = blup[which(grepl(names(control)[2], rownames(blup)) & 
                          !grepl(names(control)[5], rownames(blup))), -3]
-      DGE[,names(control)[2]] = gsub(paste0(names(control)[2],'_'), 
-                                     '', rownames(DGE), fixed = T)
+      DGE[,names(control)[2]] = extr_names(rownames(DGE), paste(attr(model,"treats"), collapse = "|"))
       rownames(DGE) = NULL
       DGE[,names(control)[2]] = as.factor(DGE[,names(control)[2]])
       
@@ -420,10 +443,8 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
       ## Interaction effects ----------------
       DGE.int = blup[which(grepl(names(control)[2], rownames(blup)) & 
                              grepl(names(control)[5], rownames(blup))), -3]
-      DGE.int[,names(control)[2]] = gsub(paste0(names(control)[2],'_'),'', 
-                                         gsub(':.*', '', rownames(DGE.int)), fixed = T)
-      DGE.int[,names(control)[5]] = gsub(paste0(names(control)[5], '_'),'', 
-                                         gsub('.*:', '', rownames(DGE.int)), fixed = T)
+      DGE.int[,names(control)[2]] = extr_names(rownames(DGE.int), paste(attr(model,"treats"), collapse = "|"))
+      DGE.int[,names(control)[5]] = extr_names(rownames(DGE.int), paste(unique(prep.out$data[,colnames(control)[5]]), collapse = "|"))
       rownames(DGE.int) = NULL
       
       if(any(grepl(' ',DGE.int[,names(control)[2]]))){
@@ -509,12 +530,11 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
                                    !grepl(names(control)[2], rownames(blup))), -3]
         output$blups$coef.random = coef.random
       }
-    }else{ #### PAREI AQUI ====
+    }else{ 
       
       ## Main effects --------------
       DGE = blup[which(grepl(names(control)[2], rownames(blup))), -3]
-      DGE[,names(control)[2]] = gsub(paste0(names(control)[2],'_'), 
-                                     '', rownames(DGE), fixed = T)
+      DGE[,names(control)[2]] = extr_names(rownames(DGE), paste(attr(model,"treats"), collapse = "|"))
       rownames(DGE) = NULL
       DGE[,names(control)[2]] = as.factor(DGE[,names(control)[2]])
       
@@ -574,8 +594,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
     
     ## Main effects 
     DGE = blup[which(grepl(names(control)[2], rownames(blup))), -3]
-    DGE[,names(control)[2]] = gsub(paste0(names(control)[2],'_'), 
-                                   '', rownames(DGE), fixed = T)
+    DGE[,names(control)[2]] = extr_names(rownames(DGE), paste(attr(model,"treats"), collapse = "|"))
     rownames(DGE) = NULL
     DGE[,names(control)[2]] = as.factor(DGE[,names(control)[2]])
     
@@ -634,6 +653,7 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
   attr(output, 'data') = prep.out$data
   attr(output, 'residuals') = model$residuals
   attr(output, 'sd.class') = sd.class
+  attr(output, 'treats') = attr(model, "treats")
   class(output) = c('comresp', class(prep.out))
   remove(prep.out, envir = .GlobalEnv)
   
@@ -695,19 +715,20 @@ resp = function(prep.out, model, weight.tgv = FALSE, sd.class = 1) {
 #' 
 #' @examples
 #' \donttest{
-#'  library(gencomp)
-##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+##'  library(gencomp)
+##'   comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
 ##'                    plt = 'tree', age = 'age', row = 'row', col = 'col',
 ##'                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
 ##'                    n.dec = 3, verbose = FALSE, effs = c("block"))
-##'  model = asr_ma(prep.out = comp_mat,
-##'                 fixed = MAI~ age, 
-##'                 random = ~ block:age, 
-##'                 lrtest = TRUE, 
-##'                 spatial = TRUE, 
-##'                 cor = TRUE, 
-##'                 maxit = 20)
-##'              
+##'  model = asr(prep.out = comp_mat,
+##'              fixed = MAI ~ age, 
+##'              random = ~ block:age, 
+##'              lrtest = TRUE, 
+##'              spatial = TRUE, 
+##'              cor = TRUE, 
+##'              K = NULL,
+##'              maxit = 20)
+##'  
 ##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
 ##'  
 #'  plot(results, category = 'DGEvIGE', level = 'within', age = '6y')
@@ -740,6 +761,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
   rownames(dat) = NULL
   dat$resid = c(attr(object, 'residuals'))
   sd.class = attr(object, 'sd.class')
+  treats = attr(object, "treats")
   
   if("comprepfor" %in% class(object) && control[, 5] > 1){
     stopifnot("'age' should be of size 1" = length(age) == 1)
@@ -782,7 +804,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
         blup = c(main$DGE, main$IGE),
         se = c(main$se.DGE, main$se.IGE),
         rel = c(main$rel.DGE, main$rel.IGE),
-        comp = rep(c('DGE', 'IGE'), each = control[,2])
+        comp = rep(c('DGE', 'IGE'), each = length(treats))
       )
       
       temp$gen = factor(temp$gen, levels = temp[order(temp$blup, decreasing = TRUE)[
@@ -1089,7 +1111,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
               blup = c(df$DGE, df$IGE),
               se = c(df$se.DGE, df$se.IGE),
               rel = c(df$rel.DGE, df$rel.IGE),
-              comp = rep(c('DGE', 'IGE'), each = control[,2])
+              comp = rep(c('DGE', 'IGE'), each = length(treats))
             )
             
             temp2$gen = factor(temp2$gen, levels = temp2[order(temp2$blup, decreasing = TRUE)[
@@ -1455,7 +1477,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
           blup = c(temp$DGE, temp$IGE),
           se = c(temp$se.DGE, temp$se.IGE),
           rel = c(temp$rel.DGE, temp$rel.IGE),
-          comp = rep(c('DGE', 'IGE'), each = control[,2])
+          comp = rep(c('DGE', 'IGE'), each = length(treats))
         )
         
         temp2$gen = factor(temp2$gen, levels = temp2[order(temp2$blup, decreasing = TRUE)[
@@ -1742,7 +1764,7 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
 #' @param x An object of class `comresp`.
 #' @param category A string indicating which object to print. Options are `"all"`
 #' for printing all objects, `"summar"` for printing the variance components and the 
-#' likelihood ratio test (if `lrt = TRUE` in [gencomp::asr] or [gencomp::asr_ma]), 
+#' likelihood ratio test (if `lrt = TRUE` in [gencomp::asr]), 
 #' `"blup.main"` (Default) for printing the DGE, IGE and TGV (the main effects 
 #' if a multi-age model was fitted), and `"blup.within"` for printing the DGE, 
 #' IGE and TGV within ages (if a multi-age model was fitted).
@@ -1763,19 +1785,20 @@ plot.comresp = function(x, ..., category = 'DGE.IGE', level = 'main', age = 'all
 #' @examples
 #' \donttest{
 #'  library(gencomp)
-##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+#'   comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
 ##'                    plt = 'tree', age = 'age', row = 'row', col = 'col',
 ##'                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
 ##'                    n.dec = 3, verbose = FALSE, effs = c("block"))
-##'  model = asr_ma(prep.out = comp_mat,
-##'                 fixed = MAI~ age, 
-##'                 random = ~ block:age, 
-##'                 lrtest = TRUE, 
-##'                 spatial = TRUE, 
-##'                 cor = TRUE, 
-##'                 maxit = 20)
+##'  mod = asr(prep.out = comp_mat,
+##'              fixed = MAI ~ age, 
+##'              random = ~ block:age, 
+##'              lrtest = TRUE, 
+##'              spatial = TRUE, 
+##'              cor = TRUE, 
+##'              K = NULL,
+##'              maxit = 20)
 ##'              
-##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
+##'  results = resp(prep.out = comp_mat, model = mod, weight.tgv = FALSE, sd.class = 1)
 #'  
 #'  print(results)
 #'  print(results, category = 'summar')

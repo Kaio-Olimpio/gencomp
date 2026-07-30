@@ -13,7 +13,7 @@
 
 \item{category}{A string indicating which object to print. Options are \code{"all"}
 for printing all objects, \code{"summar"} for printing the variance components and the
-likelihood ratio test (if \code{lrt = TRUE} in \link{asr} or \link{asr_ma}),
+likelihood ratio test (if \code{lrt = TRUE} in \link{asr}),
 \code{"blup.main"} (Default) for printing the DGE, IGE and TGV (the main effects
 if a multi-age model was fitted), and \code{"blup.within"} for printing the DGE,
 IGE and TGV within ages (if a multi-age model was fitted).}
@@ -28,19 +28,20 @@ Print a \code{comresp} object in the R console.
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
                    plt = 'tree', age = 'age', row = 'row', col = 'col',
                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
                    n.dec = 3, verbose = FALSE, effs = c("block"))
- model = asr_ma(prep.out = comp_mat,
-                fixed = MAI~ age, 
-                random = ~ block:age, 
-                lrtest = TRUE, 
-                spatial = TRUE, 
-                cor = TRUE, 
-                maxit = 20)
+ mod = asr(prep.out = comp_mat,
+             fixed = MAI ~ age, 
+             random = ~ block:age, 
+             lrtest = TRUE, 
+             spatial = TRUE, 
+             cor = TRUE, 
+             K = NULL,
+             maxit = 20)
              
- results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
+ results = resp(prep.out = comp_mat, model = mod, weight.tgv = FALSE, sd.class = 1)
  
  print(results)
  print(results, category = 'summar')

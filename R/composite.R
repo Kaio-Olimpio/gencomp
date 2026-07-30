@@ -2,11 +2,11 @@
 ##'
 ##' @description
 ##' This function simulates clonal composites using outputs of a genetic-spatial
-##' competition model fitted using [gencomp::asr()] or [gencomp::asr_ma()]. Currently, 
+##' competition model fitted using [gencomp::asr()]. Currently, 
 ##' only forestry data is accepted. 
 ##' 
 ##' @param prep.out A `comprepfor` object.
-##' @param model A `compmod` object obtained using [gencomp::asr()] or [gencomp::asr_ma()].
+##' @param model A `compmod` object obtained using [gencomp::asr()].
 ##' @param resp.out A `comresp` object.
 ##' @param d.row.col A vector of size two. The first element contain the distance between
 ##' rows, and second the distance between columns of the simulated grid.
@@ -42,7 +42,7 @@
 ##' by jointly modeling spatial variation and genetic competition. Forest Ecology 
 ##' and Management 548, 121393. \doi{https://doi.org/10.1016/j.foreco.2023.121393}
 ##'
-##' @seealso  [gencomp::prepfor], [gencomp::asr], [gencomp::asr_ma], [gencomp::resp]
+##' @seealso  [gencomp::prepfor], [gencomp::asr], [gencomp::resp]
 ##' 
 ##' @importFrom stats quantile model.matrix model.matrix.lm
 ##' 
@@ -51,17 +51,18 @@
 ##' @examples
 ##' \donttest{
 ##' library(gencomp)
-##'  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+#'   comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
 ##'                    plt = 'tree', age = 'age', row = 'row', col = 'col',
 ##'                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
 ##'                    n.dec = 3, verbose = FALSE, effs = c("block"))
-##'  model = asr_ma(prep.out = comp_mat,
-##'                 fixed = MAI~ age, 
-##'                 random = ~ block:age, 
-##'                 lrtest = TRUE, 
-##'                 spatial = TRUE, 
-##'                 cor = TRUE, 
-##'                 maxit = 20)
+##'  model = asr(prep.out = comp_mat,
+##'              fixed = MAI ~ age, 
+##'              random = ~ block:age, 
+##'              lrtest = TRUE, 
+##'              spatial = TRUE, 
+##'              cor = TRUE, 
+##'              K = NULL,
+##'              maxit = 20)
 ##'              
 ##'  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
 ##'  

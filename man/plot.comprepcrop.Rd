@@ -34,5 +34,5 @@ plot(comps, category = 'boxplot')
 
 }
 \seealso{
-\link{ggplot2}, \link{prepcrop}
+\link[ggplot2:ggplot2]{ggplot2}, \link{prepcrop}
 }

@@ -17,3 +17,5 @@
 ^Manuscript$
 ^repo_settings\.R$
 ^vignettes/*_files$
+^R/tests$
+^R/archive$

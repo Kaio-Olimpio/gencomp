@@ -39,5 +39,5 @@ plot(comp_mat, category = 'boxplot', age = "3y")
 
 }
 \seealso{
-\link{ggplot2}, \link{prepfor}
+\link[ggplot2:ggplot2]{ggplot2}, \link{prepfor}
 }

@@ -52,18 +52,19 @@ to the competition class of each genotype.
 \examples{
 \donttest{
  library(gencomp)
- comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
+  comp_mat = prepfor(data = euca, gen = 'clone', area = 'area',
                    plt = 'tree', age = 'age', row = 'row', col = 'col',
                    dist.col = 3, dist.row = 2, trait = 'MAI', method = 'SK',
                    n.dec = 3, verbose = FALSE, effs = c("block"))
- model = asr_ma(prep.out = comp_mat,
-                fixed = MAI~ age, 
-                random = ~ block:age, 
-                lrtest = TRUE, 
-                spatial = TRUE, 
-                cor = TRUE, 
-                maxit = 20)
-             
+ model = asr(prep.out = comp_mat,
+             fixed = MAI ~ age, 
+             random = ~ block:age, 
+             lrtest = TRUE, 
+             spatial = TRUE, 
+             cor = TRUE, 
+             K = NULL,
+             maxit = 20)
+ 
  results = resp(prep.out = comp_mat, model = model, weight.tgv = FALSE, sd.class = 1)
  
  plot(results, category = 'DGEvIGE', level = 'within', age = '6y')
@@ -79,5 +80,5 @@ to the competition class of each genotype.
  }
 }
 \seealso{
-\link{ggplot2}, \link{resp}
+\link[ggplot2:ggplot2]{ggplot2}, \link{resp}
 }

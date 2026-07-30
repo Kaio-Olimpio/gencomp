@@ -83,8 +83,11 @@ $$
                 f_d = \frac{1}{\sqrt{\mathcal{D}^2_r + \mathcal{D}^2_c}} \\ 
                 f_r = \frac{1}{\mathcal{D}_r} \\ 
                 f_c = \frac{1}{\mathcal{D}_c}                
-            \end{cases}
-$$
+\end{cases}
+\tag{1}
+$$ 
+
+
 
 where  $f_r$, $f_c$ and $f_d$ are the directional competition intensity factors for a given plot (i.e., a given row of $\mathbf{Z}_c$) in the row, column and diagonal directions, respectively; $\mathcal{D}_r$ and $\mathcal{D}_c$ are the distance between the focal individual and its neighbors in the row and column directions, respectively.
 
@@ -96,6 +99,7 @@ $$
                 f_r = \sqrt{\frac{2}{2 \left(n_c + n_r\right) + n_d}} \\ 
                 f_c = \sqrt{\frac{2}{2 \left(n_c + n_r\right) + n_d}}               
             \end{cases}
+\tag{2}
 $$
 
 where $n_r$, $n_c$ and $n_d$ are the number of neighbors in the row, column and diagonal directions, respectively
@@ -108,6 +112,7 @@ $$
                 f_r = f_d \sqrt{1 + p^2} \\ 
                 f_c = \frac{f_d \sqrt{1 + p^2}}{p}               
             \end{cases}
+\tag{3}
 $$
 
 where $p = {\mathcal{D}_c}/{\mathcal{D}_r}$.
@@ -116,6 +121,7 @@ Once the direction competition intensity factors are estimated, the mean competi
 
 $$
 \hat{\phi} = \overline{n_r} \overline{f}_r + \overline{n}_c \overline{f}_c + \overline{n}_d \overline{f}_d
+\tag{4}
 $$
 
 To build the $\mathbf{Z}_c$, `gencomp` has the function `prepfor`. Here is how to use it employing the example dataset:
@@ -139,11 +145,11 @@ comp_mat = prepfor(
 )
 ```
 
-`data` is the working dataset. `gen`, `row`, `col`, and `trait` are the column names in the dataset that contain the information of genotypes, row, column, and trait, respectively. `dist_row` and `dist_col` are the distances between rows and columns, respectively. `method` refers to the method to be used to compute the competition intensity: it should be `"MU"`, `"CC"` or `"SK"` (as detailed above). `area` and `age` are `NULL` by default, but if you have non-contiguous blocks (as we have in our example) and multi-age (repeated measures) data (see `vignette("multi_age)"`), you can add the name of the columns that contain this information in the data frame. `n.dec` is the number of decimal digits to show in $\mathbf{Z}_c$. The `plt` argument is optional (defaulting to `NULL`) and allows users to specify the name of the column containing plot information. This helps ensure that the functions follow the same order as the data collection in the field. If `plt` is not provided, the function will automatically generate a column to differentiate the plots, ordering the dataset by row and column. The `effs` argument accepts a string vector with the names of columns representing other effects to be considered in the model fitting step. For instance, the effect of block (`block`). Finally, `verbose` controls whether a progress bar is printed in the console or not. 
+`data` is the working dataset. `gen`, `row`, `col`, and `trait` are the column names in the dataset that contain the information of genotypes, row, column, and trait, respectively. `dist_row` and `dist_col` are the distances between rows and columns, respectively. `method` refers to the method to be used to compute the competition intensity: it should be `"MU"`, `"CC"` or `"SK"` (as detailed above). `area` and `age` are `NULL` by default, but if you have non-contiguous blocks (as we have in our example) and multi-age (repeated measures) data, you can add the name of the columns that contain this information in the data frame. `n.dec` is the number of decimal digits to show in $\mathbf{Z}_c$. The `plt` argument is optional (defaulting to `NULL`) and allows users to specify the name of the column containing plot information. This helps ensure that the functions follow the same order as the data collection in the field. If `plt` is not provided, the function will automatically generate a column to differentiate the plots, ordering the dataset by row and column. The `effs` argument accepts a string vector with the names of columns representing other effects to be considered in the model fitting step. For instance, the effect of block (`block`). Finally, `verbose` controls whether a progress bar is printed in the console or not. 
 
 The `prepfor` function generates a list of class `comprepfor`. This list has four elements:
 
-1.  A data frame with the inputted data and $\mathbf{Z}_c$ merged:
+1.  A data frame with $\mathbf{Z}_c$ merged with the working dataset:
 
 ```{r results='hide'}
 comp_mat$data[1:5, c(1:5, (ncol(comp_mat$data)-4):ncol(comp_mat$data))]
@@ -208,6 +214,7 @@ A general spatial-genetic competition model can be represented by:
  
 $$
 \mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \mathbf{Z}_g \mathbf{g} + \mathbf{Z}_c \mathbf{c} + \mathbf{Z}_p \mathbf{p}  + \boldsymbol{\varepsilon}
+\tag{5}
 $$
  
 where $\mathbf{y}$ is the vector of phenotypic records, $\boldsymbol{\beta}$ is the vector of fixed effects, $\mathbf{g}$ is the vector of direct genetic effects (DGE), $\mathbf{c}$ is the vector of indirect genetic effects (IGE), $\mathbf{p}$ is the vector of other random effects, and $\boldsymbol{\varepsilon}$ is the vector of spatially correlated errors. $\mathbf{X}$ is the incidence matrix of the fixed effects, $\mathbf{Z}_g$ is the DGE incidence matrix, $\mathbf{Z}_c$ is the IGE incidence matrix (built using `prepfor`), and $\mathbf{Z}_p$ is the design matrix of other random effects. The dimensions of $\mathbf{Z}_c$ are the same as $\mathbf{Z}_g$. The spatially correlated errors are distributed as 
@@ -215,6 +222,7 @@ where $\mathbf{y}$ is the vector of phenotypic records, $\boldsymbol{\beta}$ is 
   
 $$
 \mathbf{\Sigma_g} = \begin{bmatrix}\sigma_{\text{g}}^2 & \sigma_{\text{gc}}\\\sigma_{\text{gc}} & \sigma_{\text{c}}^2\\\end{bmatrix}\otimes {{\mathbf I_V}}
+\tag{6}
 $$
   
 where $\sigma_{\text{g}}^2$ is the DGE variance, $\sigma_{\text{c}}^2$ is the IGE variance, and $\sigma_{\text{gc}}$ is the covariance between DGE and IGE. An alternative parametrization considers that $\mathbf{g}$ and $\mathbf{c}$ are independent. If this is not true for the trait and/or population under investigation, assuming independence will add bias to the results.
@@ -228,7 +236,8 @@ model = asr(
   random = ~ block,
   lrtest = TRUE,
   spatial = TRUE,
-  cor = TRUE
+  cor = TRUE,
+  K = NULL
 )
 ```
 `prep.out` is a `comprepfor` object. `fixed` is a formula, declared just like is usually done for regular `asreml` models. `random` is also a formula, but this argument should just be altered if other random effects than the genotypic effects should be considered in the model. This is because all pre-programmed models already consider DGE and IGE, as previously described. In our example, we added the `block` effect, which was declared in the `effs` argument of `comprepfor`. `lrtest` defines if hypothesis tests using likelihood ratio tests should be done. `spatial` determines if a regular genetic competition model (`spatial = FALSE`) or a spatial-genetic competition model (`spatial = TRUE`) should be fitted. Finally, `cor` dictates if the function will fit a model considering the covariance between DGE and IGE (`cor = TRUE`) or not (`cor = FALSE`). `asr` can receive other arguments passed on to the `asreml` function (see `?asreml` for more information). The output of the `asr` function is an object of classes `asreml` and `compmod`. Since it holds the `asreml` class, it is suitable for using with S3 methods like `plot`, `summary`, `predict`, `update`, `resid` and others (see `help("asreml.object")`).
@@ -280,9 +289,12 @@ Available if `cor = TRUE` in the function `asr`. Contain the DGE heritability an
 
 $$
 H^2_g = \frac{\hat{\sigma}^2_g}{\hat{\sigma}^2_y}
+\tag{7}
 $$
+
 $$
 H^2_t = \frac{\hat{\sigma}^2_g + 2\times \hat{\phi} \times \hat{\sigma}_{gc} + \hat{\phi}^2 \times \hat{\sigma}^2_c}{\hat{\sigma}^2_y}
+\tag{8}
 $$
 with $\sigma^2_y$ being the total phenotypic variance.
 
@@ -303,11 +315,13 @@ When genetic competition effects are statistically significant, the most appropr
 
 $$
 {TGV}_v = \hat{g}_v + \hat{\phi} \times \hat{c}_v
+\tag{9}
 $$
 where $\hat{g}_v$ and $\hat{c}_v$ are the DGE and IGE of the $v^{th}$ candidate, respectively. If `weight.tgv = TRUE` in the `resp` function, the weighted TGV is computed as follows:
 
 $$
 {wTGV}_v = \hat{g}_v \times r_{g_v}^2 + \hat{\phi} \times \hat{c}_v \times r_{c_v}^2
+\tag{10}
 $$
 with $r_{g_v}^2$ and $r_{c_v}^2$ being the reliabilities of DGE and IGE, respectively.
 
@@ -324,6 +338,8 @@ head(res$blups$main) |>
 
 From this data frame, several information can be extracted. Check out below.
 
+## Plots
+
 ### Competition classes
 
 The higher the IGE, the more aggressive is the genotype. Here, we use a modified version of the classification proposed by @ferreira_novel_2023 to define competition classes:
@@ -334,6 +350,7 @@ $$
                 \hat{c}_v > \bar{c} + (\tau) sd(c) \rightarrow \text{Sensitive} \\ 
                 \hat{c}_v < \bar{c} - (\tau)  sd(c) \rightarrow \text{Aggresive}               
             \end{cases}
+\tag{11}
 $$
 with $\bar{c}$ being the mean IGE in the population, $\hat{c}_v$ the IGE of the $v^{th}$ genotype, $sd(c)$ the IGE's standard deviation, and $\tau$ a weight defining the thresholds to declare if a genotype is aggressive, homoeostatic or sensitive.
 
@@ -429,6 +446,245 @@ cc |>
 ```
 
 The predicted mean of this clonal mixture was `r round(mean(cc$y.pred),2)`. 
+
+# Multi-age analysis
+
+This section describes the  workflow for considering genetic competition in a repeated measures context. More details on the theory can be found at @ferreira_competition_2024 and @chaves_incorporating_2025. 
+
+## Building the competition matrix
+
+We will use the complete `euca` dataset. 
+
+```{r results='hide'}
+data(euca)
+head(euca)
+```
+
+```{r echo=FALSE}
+head(euca) |> kbl(format = 'html', row.names = FALSE, digits = 2) |> kable_styling()
+```
+
+In the multi-age model, $\mathbf{Z}_c = (\mathbf{Z}_{c_1}, \mathbf{Z}_{c_2}, \dots, \mathbf{Z}_{c_M})$, i.e., we must build a unique competition matrix for each age level $\left(m = 1, 2, \dots, M\right)$. 
+
+```{r warning=FALSE, message=FALSE, results='hide'}
+comp_mat = prepfor(
+  data = euca,
+  gen = 'clone',
+  area = 'area',
+  plt = 'tree',
+  age = 'age',
+  row = 'row',
+  col = 'col',
+  dist.col = 3,
+  dist.row = 2,
+  trait = 'MAI',
+  method = 'SK',
+  n.dec = 3,
+  verbose = TRUE,
+  effs = c("block")
+)
+```
+
+Note that `age = "age"`, since the age information is contained in the `age` column in `euca`. Internally, `age` is converted to factor so it can be added to the multi-age model in the `asr` function.
+
+The `prepfor` object contains the generated data frame, now with information of multiple ages; and $M$ other lists with particularized information by age. Below, we exemplify the outputs using `Age_3y` as an example.
+
+```{r results='hide'}
+comp_mat$data[c(1:5, (nrow(comp_mat$data) - 5):nrow(comp_mat$data)),
+              c(1:5, (ncol(comp_mat$data)-4):ncol(comp_mat$data))]
+```
+
+```{r echo=FALSE}
+comp_mat$data[c(1:5, (nrow(comp_mat$data) - 5):nrow(comp_mat$data)),
+              c(1:5, (ncol(comp_mat$data)-4):ncol(comp_mat$data))] |>
+  kbl(format = 'html', row.names = FALSE, digits = 2) |> kable_styling()
+```
+
+
+```{r}
+head(comp_mat$Age_3y$neigh_check) 
+```
+
+```{r echo=FALSE}
+head(comp_mat$Age_3y$neigh_check) |>
+  kbl(format = 'html', row.names = FALSE, digits = 2) |> kable_styling()
+```
+
+```{r results='hide'}
+comp_mat$Age_3y$Z[1:5, 1:5]
+```
+
+```{r echo=FALSE}
+comp_mat$Age_3y$Z[1:5, 1:5] |>
+  kbl(format = 'html', row.names = FALSE, digits = 2) |> kable_styling()
+```
+
+```{r}
+comp_mat$Age_3y$CIF
+```
+
+```{r}
+comp_mat$Age_3y$data[1:5,c(1:5, (ncol(comp_mat$data)-4):ncol(comp_mat$data))]
+```
+
+The plots also detail the information by age.
+
+```{r, fig.cap = "Heatmap representing the grid, in which the cells are filled according to the phenotype value of each plot (blank cells are missing values)"}
+plot(comp_mat, category = "heatmap")
+```
+
+
+```{r warning=FALSE, message=FALSE, fig.cap = "Boxplots depicting the phenotypic performance (y-axis) of each selection candidate (x-axis). The candidates' names were removed for better visualization"}
+plot(comp_mat, category = "boxplot") + theme(axis.text.x = element_blank())
+```
+
+## Fitting the model {.justify}
+
+A general multi-age spatial-genetic competition model can be represented by the Equation 5. The difference is in the variance-covariance structure of both $\mathbf{g}$ and $\mathbf{c}$. In this case, they are both compound symmetry, meaning that the equation above estimates their main effects and their interaction with the different ages. The within-age DGE and IGE can be accessed by adding the main effect to its corresponding interaction effect from a specific age. The heterogeneous (per-age) spatially correlated errors are distributed as $\boldsymbol{\varepsilon} \sim \mathcal{N}\{\mathbf{0}, \oplus_{m=1}^M{\sigma^2_{\varepsilon_m} \left( \boldsymbol{AR1}_{C_m} \otimes \boldsymbol{AR1}_{R_m} \right)}\}$, where $\oplus$ is the direct sum. 
+ 
+The same function, `asr`, can be used to fit the model.
+
+```{r warning=FALSE, message=FALSE, results='hide'}
+model = asr(
+  prep.out = comp_mat,
+  fixed = MAI ~ age,
+  random = ~ block:age,
+  lrtest = TRUE,
+  spatial = TRUE,
+  cor = TRUE,
+  K = NULL
+)
+```
+
+Note that a multi-age model is fitted automatically when `age` is not `NULL` in the `prepfor` function. However, the `age` effect still have to be explicitly declared in the model. 
+
+## Results {.justify}
+
+There is no difference between single-age and multi-age models from this point onwards. 
+
+```{r}
+res = resp(
+  prep.out = comp_mat,
+  model = model,
+  weight.tgv = FALSE,
+  sd.class = 1
+)
+```
+
+In addition to the variance component estimate of the main effects, the `varcomp` data frame also has the corresponding estimates of the genotype-by-environment interaction effects. The same applies to the significance test shown by the `lrt` data frame.
+
+```{r results='hide'}
+res$varcomp
+```
+
+```{r echo=FALSE}
+res$varcomp |>
+  kbl(format = 'html', row.names = TRUE, digits = 4) |> kable_styling()
+```
+
+
+```{r results='hide'}
+res$lrt
+```
+
+```{r echo=FALSE}
+res$lrt |>
+  kbl(format = 'html', row.names = FALSE) |> kable_styling()
+```
+
+
+The heritabilities are particularized by age.
+
+```{r results='hide'}
+res$heritability
+```
+
+```{r echo=FALSE}
+res$heritability |>
+  kbl(format = 'html', row.names = TRUE, digits = 3) |> kable_styling()
+```
+
+Regarding the BLUPs, in the multi-age case, there are two lists: one containing the main effects, and other with the within-ages effects (main + interaction). If other random effects were declared in the model, there will be a further data frame with their BLUPs.
+
+```{r results='hide'}
+head(res$blups$main)
+```
+
+```{r echo=FALSE}
+head(res$blups$main) |>
+  kbl(format = 'html', row.names = FALSE, digits = 3) |> kable_styling()
+```
+
+
+```{r results='hide'}
+head(res$blups$within)
+```
+
+
+```{r echo=FALSE}
+head(res$blups$within) |>
+  kbl(format = 'html', row.names = FALSE, digits = 3) |> kable_styling()
+```
+
+From this data frame, several information can be extracted. 
+
+## Plots
+
+In the generic function `plot`, use the argument `level` to control if the plot should illustrate information from main effects (`level = "main"`) or within-ages effects (`level = "within"`). If `level = "within"`, another argument, `age`, will further define if all ages should be plotted together (`age = "all"`) or separately (`age = ` name of a specific age). Check out below.
+
+
+### Competition classes
+
+
+```{r fig.cap = "Density of IGE values. The area within the distribution is filled according to the competition class"}
+plot(res, category = "class", level = "main")
+```
+
+
+```{r fig.cap = "Relationship between IGE (x-axis) and DGE (y-axis). The dots are coloured according to the competition class."}
+plot(res, category = "DGEvIGE", level = "within")
+```
+
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the competition class of each genotype"}
+plot(res, category = "grid.class", level = "within", age = "6y")
+```
+
+### Ranking
+
+```{r fig.cap = "Direct (DGE) and indirect (IGE) genotypic effects (\textit{y}-axis) of each candidate. The plots are in descending order according to the DGE. The colour of the dots reflects the reliability of both the DGE and IGE for each genotype"}
+plot(res, category = "DGE.IGE", level = "main") + 
+  theme(axis.text.x = element_text(size = 4, vjust = .5, hjust = 1))
+```
+
+
+```{r fig.cap = "Total genotypic value (TGV) (y-axis) of each candidate (x-axis), in increasing order"}
+plot(res, category = "TGV", level = "within", age = "3y") + 
+  theme(axis.text.x = element_text(size = 4, vjust = .5, hjust = 1))
+```
+
+
+### Heatmaps
+
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the direct genotypic effect (DGE) of each genotype"}
+plot(res, category = "grid.dge", level = "within", age = "all")
+```
+
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the indirect genotypic effect (IGE) of each genotype"}
+plot(res, category = "grid.ige", level = "within", age = "3y")
+```
+
+```{r fig.cap = "Heatmap representations of the field trial, with cells filled according to the residual value of each plot. Blank cells are missing values"}
+plot(res, category = "grid.res", level = "main")
+```
+
+
+### Number of different neighbours
+
+```{r fig.cap = "Number of different genotypes as neighbors (total and per competition class) of each selection candidate"}
+plot(res, category = "nneigh", level = "within", age = "6y")
+```
+
+
 
 
 # References

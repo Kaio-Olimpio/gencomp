@@ -48,13 +48,13 @@ Currently, `gencomp` can be applied in three situations:
 - Single-trial crop breeding data
   (`vignette(topic = "crop_competition", package = "gencomp")`)
 - Multi-ages (repeated measures) tree breeding data
-  (`vignette(topic = "multi_age", package = "gencomp")`)
+  (`vignette(topic = "tree_competition", package = "gencomp")`)
 
 ## Citation
 
 If you used the package to analyse data for a publication, please cite:
 
-Chaves SFS, Ferreira FM, Ferreira GC, Gezan SA, Dias KOG (2025)
+Chaves S, Ferreira FM, Ferreira GC, Gezan SA, Dias KOG (2025)
 Incorporating spatial and genetic competition into breeding pipelines
 with the `R` package `gencomp`. *Heredity* **134**, 129-141.
 <https://doi.org/10.1038/s41437-024-00743-9>

@@ -2064,10 +2064,10 @@ asr = function(prep.out, fixed, random = ~1, spatial = TRUE, cor = TRUE,
     }
   }
   
-  remove(control, fixed, random, input, K, envir = .GlobalEnv)
   class(scm) = c("compmod", class(scm))
   if(multi.age) attr(scm,"multi.age") = TRUE
   if(!is.null(K)) attr(scm, "treats") = attr(K, 'rowNames') else attr(scm, "treats") = levels(input[,colnames(control)[2]])
+  if(!is.null(K)) remove(control, fixed, random, input, K, envir = .GlobalEnv) else remove(control, fixed, random, input, envir = .GlobalEnv)
   
   return(scm)
 }

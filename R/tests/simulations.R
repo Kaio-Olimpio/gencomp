@@ -9,8 +9,8 @@ library(asreml)
 
 # Simulation parameters ---------------------------------------------------
 s2d = 25
-s2c = 15
-rdc = -.75
+s2c = 5
+rdc = -.8
 sdc = rdc*sqrt(s2d)*sqrt(s2c)
 h2 = .4
 s2e = s2d/h2 - s2d

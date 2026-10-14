@@ -31,8 +31,8 @@ composed of clonal mixtures, based on clones’ competition capacity.
 Install `gencomp` running the following code:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("Kaio-Olimpio/gencomp", build_vignettes = TRUE)
+# install.packages("pak")
+pak::pak("Kaio-Olimpio/gencomp")
 ```
 
 **IMPORTANT: `gencomp` fits linear mixed models using the `ASReml-R`

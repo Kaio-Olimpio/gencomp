@@ -22,8 +22,8 @@ Just like Max, plants also compete. In this case, space, light, water and nutrie
 Install `gencomp` running the following code:
 
 ```{r eval=FALSE}
-# install.packages("devtools")
-devtools::install_github("Kaio-Olimpio/gencomp", build_vignettes = TRUE)
+# install.packages("pak")
+pak::pak("Kaio-Olimpio/gencomp")
 ```
 
 **IMPORTANT: `gencomp` fits linear mixed models using the `ASReml-R` machinery. Thus, you must have `ASReml-R` installed prior to installing `gencomp`.**

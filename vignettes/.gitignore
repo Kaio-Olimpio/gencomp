@@ -1,3 +1,5 @@
 *.html
 *.R
 *_files
+vsn_text.qmd
+*.docx
